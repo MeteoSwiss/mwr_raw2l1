@@ -1,0 +1,44 @@
+(1) HKDSelect: Only the first byte of this integer value is used for selection of data groups. The meaning of the various bit settings of this byte is the following:
+• Bit 1: When this bit is set to ‘1’, the GPS-position (longitude, latitude) is recorded in this file, otherwise not.
+• Bit 2: When this bit is set to ‘1’, the temperature data is recorded in this file, otherwise not. 
+• Bit 3: When this bit is set to ‘1’, the receiver stability data is recorded in this file, otherwise not.
+• Bit 4: When this bit is set to ‘1’, the remaining flash memory is recorded in this file, otherwise not.
+• Bit 5: When this bit is set to ‘1’, quality flags are recorded in this file, otherwise not.
+• Bit 6: When this bit is set to ‘1’, status flags are recorded in this file, otherwise not.
+(2) Alarm: The alarm flag is activated in the following cases:
+• interference or failure of a channel that is used in one of the retrievals
+• thermal receiver stability not sufficient for measurement
+• noise diode failure of one of the receivers
+• ambient target thermal sensor not stable
+(3) GPS longitude / latitude format: (-)DDDMM.mmmm, longitude is negative: West of 0- meridian, latitude is negative: South of equator. ‘DDD’ is measured in degrees (0-180 for longitude, 0-90 for latitude), ‘MM’ is measures in minutes (‘), ‘mmmm’ is the decimal fraction of ‘MM’. Example: longitude = -12245.50 means 122°45’30’’ West, latitude -3321.25 means 33°21’15’’ South.
+(4) Quality Flags: This 4 byte unsigned integer is subdivided into 8 groups of 4 bits:
+MSB yyxx yyxx yyxx yyxx yyxx yyxx yyxx yyxx
+LSB LP STA TPB TPC HPC DLY IWV LWP
+Each group represents the quality flags of a certain level 2 product (retrieved data). The ‘xx’ bits are coded in the following way:
+• ‘xx’ = 0: this level 2 product is not evaluated for quality control
+• ‘xx’ = 1: highest quality level
+• ‘xx’ = 2: reduced quality
+• ‘xx’ = 3: low quality. This sample should not be used.
+The ‘yy’ bits are coding the possible reasons for reduced or low quality sampling:
+• ‘yy’ = 0: unknown
+• ‘yy’ = 1: possible external interference on a receiver channel or failure of a receiver channel that is used in the retrieval of this product.
+• ‘yy’ = 2: LWP too high. At high rain rates the scattering on rain drops can mask the water vapour line completely and no humidity profiling or IWV determination is possible. Also the temperature profiling may be affected when the oxygen line channels are all saturated due to droplets.
+• ‘yy’ = 3: free for future use.
+(5) Status Flags:
+• Bit 1-7: status flags for channel 1 to 7 of the humidity profiler receiver. When a bit is set ‘1’, the corresponding channel is ok, otherwise the channel has a malfunction.
+• Bit 8: not used
+• Bit 9-15: status flags for channel 1 to 7 of the temperature profiler receiver. When a bit is set ‘1’, the corresponding channel is ok, otherwise the channel has a malfunction.
+• Bit 16: not used
+• Bit 17: rain flag. ‘1’ means raining, ‘0’ = no rain
+• Bit 18: dew blower speed status. ‘1’ = high speed mode, ‘0’ = low speed mode
+• Bit 19: BL-mode flag. ‘1’ = boundary layer scanning active, ‘0’ = BL-mode not active
+• Bit 20: ‘1’ = sky tipping calibration running, ‘0’ = not active
+• Bit 21: ‘1’ = gain calibration running (using internal ambient target), ‘0’ = not active
+• Bit 22: ‘1’ = noise calibration running, ‘0’ = not active
+• Bit 23: ‘1’ = noise diode of humidity profiler ok, ‘0’ = noise diode not working
+• Bit 24: ‘1’ = noise diode of temperature profiler ok, ‘0’ = noise diode not working
+• Bits 25,26: receiver 1 (humidity profiler) thermal stability. ‘0’ = unknown, not enough data samples recorded yet, ‘1’ = stability ok, ‘2’ = not sufficiently stable
+• Bits 27,28: receiver 2 (temperature profiler) thermal stability. ‘0’ = unknown, not enough data samples recorded yet, ‘1’ = stability ok, ‘2’ = not sufficiently stable
+• Bit 29: power failure flag. ‘1’ = a power failure has occurred recently. When a new MDF has been started automatically after a power failure, the ‘1’ flag is kept for 1000 seconds and switching back to ‘0’ afterwards. ‘0’ = no power failure occurred.
+• Bit 30: ambient target stability: Some radiometers are using two ambient target temperature sensors for monitoring the target’s physical temperature. When the temperature readings of these two sensors differ by more than 0.3 K, the flag turns to ‘1’. ‘0’ = sensors ok.
+• Bit 31: noise diode status: ‘0’ = noise diode is turned off for the current sample, ‘1’ = noise diode is turned on for the current sample.
