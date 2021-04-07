@@ -751,7 +751,7 @@ def scan_starttime_to_time(starttime, n_angles, inttime=40, caltime=40, idletime
 #------------------------------------------------------------------------------
 
 
-filename = 'testdata/C00-V859_190803'
+filename = 'testdata/rpg/C00-V859_190803'
     
 filename_noext = os.path.splitext(filename)[0] #make sure that filenam has no extension
 
