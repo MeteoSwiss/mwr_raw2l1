@@ -4,6 +4,7 @@ Create E-PROFILE NetCDF from input dictionary
 """
 import netCDF4 as nc
 import numpy as np
+import yaml
 
 ncformat = 'NETCDF4'
 ncdateformat = 'seconds since 1970-01-01-00:00:00'
