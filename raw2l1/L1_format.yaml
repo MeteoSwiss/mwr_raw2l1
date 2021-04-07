@@ -7,7 +7,7 @@ dimensions:
 
 
 variables:
-  time:   # variable name in code
+  time: # variable name in code
     name: time # variable name in output NetCDF
     dim:
       - time
@@ -41,5 +41,4 @@ variables:
     optional: False
     attributes:
       standard_name: brightness_temperature
-        units: K
-
+      units: K
