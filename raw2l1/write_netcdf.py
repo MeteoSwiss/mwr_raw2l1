@@ -6,7 +6,7 @@ import netCDF4 as nc
 import numpy as np
 
 ncformat = 'NETCDF4'
-ncdateformat = 'seconds since 1970-01-01-00:00:00'
+ncdateformat = 'seconds since 1970-01-01-00:00:00'   # TODO: Transform to DAYS since ... for consistency with other E-PROFILE data formats
 
 ncdims_unlimited = ['time']
 ncdims_fixed = ['frequency']
