@@ -24,7 +24,7 @@ def write(data, filename, config, format='NETCDF4'):
                 else:
                     raise KeyError('Variable %s is a mandatory input but was not found in input dictionary' % var)
             if var == 'time':
-                ncvar[:] = nc.date2num(data[var], ncdateformat)
+                ncvar[:] = nc.date2num(data[var], specs['attributes']['units'])
             else:
                 ncvar[:] = data[var]
 
