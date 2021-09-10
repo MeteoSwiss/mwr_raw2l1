@@ -13,7 +13,26 @@ missing_float = -999.
 missing_int = -9
 
 
-
+FILETYPE_CONFS = {  # assign metadata to each known filecode
+    # BRT files
+    666666: dict(type='brt', anglever=1, formatchar_angle='f'),
+    666667: dict(type='brt', anglever=1, formatchar_angle='f'),
+    666000: dict(type='brt', anglever=2, formatchar_angle='i'),
+    667000: dict(type='brt', anglever=2, formatchar_angle='i'),
+    # BLB files
+    567845847: dict(type='blb', structver=1),
+    567845848: dict(type='blb', structver=2),
+    # IRT files
+    671112495: dict(type='irt', structver=1),
+    671112496: dict(type='irt', structver=2, anglever=1, formatchar_angle='f'),
+    671112000: dict(type='irt', structver=2, anglever=2, formatchar_angle='i'),
+    # MET files
+    599658943: dict(type='met', structver=1),
+    599658944: dict(type='met', structver=2),
+    # HKD files
+    837854832: dict(type='hkd'),
+}
+# TODO: ask Volker whether different dict structures are ok here
 
 
 
@@ -21,6 +40,49 @@ missing_int = -9
 ###############################################################################
 # readers for different RPG files
 #------------------------------------------------------------------------------
+
+
+class BaseFile(object):
+    def __init__(self, filename):
+        self.filename = filename
+        self.data = {}
+        self.byte_offset = 0  # counter for consumed bytes, increased by each method
+        self.filecode = None
+        self.data_bin = self.get_binary()
+        self.read()  # fills self.data
+
+    def get_binary(self):
+        with open(filename, 'rb') as f:
+            return f.read()
+
+    def read(self):
+        # sequence must be preserved as self.byte_offset is increased by each method, hence they are all semi-private
+        # TODO: ask Volker whether this semi-private makes sense
+        self._read_filecode()
+        self._read_header()
+        self._read_meas()
+
+
+    def _read_filecode(self):
+        self.filecode = struct.unpack_from('<i', self.data_bin, self.byte_offset)[0]
+        self.byte_offset += 4
+        # TODO: add general interpreter of filecode testing for correct type and
+
+    def _read_header(self):
+        pass
+
+    def _read_meas(self):
+        pass
+
+
+class BRT(BaseFile):
+    def _read_header(self):
+        pass
+        # TODO: read header of brt file
+
+    def _read_meas(self):
+        pass
+        # TODO: read observation of brt file
 
 # TODO: Consider transforming to SI units. IRT -> K; wavelength -> m; frequency -> Hz
 def read_brt(filename, accept_localtime=False):
@@ -108,9 +170,7 @@ def read_brt(filename, accept_localtime=False):
             '<'+formatchar_angle, d, byte_offset)[0], anglever)
         byte_offset += 4          
 
-    
     return data
-
 
 
 def read_blb(filename, accept_localtime=False):
@@ -331,7 +391,6 @@ def read_irt(filename, accept_localtime=False):
     
     return data
     
-    
 
 def read_met(filename, accept_localtime=False):
     """
@@ -468,7 +527,6 @@ def read_met(filename, accept_localtime=False):
             byte_offset += 4
 
     return data
-
 
 
 def read_hkd(filename, accept_localtime=False):
@@ -640,7 +698,6 @@ def interpret_time(x):
     return out
 
 
-
 def interpret_angle(x, version):
     """
     translate the angle encoding from RPG to elevation and azimuth in degrees
@@ -680,7 +737,6 @@ def interpret_angle(x, version):
     return ele, azi
 
 
-
 def interpret_coord(x, version=2):
     """
     Translate coordinate encoding from RPG to degrees with decimal digits.
@@ -707,8 +763,6 @@ def interpret_coord(x, version=2):
         return np.sign(x) * (degabs + minabs/60)
     return x
         
-
-
 
 def scan_starttime_to_time(starttime, n_angles, inttime=40, caltime=40, idletime=1.4):
     """
