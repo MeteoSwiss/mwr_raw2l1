@@ -41,6 +41,11 @@ FILETYPE_CONFS = {  # assign metadata to each known filecode
 # readers for different RPG files
 #------------------------------------------------------------------------------
 
+def get_binary(self):  #TODO: ask Volker if it is ok to declare this function outside of any class (pretty general in my eyes)
+    """return the entire content of the binary file as binary stream"""
+    with open(filename, 'rb') as f:
+        return f.read()
+
 
 class BaseFile(object):
     def __init__(self, filename):
@@ -48,12 +53,8 @@ class BaseFile(object):
         self.data = {}
         self.byte_offset = 0  # counter for consumed bytes, increased by each method
         self.filecode = None
-        self.data_bin = self.get_binary()
+        self.data_bin = get_binary(self.filename)
         self.read()  # fills self.data
-
-    def get_binary(self):
-        with open(filename, 'rb') as f:
-            return f.read()
 
     def read(self):
         # sequence must be preserved as self.byte_offset is increased by each method, hence they are all semi-private
@@ -61,7 +62,6 @@ class BaseFile(object):
         self._read_filecode()
         self._read_header()
         self._read_meas()
-
 
     def _read_filecode(self):
         self.filecode = struct.unpack_from('<i', self.data_bin, self.byte_offset)[0]
