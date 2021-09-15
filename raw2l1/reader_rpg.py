@@ -6,11 +6,13 @@ import numpy as np
 import datetime as dt
 import struct
 import os
-from errors import UnknownFileType
+from errors import UnknownFileType, FileTooShort
 
 # configuration to be exported to config file
 missing_float = -999.
 missing_int = -9
+
+BYTE_ORDER = '<'  # byte order in all RPG files assumed little-endian  #TODO: ask Harald whether this is true or whether it depends on the instrument PC (hopefully not!)
 
 FILETYPE_CONFS = {  # assign metadata to each known filecode
     # BRT files
@@ -31,20 +33,19 @@ FILETYPE_CONFS = {  # assign metadata to each known filecode
     # HKD files
     837854832: dict(type='hkd'),
 }
-
-
 # TODO: ask Volker whether different dict structures are ok here
+
 
 
 ###############################################################################
 # readers for different RPG files
 # ------------------------------------------------------------------------------
 
-def get_binary(filename):  # TODO: ask Volker if it is ok to declare this function outside of any class (pretty general in my eyes). If yes, should it go to helper functions module
+def get_binary(filename):
     """return the entire content of the binary file as binary stream"""
     with open(filename, 'rb') as f:
         return f.read()
-
+# TODO: ask Volker if it is ok to declare get_binary outside of any class (pretty general in my eyes). If yes, should it go to helper functions module
 
 class BaseFile(object):
     def __init__(self, filename, accept_localtime=False):
@@ -66,13 +67,34 @@ class BaseFile(object):
         self._read_meas()
         self.interpret_raw_data()
 
-    def decode_binary(self, encoding_pattern):
-        out = struct.unpack_from(encoding_pattern['type'], self.data_bin, self.byte_offset)
+    def decode_binary(self, encoding_pattern, byte_order=BYTE_ORDER):
+        """"decode next variable from binary stream and write to dict self.data + augment self.byte_offset"""
+        full_type = byte_order + encoding_pattern['shape'][0] * encoding_pattern['type']
+        out = struct.unpack_from(full_type, self.data_bin, self.byte_offset)
         self.byte_offset += encoding_pattern['bytes']
-        if len(out) == 1:  # extract from tuple if it has only one element
+        if len(out) == 1:  # extract from tuple if it has only one element, otherwise return tuple
             self.data[encoding_pattern['name']] = out[0]
         else:
             self.data[encoding_pattern['name']] = out
+
+    def decode_binary_np(self, encoding_pattern, n_entries, byte_order=BYTE_ORDER):
+        """decode bunch of binary stream via 2d numpy array to write to dict self.data + augment self.byte_offset"""
+        dtype_np = np.dtype([(ep['name'], byte_order+ep['type'], ep['shape']) for ep in encoding_pattern])
+        names = [ep['name'] for ep in encoding_pattern]
+        bytes_per_var = np.array([ep['bytes'] for ep in encoding_pattern])
+
+        byte_offset_start = self.byte_offset
+        n_bytes = bytes_per_var.sum() * n_entries
+        self.byte_offset += n_bytes
+        if len(self.data_bin) < self.byte_offset:  # TODO: ask Volker if check is ok here. think I can't check earlier
+            raise FileTooShort('number of bytes in file %s does not match the one inferred from n_meas' % self.filename)
+
+        arr = np.frombuffer(self.data_bin[byte_offset_start: self.byte_offset], dtype=dtype_np)
+        for idx, name in enumerate(names):
+            if encoding_pattern[idx]['shape'] == (1,):  # variables which only have a time dimension shall not be 2d
+                self.data[name] = arr[name].flatten()  # TODO: ask Volker if this manipulation is ok. Doing this also for later usage in loops
+            else:
+                self.data[name] = arr[name]
 
     def interpret_filecode(self):
         try:
@@ -85,7 +107,6 @@ class BaseFile(object):
         self.data['time'] = interpret_time(self.data['time_raw'])
         if 'pointing_raw' in self.data.keys():
             self.data['ele'], self.data['azi'] = interpret_angle(self.data['pointing_raw'], self.filestruct['anglever'])
-
 
     def check_data(self, accept_localtime):
         if not accept_localtime and self.data['timeref'] == 0:
@@ -111,31 +132,30 @@ class BRT(BaseFile):
     def _read_header(self):
         # quantities with fixed length
         encodings_bin_fix = (
-            dict(name='n_meas', type='<i', bytes=4),
-            dict(name='timeref', type='<i', bytes=4),
-            dict(name='n_freq', type='<i', bytes=4))
+            dict(name='n_meas', type='i', shape=(1,), bytes=4),
+            dict(name='timeref', type='i', shape=(1,), bytes=4),
+            dict(name='n_freq', type='i', shape=(1,), bytes=4))
         for enc in encodings_bin_fix:
             self.decode_binary(enc)
 
-        # quantities with length-dependent on number of spectral channels (n_freq) only possible afer n_freq is read
+        # quantities with length-dependent on number of spectral channels (n_freq) only possible after n_freq is read
         n_freq = self.data['n_freq']
         encodings_bin_var = (
-            dict(name='frequency', type='<'+n_freq*'f', bytes=n_freq*4),
-            dict(name='Tb_min', type='<'+n_freq*'f', bytes=n_freq*4),
-            dict(name='Tb_max', type='<'+n_freq*'f', bytes=n_freq*4))
+            dict(name='frequency', type='f', shape=(n_freq,), bytes=n_freq * 4),
+            dict(name='Tb_min', type='f', shape=(n_freq,), bytes=n_freq * 4),
+            dict(name='Tb_max', type='f', shape=(n_freq,), bytes=n_freq * 4))
         for enc in encodings_bin_var:
             self.decode_binary(enc)
 
     def _read_meas(self):
+        """read actual measurements. Filecode and Header needs to be read before as info is needed for decoding"""
         n_freq = self.data['n_freq']
         encodings_bin = (
-            dict(name='time_raw', type='<i', bytes=4),
-            dict(name='rainflag', type='<B', bytes=4),
-            dict(name='frequency', type='<'+n_freq*'f', bytes=n_freq*4),
-            dict(name='pointing_raw', type='<' + self.filestruct['formatchar_angle'], bytes=4))
-        # TODO: write method decode_binary_np in BaseFile class
-
-
+            dict(name='time_raw', type='i', shape=(1,), bytes=4),
+            dict(name='rainflag', type='B', shape=(1,), bytes=1),
+            dict(name='Tb', type='f', shape=(n_freq,), bytes=n_freq * 4),
+            dict(name='pointing_raw', type=self.filestruct['formatchar_angle'], shape=(1,), bytes=4))
+        self.decode_binary_np(encodings_bin, self.data['n_meas'])
 
 
 # TODO: Consider transforming to SI units. IRT -> K; wavelength -> m; frequency -> Hz
@@ -731,15 +751,11 @@ def read_hkd(filename, accept_localtime=False):
 # Helper functions
 # ------------------------------------------------------------------------------
 
-def interpret_time(x):
-    """
-    translate the time format of RPG files to datetime object
-    """
-
+def interpret_time(time_in):
+    """translate the time format of RPG files to datetime object"""
     posix_offset = dt.datetime.timestamp(dt.datetime(2001, 1, 1))  # offset between RPG and POSIX time in seconds
-    out = dt.datetime.fromtimestamp(x + posix_offset)
-
-    return out
+    times = [dt.datetime.fromtimestamp(x + posix_offset) for x in time_in]
+    return np.array(times)
 
 
 def interpret_angle(x, version):
