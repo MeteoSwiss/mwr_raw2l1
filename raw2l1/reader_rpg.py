@@ -792,12 +792,12 @@ def interpret_angle(x, version):
         ele = np.sign(x) * (np.abs(x) // 1e5) / 100
         azi = (np.abs(x) - np.abs(ele) * 1e7) / 100
     else:
-        raise ValueError('Known versions for angle encoding are 1 and 2, but received %f' % version)
+        raise NotImplementedError('Known versions for angle encoding are 1 and 2, but received %f' % version)
 
     return ele, azi
 
 
-def interpret_coord(x, version=2):
+def interpret_coord(x, version=2):  # TODO: Ask Harald how to find out which coord version used. In manual 06/2020 version=1 is described
     """
     Translate coordinate encoding from RPG to degrees with decimal digits.
 
@@ -821,7 +821,10 @@ def interpret_coord(x, version=2):
         degabs = np.abs(x) // 100
         minabs = np.abs(x) - degabs * 100
         return np.sign(x) * (degabs + minabs / 60)
-    return x
+    elif version == 2:
+        return x
+    else:
+        raise NotImplementedError('Known versions for coordinates encoding are 1 and 2, but received %f' % version)
 
 
 def scan_starttime_to_time(starttime, n_angles, inttime=40, caltime=40, idletime=1.4):
