@@ -39,7 +39,7 @@ FILETYPE_CONFS = {  # assign metadata to each known filecode
 # ------------------------------------------------------------------------------
 
 
-class BaseFile(object):
+class BaseFile(object):  # TODO: ask Volker if name BaseFile is ok or if he has another suggestion for naming this class
     def __init__(self, filename, accept_localtime=False):
         self.filename = filename
         self.data = {}
@@ -128,7 +128,7 @@ class BRT(BaseFile):
             dict(name='n_meas', type='i', shape=(1,), bytes=4),  #TODO: Ask Volker about calcsize: could not find equivalent for numpy so left byte number an explicit input (is also specified in rpg manual)
             dict(name='timeref', type='i', shape=(1,), bytes=4),
             dict(name='n_freq', type='i', shape=(1,), bytes=4))
-        for enc in encodings_bin_fix:
+        for enc in encodings_bin_fix:  # TODO: include this loop to self.decode_binary (readability and similarity to self.decode_binary_np)
             self.decode_binary(enc)
 
         # quantities with length dependent on number of spectral channels (n_freq) only possible after n_freq is read
@@ -152,7 +152,7 @@ class BRT(BaseFile):
 
 
 class BLB(BaseFile):
-    pass  # TODO: implement BLB class. hardest as 3 dimensional (time, freq, ele)
+    pass  # TODO: implement BLB class. harder as 3 dimensional (time, freq, ele)
 
 
 class IRT(BaseFile):
@@ -194,6 +194,14 @@ class IRT(BaseFile):
 
         self.decode_binary_np(encodings_bin, self.data['n_meas'])
 
+
+class MET(BaseFile):
+    pass  # TODO: implement MET class. For structver >=2 has a bit encoding presence of different sensors
+
+
+class HKD(BaseFile):
+    pass  # TODO: implement HKD class. Similar to MET
+
 # TODO: Consider transforming to SI units. IRT/IRT_min/IRT_max -> K; wavelength -> m; frequency -> Hz. could be done in interpret_raw_data of BaseFile class
 
 ###############################################################################
@@ -205,10 +213,15 @@ filename = './testdata/rpg/C00-V859_190803'
 
 filename_noext = os.path.splitext(filename)[0]  # make sure that filename has no extension
 brt = BRT(filename_noext + '.BRT')
-# blb
+blb = BRT(filename_noext + '.BLB')
 irt = IRT(filename_noext + '.IRT')
+met = MET(filename_noext + '.MET')
+hkd = HKD(filename_noext + '.HKD')
+
+# legacy readers
 brt_old = read_brt(filename_noext + '.BRT')
 blb_old = read_blb(filename_noext + '.BLB')
 irt_old = read_irt(filename_noext + '.IRT')
 met_old = read_met(filename_noext + '.MET')
 hkd_old = read_hkd(filename_noext + '.HKD')
+pass
