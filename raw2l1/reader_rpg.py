@@ -464,20 +464,20 @@ def read_irt(filename, accept_localtime=False):
     byte_offset += 4
     data['timeref'] = struct.unpack_from('<i', d, byte_offset)[0]
     byte_offset += 4
-    if structver <= 2:
+    if structver >= 2:
         data['n_wavelengths'] = struct.unpack_from('<i', d, byte_offset)[0]
         byte_offset += 4
         data['wavelength'] = struct.unpack_from('<' + data['n_wavelengths'] * 'f', d, byte_offset)
         byte_offset += data['n_wavelengths'] * 4
     else:
         data['n_wavelengths'] = 1
-        data['n_wavelength'] = missing_float
+        data['wavelength'] = missing_float
 
     # tests on header
     if not accept_localtime and data['timeref'] == 0:
         raise ValueError('Time encoded in local time but UTC required by "accept_localtime"')
 
-        # measurements
+    # measurements
     ##############
 
     # init measurements
