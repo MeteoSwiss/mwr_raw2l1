@@ -109,6 +109,7 @@ class BaseFile(object):
             self.data['ele'], self.data['azi'] = interpret_angle(self.data['pointing_raw'], self.filestruct['anglever'])
 
     def check_data(self, accept_localtime):
+        # general checks for the consistency of the data
         if not accept_localtime and self.data['timeref'] == 0:
             raise ValueError('Time encoded in local time but UTC required by "accept_localtime"')
             # TODO: Ask Volker if it is ok to raise a ValueError here or if we should define own error type
@@ -132,7 +133,7 @@ class BRT(BaseFile):
     def _read_header(self):
         # quantities with fixed length
         encodings_bin_fix = (
-            dict(name='n_meas', type='i', shape=(1,), bytes=4),
+            dict(name='n_meas', type='i', shape=(1,), bytes=4),  #TODO: Ask Volker about calsize: could not find equivalent for numpy so left byte number an explicit input (is also specified in rpg manual)
             dict(name='timeref', type='i', shape=(1,), bytes=4),
             dict(name='n_freq', type='i', shape=(1,), bytes=4))
         for enc in encodings_bin_fix:
@@ -746,7 +747,7 @@ def read_hkd(filename, accept_localtime=False):
 
     return data
 
-
+# TODO: once happy with the classes BRT, BLB, IRT, MET, HKD, the functions read_brt/blb/irt/met/hkd can be removed
 ###############################################################################
 # Helper functions
 # ------------------------------------------------------------------------------
@@ -754,8 +755,19 @@ def read_hkd(filename, accept_localtime=False):
 def interpret_time(time_in):
     """translate the time format of RPG files to datetime object"""
     posix_offset = dt.datetime.timestamp(dt.datetime(2001, 1, 1))  # offset between RPG and POSIX time in seconds
+
+    scalar_input = False
+    if np.isscalar(time_in):
+        time_in = np.array([time_in])
+        scalar_input = True
+
     times = [dt.datetime.fromtimestamp(x + posix_offset) for x in time_in]
-    return np.array(times)
+    out = np.array(times)
+
+    if scalar_input:
+        out = out[0]
+
+    return out
 
 
 def interpret_angle(x, version):
@@ -779,7 +791,7 @@ def interpret_angle(x, version):
         azimuth
 
     """
-    scalar_input = False
+    scalar_input = False  # TODO: ask Volker about this code copy between interpret_angle and interpret_time
     if np.isscalar(x):
         x = np.array([x])
         scalar_input = True
@@ -798,9 +810,9 @@ def interpret_angle(x, version):
     else:
         raise NotImplementedError('Known versions for angle encoding are 1 and 2, but received %f' % version)
 
-    if scalar_input:
-        ele = ele.item(0)
-        azi = azi.item(0)
+    if scalar_input:  # TODO: ask Volker about this code copy between interpret_angle and interpret_time
+        ele = ele[0]
+        azi = azi[0]
 
     return ele, azi
 
@@ -880,8 +892,8 @@ filename = './testdata/rpg/C00-V859_190803'
 
 filename_noext = os.path.splitext(filename)[0]  # make sure that filename has no extension
 brt = BRT(filename_noext + '.BRT')
-brt = read_brt(filename_noext + '.BRT')
-blb = read_blb(filename_noext + '.BLB')
-irt = read_irt(filename_noext + '.IRT')
-met = read_met(filename_noext + '.MET')
-hkd = read_hkd(filename_noext + '.HKD')
+brt_old = read_brt(filename_noext + '.BRT')
+blb_old = read_blb(filename_noext + '.BLB')
+irt_old = read_irt(filename_noext + '.IRT')
+met_old = read_met(filename_noext + '.MET')
+hkd_old = read_hkd(filename_noext + '.HKD')
