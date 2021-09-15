@@ -779,13 +779,17 @@ def interpret_angle(x, version):
         azimuth
 
     """
+    scalar_input = False
+    if np.isscalar(x):
+        x = np.array([x])
+        scalar_input = True
 
     if version == 1:
-        if x >= 1e6:
-            x -= 1e6
-            ele_offset = 100
-        else:
-            ele_offset = 0
+        ele_offset = np.zeros(x.shape)
+        ind_offset_corr = (x >= 1e6)
+        ele_offset[ind_offset_corr] = 100
+        x[ind_offset_corr] -= 1e6
+
         azi = (np.abs(x) // 100) / 10  # assume azi and ele are measured in 0.1 degree steps
         ele = x - np.sign(x) * azi * 1000 + ele_offset
     elif version == 2:
@@ -793,6 +797,10 @@ def interpret_angle(x, version):
         azi = (np.abs(x) - np.abs(ele) * 1e7) / 100
     else:
         raise NotImplementedError('Known versions for angle encoding are 1 and 2, but received %f' % version)
+
+    if scalar_input:
+        ele = ele.item(0)
+        azi = azi.item(0)
 
     return ele, azi
 
