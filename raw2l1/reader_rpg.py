@@ -133,13 +133,13 @@ class BRT(BaseFile):
     def _read_header(self):
         # quantities with fixed length
         encodings_bin_fix = (
-            dict(name='n_meas', type='i', shape=(1,), bytes=4),  #TODO: Ask Volker about calsize: could not find equivalent for numpy so left byte number an explicit input (is also specified in rpg manual)
+            dict(name='n_meas', type='i', shape=(1,), bytes=4),  #TODO: Ask Volker about calcsize: could not find equivalent for numpy so left byte number an explicit input (is also specified in rpg manual)
             dict(name='timeref', type='i', shape=(1,), bytes=4),
             dict(name='n_freq', type='i', shape=(1,), bytes=4))
         for enc in encodings_bin_fix:
             self.decode_binary(enc)
 
-        # quantities with length-dependent on number of spectral channels (n_freq) only possible after n_freq is read
+        # quantities with length dependent on number of spectral channels (n_freq) only possible after n_freq is read
         n_freq = self.data['n_freq']
         encodings_bin_var = (
             dict(name='frequency', type='f', shape=(n_freq,), bytes=n_freq * 4),
@@ -154,12 +154,55 @@ class BRT(BaseFile):
         encodings_bin = (
             dict(name='time_raw', type='i', shape=(1,), bytes=4),
             dict(name='rainflag', type='B', shape=(1,), bytes=1),
-            dict(name='Tb', type='f', shape=(n_freq,), bytes=n_freq * 4),
+            dict(name='Tb', type='f', shape=(n_freq,), bytes=n_freq*4),
             dict(name='pointing_raw', type=self.filestruct['formatchar_angle'], shape=(1,), bytes=4))
         self.decode_binary_np(encodings_bin, self.data['n_meas'])
 
 
-# TODO: Consider transforming to SI units. IRT -> K; wavelength -> m; frequency -> Hz
+class BLB(BaseFile):
+    pass  # TODO: implement BLB class. hardest as 3 dimensional (time, freq, ele)
+
+
+class IRT(BaseFile):
+    def _read_header(self):
+        # quantities with fixed length
+        encodings_bin_fix = [
+            dict(name='n_meas', type='i', shape=(1,), bytes=4),
+            dict(name='IRT_min', type='f', shape=(1,), bytes=4),
+            dict(name='IRT_max', type='f', shape=(1,), bytes=4),
+            dict(name='timeref', type='i', shape=(1,), bytes=4)]  # define as list to be able to append. TODO: Ask Volker whether it is ok to have list here but tuple in BRT. Or should encodings in BRT also be declared as list, although they will not be changed
+        if self.filestruct['structver'] >= 2:
+            encodings_bin_fix.append(
+                dict(name='n_wavelengths', type='i', shape=(1,), bytes=4))
+
+        for enc in encodings_bin_fix:
+            self.decode_binary(enc)
+
+        # quantities with length dependent on number of spectral channels (n_wavelenghts) only possible after read
+        n_wl = self.data['n_wavelengths']
+        encodings_bin_var = [
+            dict(name='wavelength', type='f', shape=(n_wl,), bytes=n_wl*4)]
+        for enc in encodings_bin_var:
+            self.decode_binary(enc)
+
+        # complete missing input for structver == 1
+        if self.filestruct['structver'] == 1:
+            self.data['n_wavelengths'] = 1
+            self.data['wavelength'] = np.nan  #TODO: Ask Volker if nan is better than the missing value constant used previously
+
+    def _read_meas(self):
+        n_wl = self.data['n_wavelengths']
+        encodings_bin = [
+            dict(name='time_raw', type='i', shape=(1,), bytes=4),
+            dict(name='rainflag', type='B', shape=(1,), bytes=1),
+            dict(name='IRT', type='f', shape=(n_wl,), bytes=n_wl*4)]
+        if self.filestruct['structver'] >= 2:
+            encodings_bin.append(
+                dict(name='pointing_raw', type=self.filestruct['formatchar_angle'], shape=(1,), bytes=4))
+
+        self.decode_binary_np(encodings_bin, self.data['n_meas'])
+
+# TODO: Consider transforming to SI units. IRT/IRT_min/IRT_max -> K; wavelength -> m; frequency -> Hz. could be done in interpret_raw_data of BaseFile class
 def read_brt(filename, accept_localtime=False):
     """
     Read BRT file holding the MWR brightness temperatures of starring obs
@@ -892,8 +935,10 @@ filename = './testdata/rpg/C00-V859_190803'
 
 filename_noext = os.path.splitext(filename)[0]  # make sure that filename has no extension
 brt = BRT(filename_noext + '.BRT')
+# blb
+irt = IRT(filename_noext + '.IRT')
 brt_old = read_brt(filename_noext + '.BRT')
-blb_old = read_blb(filename_noext + '.BLB')
+# blb_old = read_blb(filename_noext + '.BLB')
 irt_old = read_irt(filename_noext + '.IRT')
 met_old = read_met(filename_noext + '.MET')
 hkd_old = read_hkd(filename_noext + '.HKD')
