@@ -258,7 +258,7 @@ filename_noext = os.path.splitext(filename)[0]  # make sure that filename has no
 
 hkd = HKD(filename_noext + '.HKD')
 brt = BRT(filename_noext + '.BRT')
-blb = BRT(filename_noext + '.BLB')
+blb = BLB(filename_noext + '.BLB')
 irt = IRT(filename_noext + '.IRT')
 met = MET(filename_noext + '.MET')
 hkd = HKD(filename_noext + '.HKD')
