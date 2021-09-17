@@ -18,4 +18,5 @@ class FileTooShort(MWRFileError):
     """Raised if file seems too short, e.g. if parameter n_meas > rest of buffer"""
 
 
-
+class TimerefError(MWRError):
+    """Raised if time reference is local but UTC is required"""

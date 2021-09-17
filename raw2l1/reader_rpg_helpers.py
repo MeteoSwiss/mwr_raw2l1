@@ -131,7 +131,7 @@ def interpret_statusflag_series(flag_series, bit_order):
         all_flagdicts.append(interpret_statusflag(flag, bit_order))
 
     out = all_flagdicts[0]  # FIXME: return a dict with lists inside, first element is just for testing
-    # TODO: ask Volker how to return a dict of lists from a list of dicts
+    # TODO: ask Volker how to return a dict of lists from a list of dicts. BUT this is slow for time dimension with up to 1e5 entires ==> rather ask how I could vectorize interpret_statusflag
 
     return out
 

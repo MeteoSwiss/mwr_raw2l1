@@ -5,7 +5,8 @@ reader for RPG HATPRO, TEMPRO or HUMPRO binary files
 import numpy as np
 import struct
 import os
-from errors import UnknownFileType, WrongFileType, FileTooShort
+from errors import (UnknownFileType, WrongFileType, FileTooShort,
+                    TimerefError)
 from reader_rpg_helpers import (get_binary,
                                 interpret_time, interpret_angle, interpret_coord,
                                 interpret_hkd_contents_code, interpret_statusflag_series,
@@ -33,16 +34,13 @@ FILETYPE_CONFS = {  # assign metadata to each known filecode
     # HKD files
     837854832: dict(type='hkd'),
 }
-# TODO: ask Volker whether different dict structures are ok here
-
+# TODO: ask Volker whether different dict structures are ok here ==> Yes, as long as they don't cause if clauses in code
 
 
 ###############################################################################
 # readers for different RPG files
 # ------------------------------------------------------------------------------
-
-
-class BaseFile(object):  # TODO: ask Volker if name BaseFile is ok or if he has another suggestion for naming this class
+class BaseReader(object):
     def __init__(self, filename, accept_localtime=False):
         self.filename = filename
         self.data = {}
@@ -55,7 +53,6 @@ class BaseFile(object):  # TODO: ask Volker if name BaseFile is ok or if he has 
 
     def read(self):
         # sequence must be preserved as self.byte_offset is increased by each method, hence they are all semi-private
-        # TODO: ask Volker whether this semi-private makes sense
         self._read_filecode()
         self.interpret_filecode()
         self._read_header()
@@ -63,18 +60,27 @@ class BaseFile(object):  # TODO: ask Volker if name BaseFile is ok or if he has 
         self.interpret_raw_data()
 
     def decode_binary(self, encoding_pattern, byte_order=BYTE_ORDER):
-        """"decode next variable from binary stream and write to dict self.data + augment self.byte_offset"""
-        full_type = byte_order + encoding_pattern['shape'][0] * encoding_pattern['type']
-        out = struct.unpack_from(full_type, self.data_bin, self.byte_offset)
-        self.byte_offset += encoding_pattern['bytes']
+        """"
+        decode next variables from binary stream and write to dict self.data + augment self.byte_offset
+          - encoding_pattern: a list of tuples or lists containing the individual variable description
+                              e.g. #TODO give an example of encoding pattern here
+        """
+        for enc in encoding_pattern:
+            full_type = byte_order + enc['shape'][0] * enc['type']
+            out = struct.unpack_from(full_type, self.data_bin, self.byte_offset)
+            self.byte_offset += enc['bytes']
 
-        if len(out) == 1:  # extract from tuple if it has only one element, otherwise return tuple
-            self.data[encoding_pattern['name']] = out[0]
-        else:
-            self.data[encoding_pattern['name']] = out
+            if len(out) == 1:  # extract from tuple if it has only one element, otherwise return tuple
+                self.data[enc['name']] = out[0]
+            else:
+                self.data[enc['name']] = out
 
     def decode_binary_np(self, encoding_pattern, n_entries, byte_order=BYTE_ORDER):
-        """decode bunch of binary stream via 2d numpy array to write to dict self.data + augment self.byte_offset"""
+        """
+        decode bunch of binary stream via 2d numpy array to write to dict self.data + augment self.byte_offset
+          - encoding_pattern: a list of tuples or lists containing the individual variable description FOR ONE TIME STEP
+                              e.g. #TODO give an example of encoding pattern here
+        """
         dtype_np = np.dtype([(ep['name'], byte_order+ep['type'], ep['shape']) for ep in encoding_pattern])
         names = [ep['name'] for ep in encoding_pattern]
         bytes_per_var = np.array([ep['bytes'] for ep in encoding_pattern])
@@ -82,13 +88,13 @@ class BaseFile(object):  # TODO: ask Volker if name BaseFile is ok or if he has 
         byte_offset_start = self.byte_offset
         n_bytes = bytes_per_var.sum() * n_entries
         self.byte_offset += n_bytes
-        if len(self.data_bin) < self.byte_offset:  # TODO: ask Volker if check is ok here. think I can't check earlier
+        if len(self.data_bin) < self.byte_offset:
             raise FileTooShort('number of bytes in file %s does not match the one inferred from n_meas' % self.filename)
 
         arr = np.frombuffer(self.data_bin[byte_offset_start: self.byte_offset], dtype=dtype_np)
         for idx, name in enumerate(names):
             if encoding_pattern[idx]['shape'] == (1,):  # variables which only have a time dimension shall not be 2d
-                self.data[name] = arr[name].flatten()  # TODO: ask Volker if this manipulation is ok. Doing this also for later usage in loops
+                self.data[name] = arr[name].flatten()
             else:
                 self.data[name] = arr[name]
 
@@ -100,20 +106,19 @@ class BaseFile(object):  # TODO: ask Volker if name BaseFile is ok or if he has 
                                   % (self.filecode, self.filename))
 
     def interpret_raw_data(self):
-        self.data['time'] = interpret_time(self.data['time_raw'])
+        self.data['time'] = interpret_time(self.data['time_raw'])  # assume data-dict in all subclasses contains time
         if 'pointing_raw' in self.data.keys():
             self.data['ele'], self.data['azi'] = interpret_angle(self.data['pointing_raw'], self.filestruct['anglever'])
         for coord in ('lon_raw', 'lat_raw'):
             if coord in self.data.keys():
                 self.data[coord[0:3]] = interpret_coord(self.data[coord])
-        if 'statusflag' in self.data.keys():  # for HKD only  #TODO: ask Volker if it makes sense to have this in BaseFile
+        if 'statusflag' in self.data.keys():  # used for HKD only  #TODO: ask Volker if it makes sense to have this in BaseReader
             self.data.update(interpret_statusflag_series(self.data['statusflag'], bit_order=BYTE_ORDER))
 
     def check_data(self, accept_localtime):
         """general checks for the consistency of the data which can be applied to all file type readers"""
         if not accept_localtime and self.data['timeref'] == 0:
-            raise ValueError('Time encoded in local time but UTC required by "accept_localtime"')
-            # TODO: Ask Volker if it is ok to raise a ValueError here or if we should define own error type
+            raise TimerefError('Time encoded in local time but UTC required by "accept_localtime"')
 
     def _read_filecode(self):
         """first of the _read... methods to be executed (according to order in file)"""
@@ -129,7 +134,7 @@ class BaseFile(object):  # TODO: ask Volker if name BaseFile is ok or if he has 
         pass
 
 
-class BRT(BaseFile):
+class BRT(BaseReader):
     def interpret_filecode(self):
         super(BRT, self).interpret_filecode()
 
@@ -140,21 +145,19 @@ class BRT(BaseFile):
 
     def _read_header(self):
         # quantities with fixed length
-        encodings_bin_fix = (
-            dict(name='n_meas', type='i', shape=(1,), bytes=4),  #TODO: Ask Volker about calcsize: could not find equivalent for numpy so left byte number an explicit input (is also specified in rpg manual)
-            dict(name='timeref', type='i', shape=(1,), bytes=4),
-            dict(name='n_freq', type='i', shape=(1,), bytes=4))
-        for enc in encodings_bin_fix:  # TODO: include this loop to self.decode_binary (readability and similarity to self.decode_binary_np)
-            self.decode_binary(enc)
+        encodings_bin_fix = [
+            dict(name='n_meas', type='i', shape=(1,), bytes=4),  # TODO: Ask Volker about calcsize ==> would be good to use
+            dict(name='timeref', type='i', shape=(1,), bytes=4),  # TODO: write more compact with list comprehension just looping over names (rest stays the same) (Volkers suggestion). But could also argue that want to keep same structure for all. Think about
+            dict(name='n_freq', type='i', shape=(1,), bytes=4)]
+        self.decode_binary(encodings_bin_fix)
 
         # quantities with length dependent on number of spectral channels (n_freq) only possible after n_freq is read
         n_freq = self.data['n_freq']
-        encodings_bin_var = (
+        encodings_bin_var = [
             dict(name='frequency', type='f', shape=(n_freq,), bytes=n_freq * 4),
             dict(name='Tb_min', type='f', shape=(n_freq,), bytes=n_freq * 4),
-            dict(name='Tb_max', type='f', shape=(n_freq,), bytes=n_freq * 4))
-        for enc in encodings_bin_var:
-            self.decode_binary(enc)
+            dict(name='Tb_max', type='f', shape=(n_freq,), bytes=n_freq * 4)]
+        self.decode_binary(encodings_bin_var)
 
     def _read_meas(self):
         """read actual measurements. Filecode and Header needs to be read before as info is needed for decoding"""
@@ -167,7 +170,7 @@ class BRT(BaseFile):
         self.decode_binary_np(encodings_bin, self.data['n_meas'])
 
 
-class BLB(BaseFile):
+class BLB(BaseReader):
     def interpret_filecode(self):
         super(BLB, self).interpret_filecode()
 
@@ -179,7 +182,7 @@ class BLB(BaseFile):
     pass  # TODO: implement readers for BLB class. harder as 3 dimensional (time, freq, ele)
 
 
-class IRT(BaseFile):
+class IRT(BaseReader):
     def interpret_filecode(self):
         super(IRT, self).interpret_filecode()
 
@@ -198,21 +201,18 @@ class IRT(BaseFile):
         if self.filestruct['structver'] >= 2:
             encodings_bin_fix.append(
                 dict(name='n_wavelengths', type='i', shape=(1,), bytes=4))
-
-        for enc in encodings_bin_fix:
-            self.decode_binary(enc)
+        self.decode_binary(encodings_bin_fix)
 
         # quantities with length dependent on number of spectral channels (n_wavelenghts) only possible after read
         n_wl = self.data['n_wavelengths']
         encodings_bin_var = [
             dict(name='wavelength', type='f', shape=(n_wl,), bytes=n_wl*4)]
-        for enc in encodings_bin_var:
-            self.decode_binary(enc)
+        self.decode_binary(encodings_bin_var)
 
         # complete missing input for structver == 1
         if self.filestruct['structver'] == 1:
             self.data['n_wavelengths'] = 1
-            self.data['wavelength'] = np.nan  #TODO: Ask Volker if nan is better than the missing value constant used previously
+            self.data['wavelength'] = np.nan
 
     def _read_meas(self):
         n_wl = self.data['n_wavelengths']
@@ -227,7 +227,7 @@ class IRT(BaseFile):
         self.decode_binary_np(encodings_bin, self.data['n_meas'])
 
 
-class MET(BaseFile):
+class MET(BaseReader):
     def interpret_filecode(self):
         super(MET, self).interpret_filecode()
 
@@ -236,10 +236,10 @@ class MET(BaseFile):
             raise WrongFileType('filecode of input file corresponds to a %s-file but this reader is for MET' %
                                 self.filestruct['type'])
 
-    pass  # TODO: implement MET class. For structver >=2 has a bit encoding presence of different sensors
+    pass  # TODO: implement MET class. For structver >=2 has bit encoding presence of different sensors. Similar to HKD
 
 
-class HKD(BaseFile):
+class HKD(BaseReader):
     def interpret_filecode(self):
         super(HKD, self).interpret_filecode()
 
@@ -253,11 +253,10 @@ class HKD(BaseFile):
             dict(name='n_meas', type='i', shape=(1,), bytes=4),
             dict(name='timeref', type='i', shape=(1,), bytes=4),
             dict(name='hkd_contents_code', type='i', shape=(1,), bytes=4)]
-        for enc in encodings_bin:
-            self.decode_binary(enc)
+        self.decode_binary(encodings_bin)
 
         file_contents = interpret_hkd_contents_code(self.data['hkd_contents_code'], bit_order=BYTE_ORDER)
-        self.data.update(file_contents)  # TODO: ask Volker if it is bad that contents added to data dict are hidden in helpers file.
+        self.data.update(file_contents)  # add variables 'has_...' used below to the data dictionary
 
     def _read_meas(self):
         encodings_bin = [
@@ -284,8 +283,7 @@ class HKD(BaseFile):
         self.decode_binary_np(encodings_bin, self.data['n_meas'])
 
 
-# TODO: Consider transforming to SI units. IRT/IRT_min/IRT_max -> K; wavelength -> m; frequency -> Hz. could be done in interpret_raw_data of BaseFile class
-
+# TODO: Consider transforming to SI units. IRT/IRT_min/IRT_max -> K; wavelength -> m; frequency -> Hz. could be done in interpret_raw_data of BaseReader class
 ###############################################################################
 # main
 # ------------------------------------------------------------------------------
