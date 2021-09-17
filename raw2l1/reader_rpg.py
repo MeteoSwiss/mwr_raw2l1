@@ -5,7 +5,7 @@ reader for RPG HATPRO, TEMPRO or HUMPRO binary files
 import numpy as np
 import struct
 import os
-from errors import UnknownFileType, FileTooShort
+from errors import UnknownFileType, WrongFileType, FileTooShort
 from reader_rpg_helpers import (get_binary,
                                 interpret_time, interpret_angle, interpret_coord,
                                 interpret_hkd_contents_code, interpret_statusflag_series,
@@ -110,7 +110,7 @@ class BaseFile(object):  # TODO: ask Volker if name BaseFile is ok or if he has 
             self.data.update(interpret_statusflag_series(self.data['statusflag'], bit_order=BYTE_ORDER))
 
     def check_data(self, accept_localtime):
-        # general checks for the consistency of the data
+        """general checks for the consistency of the data which can be applied to all file type readers"""
         if not accept_localtime and self.data['timeref'] == 0:
             raise ValueError('Time encoded in local time but UTC required by "accept_localtime"')
             # TODO: Ask Volker if it is ok to raise a ValueError here or if we should define own error type
@@ -130,7 +130,14 @@ class BaseFile(object):  # TODO: ask Volker if name BaseFile is ok or if he has 
 
 
 class BRT(BaseFile):
-    # TODO: Ask Volker how to enhance inherited method interpret_filecode with check that filecode corresponds to BRT
+    def interpret_filecode(self):
+        super(BRT, self).interpret_filecode()
+
+        # check if filecode corresponds to a BRT file
+        if self.filestruct['type'] != 'brt':
+            raise WrongFileType('filecode of input file corresponds to a %s-file but this reader is for BRT' %
+                                self.filestruct['type'])
+
     def _read_header(self):
         # quantities with fixed length
         encodings_bin_fix = (
@@ -161,10 +168,26 @@ class BRT(BaseFile):
 
 
 class BLB(BaseFile):
-    pass  # TODO: implement BLB class. harder as 3 dimensional (time, freq, ele)
+    def interpret_filecode(self):
+        super(BLB, self).interpret_filecode()
+
+        # check if filecode corresponds to a BLB file
+        if self.filestruct['type'] != 'blb':
+            raise WrongFileType('filecode of input file corresponds to a %s-file but this reader is for BLB' %
+                                self.filestruct['type'])
+
+    pass  # TODO: implement readers for BLB class. harder as 3 dimensional (time, freq, ele)
 
 
 class IRT(BaseFile):
+    def interpret_filecode(self):
+        super(IRT, self).interpret_filecode()
+
+        # check if filecode corresponds to a IRT file
+        if self.filestruct['type'] != 'irt':
+            raise WrongFileType('filecode of input file corresponds to a %s-file but this reader is for IRT' %
+                                self.filestruct['type'])
+
     def _read_header(self):
         # quantities with fixed length
         encodings_bin_fix = [
@@ -205,10 +228,26 @@ class IRT(BaseFile):
 
 
 class MET(BaseFile):
+    def interpret_filecode(self):
+        super(MET, self).interpret_filecode()
+
+        # check if filecode corresponds to a MET file
+        if self.filestruct['type'] != 'met':
+            raise WrongFileType('filecode of input file corresponds to a %s-file but this reader is for MET' %
+                                self.filestruct['type'])
+
     pass  # TODO: implement MET class. For structver >=2 has a bit encoding presence of different sensors
 
 
 class HKD(BaseFile):
+    def interpret_filecode(self):
+        super(HKD, self).interpret_filecode()
+
+        # check if filecode corresponds to a HKD file
+        if self.filestruct['type'] != 'hkd':
+            raise WrongFileType('filecode of input file corresponds to a %s-file but this reader is for HKD' %
+                                self.filestruct['type'])
+
     def _read_header(self):
         encodings_bin = [
             dict(name='n_meas', type='i', shape=(1,), bytes=4),
@@ -256,11 +295,10 @@ filename = './testdata/rpg/C00-V859_190803'
 
 filename_noext = os.path.splitext(filename)[0]  # make sure that filename has no extension
 
-hkd = HKD(filename_noext + '.HKD')
 brt = BRT(filename_noext + '.BRT')
-blb = BLB(filename_noext + '.BLB')
+#blb = BLB(filename_noext + '.BLB')
 irt = IRT(filename_noext + '.IRT')
-met = MET(filename_noext + '.MET')
+#met = MET(filename_noext + '.MET')
 hkd = HKD(filename_noext + '.HKD')
 
 # legacy readers
