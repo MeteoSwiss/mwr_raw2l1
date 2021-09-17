@@ -6,7 +6,10 @@ import numpy as np
 import struct
 import os
 from errors import UnknownFileType, FileTooShort
-from reader_rpg_helpers import get_binary, interpret_time, interpret_angle, interpret_coord, scan_starttime_to_time
+from reader_rpg_helpers import (get_binary,
+                                interpret_time, interpret_angle, interpret_coord,
+                                interpret_hkd_contents_code, interpret_statusflag_series,
+                                scan_starttime_to_time)
 from legacy_reader_rpg import read_brt, read_blb, read_irt, read_met, read_hkd
 
 BYTE_ORDER = '<'  # byte order in all RPG files assumed little-endian  #TODO: ask Harald whether this is true or whether it depends on the instrument PC (hopefully not!)
@@ -64,6 +67,7 @@ class BaseFile(object):  # TODO: ask Volker if name BaseFile is ok or if he has 
         full_type = byte_order + encoding_pattern['shape'][0] * encoding_pattern['type']
         out = struct.unpack_from(full_type, self.data_bin, self.byte_offset)
         self.byte_offset += encoding_pattern['bytes']
+
         if len(out) == 1:  # extract from tuple if it has only one element, otherwise return tuple
             self.data[encoding_pattern['name']] = out[0]
         else:
@@ -99,6 +103,11 @@ class BaseFile(object):  # TODO: ask Volker if name BaseFile is ok or if he has 
         self.data['time'] = interpret_time(self.data['time_raw'])
         if 'pointing_raw' in self.data.keys():
             self.data['ele'], self.data['azi'] = interpret_angle(self.data['pointing_raw'], self.filestruct['anglever'])
+        for coord in ('lon_raw', 'lat_raw'):
+            if coord in self.data.keys():
+                self.data[coord[0:3]] = interpret_coord(self.data[coord])
+        if 'statusflag' in self.data.keys():  # for HKD only  #TODO: ask Volker if it makes sense to have this in BaseFile
+            self.data.update(interpret_statusflag_series(self.data['statusflag'], bit_order=BYTE_ORDER))
 
     def check_data(self, accept_localtime):
         # general checks for the consistency of the data
@@ -200,7 +209,41 @@ class MET(BaseFile):
 
 
 class HKD(BaseFile):
-    pass  # TODO: implement HKD class. Similar to MET
+    def _read_header(self):
+        encodings_bin = [
+            dict(name='n_meas', type='i', shape=(1,), bytes=4),
+            dict(name='timeref', type='i', shape=(1,), bytes=4),
+            dict(name='hkd_contents_code', type='i', shape=(1,), bytes=4)]
+        for enc in encodings_bin:
+            self.decode_binary(enc)
+
+        file_contents = interpret_hkd_contents_code(self.data['hkd_contents_code'], bit_order=BYTE_ORDER)
+        self.data.update(file_contents)  # TODO: ask Volker if it is bad that contents added to data dict are hidden in helpers file.
+
+    def _read_meas(self):
+        encodings_bin = [
+            dict(name='time_raw', type='i', shape=(1,), bytes=4),
+            dict(name='alarm', type='B', shape=(1,), bytes=1)]
+        if self.data['has_coord']:
+            encodings_bin.append(dict(name='lon_raw', type='f', shape=(1,), bytes=4))
+            encodings_bin.append(dict(name='lat_raw', type='f', shape=(1,), bytes=4))
+        if self.data['has_T']:
+            encodings_bin.append(dict(name='T_amb_1', type='f', shape=(1,), bytes=4))
+            encodings_bin.append(dict(name='T_amb_2', type='f', shape=(1,), bytes=4))
+            encodings_bin.append(dict(name='T_receiver_kband', type='f', shape=(1,), bytes=4))
+            encodings_bin.append(dict(name='T_receiver_vband', type='f', shape=(1,), bytes=4))  #TODO: Ask Volker if/how I could use inheritance for another instrument which has no V-Band
+        if self.data['has_stability']:
+            encodings_bin.append(dict(name='Tstab_kband', type='f', shape=(1,), bytes=4))
+            encodings_bin.append(dict(name='Tstab_vband', type='f', shape=(1,), bytes=4))
+        if self.data['has_flashmemoryinfo']:
+            encodings_bin.append(dict(name='flashmemory_remaining', type='i', shape=(1,), bytes=4))
+        if self.data['has_qualityflag']:
+            encodings_bin.append(dict(name='L2_qualityflag', type='i', shape=(1,), bytes=4))
+        if self.data['has_statusflag']:
+            encodings_bin.append(dict(name='statusflag', type='i', shape=(1,), bytes=4))
+
+        self.decode_binary_np(encodings_bin, self.data['n_meas'])
+
 
 # TODO: Consider transforming to SI units. IRT/IRT_min/IRT_max -> K; wavelength -> m; frequency -> Hz. could be done in interpret_raw_data of BaseFile class
 
@@ -212,6 +255,8 @@ class HKD(BaseFile):
 filename = './testdata/rpg/C00-V859_190803'
 
 filename_noext = os.path.splitext(filename)[0]  # make sure that filename has no extension
+
+hkd = HKD(filename_noext + '.HKD')
 brt = BRT(filename_noext + '.BRT')
 blb = BRT(filename_noext + '.BLB')
 irt = IRT(filename_noext + '.IRT')

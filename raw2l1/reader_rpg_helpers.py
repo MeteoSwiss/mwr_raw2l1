@@ -107,6 +107,93 @@ def interpret_coord(x, version=2):  # TODO: Ask Harald how to find out which coo
         raise NotImplementedError('Known versions for coordinates encoding are 1 and 2, but received %f' % version)
 
 
+def interpret_hkd_contents_code(contents_code_integer, bit_order):
+    """interpret the integer contents from HKD files and return dict of contents variables"""
+
+    bit_order = interpret_bit_order(bit_order)
+    contents_code_int8 = np.array([contents_code_integer]).view(np.uint8)
+    hkdselbits = np.unpackbits(contents_code_int8, bitorder=bit_order)
+
+    out = {'has_coord': hkdselbits[0],
+           'has_T': hkdselbits[1],
+           'has_stability': hkdselbits[2],
+           'has_flashmemoryinfo': hkdselbits[3],
+           'has_qualityflag': hkdselbits[4],
+           'has_statusflag': hkdselbits[5]}
+
+    return out
+
+
+def interpret_statusflag_series(flag_series, bit_order):
+    """interpret_statusflag applied to a series of flags"""
+    all_flagdicts = []
+    for flag in flag_series:
+        all_flagdicts.append(interpret_statusflag(flag, bit_order))
+
+    out = all_flagdicts[0]  # FIXME: return a dict with lists inside, first element is just for testing
+    # TODO: ask Volker how to return a dict of lists from a list of dicts
+
+    return out
+
+
+def interpret_statusflag(flag_integer, bit_order):
+    """interpret the integer statusflag from HKD files and return dict of status variables"""
+
+    n_freq_kband = 7  # number of frequency channels in K-band receiver
+    n_freq_vband = 7  # number of frequency channels in V-band receiver
+
+    bit_order = interpret_bit_order(bit_order)
+    flag_int8 = np.array([flag_integer]).view(np.uint8)
+    statusflagbits = np.unpackbits(flag_int8, bitorder=bit_order)
+
+    tstabflag_kband = statusflagbits[24] + 2 * statusflagbits[25]
+    tstabflag_vband = statusflagbits[26] + 2 * statusflagbits[27]
+
+    out = {'channel_quality_ok_kband': statusflagbits[0:n_freq_kband],
+            'channel_quality_ok_vband': statusflagbits[8:(8 + n_freq_vband)],
+            'rainflag': statusflagbits[16],
+            'blowerspeed_status': statusflagbits[17],
+            'BLscan_active': statusflagbits[18],
+            'tipcal_active': statusflagbits[19],
+            'gaincal_active': statusflagbits[20],
+            'noisecal_active': statusflagbits[21],
+            'noisediode_ok_kband': statusflagbits[22],
+            'noisediode_ok_vband': statusflagbits[23],
+            'Tstab_ok_kband': interpret_tstab_flag(tstabflag_kband),
+            'Tstab_ok_vband': interpret_tstab_flag(tstabflag_vband),
+            'recent_powerfailure': statusflagbits[28],
+            'Tstab_ok_amb': interpret_tstab_flag(statusflagbits[29]),  # 1:ok, 0:not ok because sensors differ by >0.3 K
+            'noisediode_on': statusflagbits[30]}
+
+    return out
+
+
+def interpret_tstab_flag(flag):
+    """interpret temperature stability flag and return a flag saying stability ok (1), not ok (0) or unknown (NaN)"""
+    if flag == 0:  # unknown, not enough data samples recorded yet
+        tstab_ok = np.nan
+    elif flag == 1:  # stability ok
+        tstab_ok = 1
+    elif flag == 2:  # not sufficiently stable
+        tstab_ok = 0
+    else:
+        ValueError('can interpret RPG temperature stability flag with values 0, 1 or 2 but received ' + flag)
+
+    return tstab_ok
+
+
+def interpret_bit_order(bit_order):
+    """interpret bit_order for use in numpy's unpackbits so that it also '>' and '<' can be used"""
+    if bit_order == 'little' or bit_order == 'big':
+        return bit_order
+    elif bit_order == '<':
+        return 'little'
+    elif bit_order == '>':
+        return 'big'
+    else:
+        raise ValueError("argument bit_order can receive '<', '>', 'little' or 'big' but got " + bit_order)
+
+
 def scan_starttime_to_time(starttime, n_angles, inttime=40, caltime=40, idletime=1.4):
     """
     RPG scan files only have one timestamp per scan. This function returns the
