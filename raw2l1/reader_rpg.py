@@ -6,7 +6,7 @@ import numpy as np
 import struct
 import os
 from errors import (UnknownFileType, WrongFileType, FileTooShort,
-                    TimerefError)
+                    TimerefError, WrongNumberOfChannels)
 from reader_rpg_helpers import (get_binary,
                                 interpret_time, interpret_angle, interpret_coord,
                                 interpret_hkd_contents_code, interpret_statusflag_series,
@@ -33,8 +33,11 @@ FILETYPE_CONFS = {  # assign metadata to each known filecode
     599658944: dict(type='met', structver=2),
     # HKD files
     837854832: dict(type='hkd'),
-}
-# TODO: ask Volker whether different dict structures are ok here ==> Yes, as long as they don't cause if clauses in code
+}  # INFO: Volker: different dict structures are ok here as long as they don't cause if clauses in code
+
+N_FREQ_DEFAULT = 14    # TODO: check how RPG deals with files from TEMPRO or HUMPRO how would have different n_freq. Other filecodes? Could also get frequency info from BRT files but ugly dependency.
+
+
 
 
 ###############################################################################
@@ -56,6 +59,7 @@ class BaseReader(object):
         self._read_filecode()
         self.interpret_filecode()
         self._read_header()
+        self.interpret_header
         self._read_meas()
         self.interpret_raw_data()
 
@@ -104,6 +108,9 @@ class BaseReader(object):
         except KeyError:
             raise UnknownFileType('reader not specified for files with filecode %d as used in %s'
                                   % (self.filecode, self.filename))
+
+    def interpret_header(self):
+        pass
 
     def interpret_raw_data(self):
         self.data['time'] = interpret_time(self.data['time_raw'])  # assume data-dict in all subclasses contains time
@@ -171,6 +178,10 @@ class BRT(BaseReader):
 
 
 class BLB(BaseReader):
+    def __init__(self, filename, accept_localtime=False):
+        self.header_reader = None
+        super(BLB, self).__init__(filename, accept_localtime)
+
     def interpret_filecode(self):
         super(BLB, self).interpret_filecode()
 
@@ -179,7 +190,72 @@ class BLB(BaseReader):
             raise WrongFileType('filecode of input file corresponds to a %s-file but this reader is for BLB' %
                                 self.filestruct['type'])
 
-    pass  # TODO: implement readers for BLB class. harder as 3 dimensional (time, freq, ele)
+        self.header_reader = getattr(self, '_read_header_%d' % self.filestruct['structver'])
+
+    def _read_header(self):
+        self.header_reader()
+
+    def _read_header_1(self):
+        """Function for reading header for files with structver 1 (n_freq first assumed and read only afterwards)"""
+        # quantities with fixed length
+        encodings_bin_fix = [
+            dict(name='n_scans', type='i', shape=(1,), bytes=4)]
+        self.decode_binary(encodings_bin_fix)
+
+        # quantities with length dependent on number of spectral channels (n_freq) only possible after n_freq is read
+        self.data['n_freq'] = N_FREQ_DEFAULT  # need assumption as number of channels is encoded after used for read
+        n_freq = self.data['n_freq']
+        encodings_bin_var_1 = [
+            dict(name='Tb_min', type='f', shape=(n_freq,), bytes=n_freq * 4),
+            dict(name='Tb_max', type='f', shape=(n_freq,), bytes=n_freq * 4),
+            dict(name='timeref', type='i', shape=(1,), bytes=4),
+            dict(name='n_freq_file', type='i', shape=(1,), bytes=4),
+            dict(name='frequency', type='f', shape=(n_freq,), bytes=n_freq * 4),
+            dict(name='n_ele', type='i', shape=(1,), bytes=4)]
+        self.decode_binary(encodings_bin_var_1)
+
+        # quantities with length dependent on number of elevations in scan (n_ele) only possible after n_ele is read
+        n_ele = self.data['n_ele']
+        encodings_bin_var_2 = [
+            dict(name='scan_ele', type='f', shape=(n_ele,), bytes=n_ele * 4)]
+        self.decode_binary(encodings_bin_var_2)
+
+    def _read_header_2(self):
+        """Function for reading header for files with structver 2 (no assumption on n_freq needed"""
+        # quantities with fixed length
+        encodings_bin_fix = [
+            dict(name='n_scans', type='i', shape=(1,), bytes=4),
+            dict(name='n_freq', type='i', shape=(1,), bytes=4)]
+        self.decode_binary(encodings_bin_fix)
+
+        # quantities with length dependent on number of spectral channels (n_freq) only possible after n_freq is read
+        n_freq = self.data['n_freq']
+        encodings_bin_var_1 = [
+            dict(name='Tb_min', type='f', shape=(n_freq,), bytes=n_freq * 4),
+            dict(name='Tb_max', type='f', shape=(n_freq,), bytes=n_freq * 4),
+            dict(name='timeref', type='i', shape=(1,), bytes=4),
+            dict(name='frequency', type='f', shape=(n_freq,), bytes=n_freq * 4),
+            dict(name='n_ele', type='i', shape=(1,), bytes=4)]
+        self.decode_binary(encodings_bin_var_1)
+
+        # quantities with length dependent on number of elevations in scan (n_ele) only possible after n_ele is read
+        n_ele = self.data['n_ele']
+        encodings_bin_var_2 = [
+            dict(name='scan_ele', type='f', shape=(n_ele,), bytes=n_ele * 4)]
+        self.decode_binary(encodings_bin_var_2)
+
+    def interpret_header(self):
+        super(BLB, self).interpret_header()
+        self.data['n_meas'] = self.data['n_scans'] * self.data['n_meas']
+
+        # check if correct number of channels was assumed for reading in structver 1 file
+        if 'n_freq_file' in self.data.keys():
+            if self.data['n_freq_file'] != self.data['n_freq']:
+                raise WrongNumberOfChannels('assumed number of channels (%d) for reading this BLB file seems wrong' %
+                                            self.data['n_freq'])
+
+    def _read_meas(self):
+        pass  # TODO: implement meas reader for BLB class. harder as 3 dimensional (time, freq, ele)
 
 
 class IRT(BaseReader):
@@ -294,7 +370,7 @@ filename = './testdata/rpg/C00-V859_190803'
 filename_noext = os.path.splitext(filename)[0]  # make sure that filename has no extension
 
 brt = BRT(filename_noext + '.BRT')
-#blb = BLB(filename_noext + '.BLB')
+blb = BLB(filename_noext + '.BLB')
 irt = IRT(filename_noext + '.IRT')
 #met = MET(filename_noext + '.MET')
 hkd = HKD(filename_noext + '.HKD')

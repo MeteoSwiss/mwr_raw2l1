@@ -3,7 +3,7 @@ class MWRError(Exception):
 
 
 class MWRFileError(MWRError):
-    """Base exception for MRW"""
+    """Base exception for MWR Files"""
 
 
 class UnknownFileType(MWRFileError):
@@ -20,3 +20,8 @@ class FileTooShort(MWRFileError):
 
 class TimerefError(MWRError):
     """Raised if time reference is local but UTC is required"""
+
+
+class WrongNumberOfChannels(MWRError):
+    """Raised if a wrong number of frequency channels is assumed for reading the file
+       -> this can happen for old-version BLB files where n_freq is read after being used"""
