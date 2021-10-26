@@ -1,17 +1,16 @@
-# -*- coding: utf-8 -*- #TODO: ask Volker about this encoding line and how extensive the doccstrings for each function/class shall be
 """
 reader for RPG HATPRO, TEMPRO or HUMPRO binary files
 """
 import numpy as np
 import struct
 import os
-from errors import (UnknownFileType, WrongFileType, FileTooShort,
+from mwr_raw2l1.errors import (UnknownFileType, WrongFileType, FileTooShort,
                     TimerefError, WrongNumberOfChannels)
-from reader_rpg_helpers import (get_binary,
-                                interpret_time, interpret_angle, interpret_coord,
-                                interpret_hkd_contents_code, interpret_statusflag_series,
-                                scan_starttime_to_time)
-from legacy_reader_rpg import read_brt, read_blb, read_irt, read_met, read_hkd
+from mwr_raw2l1.reader_rpg_helpers import (interpret_time, interpret_angle, interpret_coord,
+                                           interpret_hkd_contents_code, interpret_statusflag_series,
+                                           scan_starttime_to_time)
+from mwr_raw2l1.utils.file_utils import get_binary
+from mwr_raw2l1.legacy_reader_rpg import read_brt, read_blb, read_irt, read_met, read_hkd
 
 BYTE_ORDER = '<'  # byte order in all RPG files assumed little-endian  #TODO: ask Harald whether this is true or whether it depends on the instrument PC (hopefully not!)
 
@@ -119,7 +118,7 @@ class BaseReader(object):
         for coord in ('lon_raw', 'lat_raw'):
             if coord in self.data.keys():
                 self.data[coord[0:3]] = interpret_coord(self.data[coord])
-        if 'statusflag' in self.data.keys():  # used for HKD only  #TODO: ask Volker if it makes sense to have this in BaseReader
+        if 'statusflag' in self.data.keys():  # used for HKD only  #TODO: ask Volker if it makes sense to have this in BaseReader --> no. to HKD class with super
             self.data.update(interpret_statusflag_series(self.data['statusflag'], bit_order=BYTE_ORDER))
 
     def check_data(self, accept_localtime):
@@ -345,7 +344,7 @@ class HKD(BaseReader):
             encodings_bin.append(dict(name='T_amb_1', type='f', shape=(1,), bytes=4))
             encodings_bin.append(dict(name='T_amb_2', type='f', shape=(1,), bytes=4))
             encodings_bin.append(dict(name='T_receiver_kband', type='f', shape=(1,), bytes=4))
-            encodings_bin.append(dict(name='T_receiver_vband', type='f', shape=(1,), bytes=4))  #TODO: Ask Volker if/how I could use inheritance for another instrument which has no V-Band
+            encodings_bin.append(dict(name='T_receiver_vband', type='f', shape=(1,), bytes=4))  #TODO: Ask Volker if/how I could use inheritance for another instrument which has no V-Band ==> in Funktion auslagern. Eine macht was, andere nichts
         if self.data['has_stability']:
             encodings_bin.append(dict(name='Tstab_kband', type='f', shape=(1,), bytes=4))
             encodings_bin.append(dict(name='Tstab_vband', type='f', shape=(1,), bytes=4))
@@ -364,21 +363,25 @@ class HKD(BaseReader):
 # main
 # ------------------------------------------------------------------------------
 
+def main():
 
-filename = './testdata/rpg/C00-V859_190803'
+    filename = './testdata/rpg/C00-V859_190803'
 
-filename_noext = os.path.splitext(filename)[0]  # make sure that filename has no extension
+    filename_noext = os.path.splitext(filename)[0]  # make sure that filename has no extension
 
-brt = BRT(filename_noext + '.BRT')
-blb = BLB(filename_noext + '.BLB')
-irt = IRT(filename_noext + '.IRT')
-#met = MET(filename_noext + '.MET')
-hkd = HKD(filename_noext + '.HKD')
+    brt = BRT(filename_noext + '.BRT')
+    #blb = BLB(filename_noext + '.BLB')  # TODO: first need to finish reader
+    irt = IRT(filename_noext + '.IRT')
+    #met = MET(filename_noext + '.MET')
+    hkd = HKD(filename_noext + '.HKD')
 
-# legacy readers
-brt_old = read_brt(filename_noext + '.BRT')
-blb_old = read_blb(filename_noext + '.BLB')
-irt_old = read_irt(filename_noext + '.IRT')
-met_old = read_met(filename_noext + '.MET')
-hkd_old = read_hkd(filename_noext + '.HKD')
-pass
+    # legacy readers
+    brt_old = read_brt(filename_noext + '.BRT')
+    blb_old = read_blb(filename_noext + '.BLB')
+    irt_old = read_irt(filename_noext + '.IRT')
+    met_old = read_met(filename_noext + '.MET')
+    hkd_old = read_hkd(filename_noext + '.HKD')
+    pass
+
+if __name__ == '__main__':
+    main()

@@ -5,11 +5,6 @@ import numpy as np
 import datetime as dt
 
 
-def get_binary(filename):
-    """return the entire content of the binary file as binary stream"""
-    with open(filename, 'rb') as f:
-        return f.read()
-# TODO: ask Volker if it is ok to declare get_binary outside of any class (pretty general in my eyes). If yes, should it go to helper functions module
 
 
 def interpret_time(time_in):

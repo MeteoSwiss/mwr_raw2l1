@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "alc_raw2l1"
+name = "mwr_raw2l1"
 version = "0.1.0"
 description = ""
 authors = ["rruefenacht <rruefenacht@users.noreply.github.com>"]
@@ -14,3 +14,6 @@ PyYAML = "^5.4.1"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+rpg_reader = "mwr_raw2l1.reader_rpg:main"
