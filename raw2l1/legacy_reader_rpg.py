@@ -594,5 +594,3 @@ def read_hkd(filename, accept_localtime=False):
             data['noisediode_on'][n] = statusflagbits[30]
 
     return data
-
-
