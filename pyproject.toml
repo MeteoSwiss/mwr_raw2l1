@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "mwrpy"
+name = "alc_raw2l1"
 version = "0.1.0"
 description = ""
 authors = ["rruefenacht <rruefenacht@users.noreply.github.com>"]
