@@ -594,3 +594,7 @@ def read_hkd(filename, accept_localtime=False):
             data['noisediode_on'][n] = statusflagbits[30]
 
     return data
+
+
+if __name__ == '__main__':
+    blb = read_blb('data/rpg/C00-V859_190803.BLB')

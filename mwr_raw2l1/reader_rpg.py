@@ -58,7 +58,7 @@ class BaseReader(object):
         self._read_filecode()
         self.interpret_filecode()
         self._read_header()
-        self.interpret_header
+        self.interpret_header()
         self._read_meas()
         self.interpret_raw_data()
 
@@ -69,7 +69,7 @@ class BaseReader(object):
                               e.g. #TODO give an example of encoding pattern here
         """
         for enc in encoding_pattern:
-            full_type = byte_order + enc['shape'][0] * enc['type']
+            full_type = byte_order + np.prod(enc['shape']) * enc['type']
             out = struct.unpack_from(full_type, self.data_bin, self.byte_offset)
             self.byte_offset += enc['bytes']
 
@@ -245,7 +245,7 @@ class BLB(BaseReader):
 
     def interpret_header(self):
         super(BLB, self).interpret_header()
-        self.data['n_meas'] = self.data['n_scans'] * self.data['n_meas']
+        self.data['n_meas'] = self.data['n_scans'] * self.data['n_ele']
 
         # check if correct number of channels was assumed for reading in structver 1 file
         if 'n_freq_file' in self.data.keys():
@@ -255,6 +255,45 @@ class BLB(BaseReader):
 
     def _read_meas(self):
         pass  # TODO: implement meas reader for BLB class. harder as 3 dimensional (time, freq, ele)
+        n_ele = self.data['n_ele']
+        n_freq = self.data['n_freq']
+        encodings_bin = (
+            dict(name='time_raw', type='i', shape=(1,), bytes=4),  # scan starttime here, will be transformed to series
+            dict(name='scanflag', type='B', shape=(1,), bytes=1),
+            dict(name='scanobs', type='f', shape=(n_freq, n_ele+1), bytes=n_freq*(n_ele+1)*4))  # Tb on n_ele + T (stored at n_ele+1)
+        self.decode_binary_np(encodings_bin, self.data['n_scans'])
+
+    def interpret_raw_data(self):
+        super(BLB, self).interpret_raw_data()
+        self.interpret_scanobs()
+        self.interpret_scanflag()
+
+        # transform single vector of elevations to time series of elevations
+        self.data['ele'] = np.tile(self.data['scan_ele'], self.data['n_scans'])
+
+        # time is encoded as start time of scan (same time for all elevations). need to transform to time series
+        #self.data['time'] = scan_starttime_to_time(self.data['time'], self.data['n_ele'])  # TODO: vectorise scan starttime_to_time (and write test)
+
+        # TODO: ask Volker what functions shall be methods of BLB and which shall go to reader_rpg_helper
+
+    def interpret_scanobs(self):
+        """transform scanobs 3D array to time series of spectra and temperature"""
+        n_freq = self.data['n_freq']
+        n_ele = self.data['n_ele']
+        n_scans = self.data['n_scans']
+
+        # extract and expand ambient temperature to time series with individual time step for each elevation
+        temperature_scan = self.data['scanobs'][:, 0, -1]  # ambient temperature equal for each frequency (one per scan)
+        self.data['T'] = temperature_scan.repeat(n_ele)  # repeat to have one T value for each new time
+
+        # extract and re-order brightness temperature to from timeseries of spectra with time step for each ele
+        tb_all = self.data['scanobs'][:, :, :-1]
+        tb_all = tb_all.swapaxes(0, 1)
+        self.data['Tb'] = tb_all.reshape(n_freq, n_scans*n_ele, order='C').transpose()
+
+    def interpret_scanflag(self):
+        pass  # TODO: implement scanflag interpreter
+
 
 
 class IRT(BaseReader):
@@ -365,12 +404,12 @@ class HKD(BaseReader):
 
 def main():
 
-    filename = './testdata/rpg/C00-V859_190803'
+    filename = 'data/rpg/C00-V859_190803'
 
     filename_noext = os.path.splitext(filename)[0]  # make sure that filename has no extension
 
     brt = BRT(filename_noext + '.BRT')
-    #blb = BLB(filename_noext + '.BLB')  # TODO: first need to finish reader
+    blb = BLB(filename_noext + '.BLB')  # TODO: first need to finish reader
     irt = IRT(filename_noext + '.IRT')
     #met = MET(filename_noext + '.MET')
     hkd = HKD(filename_noext + '.HKD')

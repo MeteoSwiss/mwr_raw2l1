@@ -207,7 +207,7 @@ def scan_starttime_to_time(starttime, n_angles, inttime=40, caltime=40, idletime
         integration time for the internal calibration before each scan [s].
         The default is 40.
     idletime : float, optional
-        time duration for moving the pointing to the repective scan poisiton.
+        time duration for moving the pointing to the respective scan position.
         The default is 1.4.
 
     Returns
