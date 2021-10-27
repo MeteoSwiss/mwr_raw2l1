@@ -1,4 +1,4 @@
-from unittest import TestCase
+import unittest
 
 from mwr_raw2l1.reader_rpg import BRT, BLB, IRT, MET, HKD
 from mwr_raw2l1.utils.file_utils import abs_file_path
@@ -6,7 +6,8 @@ from mwr_raw2l1.utils.file_utils import abs_file_path
 PATH_DATA = 'mwr_raw2l1/tests/data/rpg/'
 
 
-class TestReader(TestCase):
+class TestReader(unittest.TestCase):
+    """integration tests for rpg_reader.py"""
 
     def test_read_brt(self):
         filenames = ['C00-V859_190803.BRT', 'C00-V859_190804.BRT']  # TODO: instead of C00-V859_190804 add files with other filecodes (structver)
@@ -33,3 +34,7 @@ class TestReader(TestCase):
             with self.subTest(filename=filename):
                 infile = abs_file_path(PATH_DATA, filename)
                 reader(infile)
+
+
+if __name__ == '__main__':
+    unittest.main()
