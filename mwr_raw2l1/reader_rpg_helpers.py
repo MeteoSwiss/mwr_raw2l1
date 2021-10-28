@@ -62,7 +62,7 @@ def interpret_angle(x, version):
         ele = np.sign(x) * (np.abs(x) // 1e5) / 100
         azi = (np.abs(x) - np.abs(ele) * 1e7) / 100
     else:
-        raise NotImplementedError('Known versions for angle encoding are 1 and 2, but received %f' % version)
+        raise NotImplementedError('Known versions for angle encoding are 1 and 2, but received {:f}'.format(version))
 
     if scalar_input:  # TODO: ask Volker about this code copy between interpret_angle and interpret_time
         ele = ele[0]
@@ -98,7 +98,8 @@ def interpret_coord(x, version=2):  # TODO: Ask Harald how to find out which coo
     elif version == 2:
         return x
     else:
-        raise NotImplementedError('Known versions for coordinates encoding are 1 and 2, but received %f' % version)
+        raise NotImplementedError('Known versions for coordinates encoding are 1 and 2, but received {:f}'.format(
+            version))
 
 
 def interpret_hkd_contents_code(contents_code_integer, bit_order):

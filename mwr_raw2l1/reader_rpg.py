@@ -96,8 +96,9 @@ class BaseReader(object):
         n_bytes = bytes_per_var.sum() * n_entries
         self.byte_offset += n_bytes
         if len(self.data_bin) < self.byte_offset:
-            logger.error('number of bytes in file %s does not match the one inferred from n_meas' % self.filename)
-            raise FileTooShort('number of bytes in file %s does not match the one inferred from n_meas' % self.filename)
+            err_msg = 'number of bytes in file {} does not match the one inferred from n_meas'.format(self.filename)
+            logger.error(err_msg)
+            raise FileTooShort(err_msg)
 
         arr = np.frombuffer(self.data_bin[byte_offset_start: self.byte_offset], dtype=dtype_np)
         for idx, name in enumerate(names):
@@ -110,8 +111,8 @@ class BaseReader(object):
         try:
             self.filestruct = FILETYPE_CONFS[self.filecode]
         except KeyError:
-            raise UnknownFileType('reader not specified for files with filecode %d as used in %s'
-                                  % (self.filecode, self.filename))
+            raise UnknownFileType('reader not specified for files with filecode {:d} as used in {:s}'.format(
+                                  self.filecode, self.filename))
 
     def interpret_header(self):
         pass
@@ -149,8 +150,8 @@ class BRT(BaseReader):
 
         # check if filecode corresponds to a BRT file
         if self.filestruct['type'] != 'brt':
-            raise WrongFileType('filecode of input file corresponds to a %s-file but this reader is for BRT' %
-                                self.filestruct['type'])
+            raise WrongFileType('filecode of input file corresponds to a {}-file but this reader is for BRT'.format(
+                                self.filestruct['type']))
 
     def _read_header(self):
         # quantities with fixed length
@@ -189,10 +190,10 @@ class BLB(BaseReader):
 
         # check if filecode corresponds to a BLB file
         if self.filestruct['type'] != 'blb':
-            raise WrongFileType('filecode of input file corresponds to a %s-file but this reader is for BLB' %
-                                self.filestruct['type'])
+            raise WrongFileType('filecode of input file corresponds to a {}-file but this reader is for BLB'.format(
+                                self.filestruct['type']))
 
-        self.header_reader = getattr(self, '_read_header_%d' % self.filestruct['structver'])
+        self.header_reader = getattr(self, '_read_header_{:d}'.format(self.filestruct['structver']))
 
     def _read_header(self):
         self.header_reader()
@@ -253,8 +254,8 @@ class BLB(BaseReader):
         # check if correct number of channels was assumed for reading in structver 1 file
         if 'n_freq_file' in self.data.keys():
             if self.data['n_freq_file'] != self.data['n_freq']:
-                raise WrongNumberOfChannels('assumed number of channels (%d) for reading this BLB file seems wrong' %
-                                            self.data['n_freq'])
+                raise WrongNumberOfChannels(
+                    'assumed number of channels ({}) for reading this BLB file seems wrong'.format(self.data['n_freq']))
 
     def _read_meas(self):
         pass  # TODO: implement meas reader for BLB class. harder as 3 dimensional (time, freq, ele)
@@ -304,8 +305,8 @@ class IRT(BaseReader):
 
         # check if filecode corresponds to a IRT file
         if self.filestruct['type'] != 'irt':
-            raise WrongFileType('filecode of input file corresponds to a %s-file but this reader is for IRT' %
-                                self.filestruct['type'])
+            raise WrongFileType('filecode of input file corresponds to a {}-file but this reader is for IRT'.format(
+                                self.filestruct['type']))
 
     def _read_header(self):
         # quantities with fixed length
@@ -349,8 +350,8 @@ class MET(BaseReader):
 
         # check if filecode corresponds to a MET file
         if self.filestruct['type'] != 'met':
-            raise WrongFileType('filecode of input file corresponds to a %s-file but this reader is for MET' %
-                                self.filestruct['type'])
+            raise WrongFileType('filecode of input file corresponds to a {}-file but this reader is for MET'.format(
+                                self.filestruct['type']))
 
     pass  # TODO: implement MET class. For structver >=2 has bit encoding presence of different sensors. Similar to HKD
 
@@ -361,8 +362,8 @@ class HKD(BaseReader):
 
         # check if filecode corresponds to a HKD file
         if self.filestruct['type'] != 'hkd':
-            raise WrongFileType('filecode of input file corresponds to a %s-file but this reader is for HKD' %
-                                self.filestruct['type'])
+            raise WrongFileType('filecode of input file corresponds to a {}-file but this reader is for HKD'.format(
+                                self.filestruct['type']))
 
     def _read_header(self):
         encodings_bin = [

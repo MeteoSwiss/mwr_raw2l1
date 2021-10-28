@@ -21,7 +21,7 @@ def write(data, filename, config, format='NETCDF4'):
                     # TODO: check that this creates variable of right size with only fill values
                     continue
                 else:
-                    raise KeyError('Variable %s is a mandatory input but was not found in input dictionary' % var)
+                    raise KeyError('Variable {} is a mandatory input but was not found in input dictionary'.format(var))
             if var == 'time':
                 ncvar[:] = nc.date2num(data[var], specs['attributes']['units'])
             else:
@@ -37,7 +37,7 @@ def read_config(file='L1_format.yaml'):
 def write_eprofile_netcdf_hardcode(filename, data):
     # TODO: This function can be removed once happy wiht the outcome of write()
 
-    #configuration
+    # configuration
     ncformat = 'NETCDF4'
     ncdateformat = 'seconds since 1970-01-01-00:00:00'  # TODO: Transform to DAYS since ... for consistency with other E-PROFILE data formats
 
@@ -65,34 +65,36 @@ def write_eprofile_netcdf_hardcode(filename, data):
 
     # writer
     with nc.Dataset(filename, 'w', format=ncformat) as ncid:
-    
+
         for dimact in ncdims_unlimited:
             ncid.createDimension(dimact, size=None)
-            
+
         for dimact in ncdims_fixed:
             print(dimact)
             print(np.shape(data[dimact]))
             ncid.createDimension(dimact, size=len(data[dimact]))
-                
+
         for var, specs in ncvars.items():
             ncvar = ncid.createVariable(var, specs['type'], specs['dim'], fill_value=specs['FillValue'])
             ncvar.setncatts(ncvaratt[var])
-            
+
             if var not in data.keys():
                 if specs['optional']:
-                    #TODO: check that this creates variable of righ size with only fill values
+                    # TODO: check that this creates variable of righ size with only fill values
                     continue
                 else:
-                    raise KeyError('Variable %s is a mandatory input but was not found in input dictionary' % var)
-            
+                    raise KeyError('Variable {} is a mandatory input but was not found in input dictionary'.format(var))
+
             if var == 'time':
                 ncvar[:] = nc.date2num(data[var], ncdateformat)
             else:
                 ncvar[:] = data[var]
 
+
 # testing the function
 conf = read_config()
 import reader_rpg
+
 data = reader_rpg.brt
 write_eprofile_netcdf_hardcode('nchardcode_test.nc', data)
 write(data, 'ncyaml_test.nc', conf)
