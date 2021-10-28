@@ -7,7 +7,6 @@ import numpy as np
 import yaml
 
 
-
 def write(data, filename, config, format='NETCDF4'):
     with nc.Dataset(filename, 'w', format=format) as ncid:
         for dimact in config['dimensions']['unlimited']:
@@ -28,10 +27,12 @@ def write(data, filename, config, format='NETCDF4'):
             else:
                 ncvar[:] = data[var]
 
+
 def read_config(file='L1_format.yaml'):
     with open(file) as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
     return config
+
 
 def write_eprofile_netcdf_hardcode(filename, data):
     # TODO: This function can be removed once happy wiht the outcome of write()
@@ -89,22 +90,9 @@ def write_eprofile_netcdf_hardcode(filename, data):
             else:
                 ncvar[:] = data[var]
 
-
-
-
-
 # testing the function
 conf = read_config()
 import reader_rpg
 data = reader_rpg.brt
 write_eprofile_netcdf_hardcode('nchardcode_test.nc', data)
 write(data, 'ncyaml_test.nc', conf)
-
-
-
-
-
-        
-
-
-

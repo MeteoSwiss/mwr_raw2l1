@@ -6,6 +6,7 @@ import struct
 import os
 from mwr_raw2l1.errors import (UnknownFileType, WrongFileType, FileTooShort,
                     TimerefError, WrongNumberOfChannels)
+from mwr_raw2l1.log import logger
 from mwr_raw2l1.reader_rpg_helpers import (interpret_time, interpret_angle, interpret_coord,
                                            interpret_hkd_contents_code, interpret_statusflag_series,
                                            scan_starttime_to_time)
@@ -35,8 +36,6 @@ FILETYPE_CONFS = {  # assign metadata to each known filecode
 }  # INFO: Volker: different dict structures are ok here as long as they don't cause if clauses in code
 
 N_FREQ_DEFAULT = 14    # TODO: check how RPG deals with files from TEMPRO or HUMPRO how would have different n_freq. Other filecodes? Could also get frequency info from BRT files but ugly dependency.
-
-
 
 
 ###############################################################################
@@ -92,6 +91,7 @@ class BaseReader(object):
         n_bytes = bytes_per_var.sum() * n_entries
         self.byte_offset += n_bytes
         if len(self.data_bin) < self.byte_offset:
+            logger.error('number of bytes in file %s does not match the one inferred from n_meas' % self.filename)
             raise FileTooShort('number of bytes in file %s does not match the one inferred from n_meas' % self.filename)
 
         arr = np.frombuffer(self.data_bin[byte_offset_start: self.byte_offset], dtype=dtype_np)
@@ -272,7 +272,7 @@ class BLB(BaseReader):
         self.data['ele'] = np.tile(self.data['scan_ele'], self.data['n_scans'])
 
         # time is encoded as start time of scan (same time for all elevations). need to transform to time series
-        #self.data['time'] = scan_starttime_to_time(self.data['time'], self.data['n_ele'])  # TODO: vectorise scan starttime_to_time (and write test)
+        # self.data['time'] = scan_starttime_to_time(self.data['time'], self.data['n_ele'])  # TODO: vectorise scan starttime_to_time (and write test)
 
         # TODO: ask Volker what functions shall be methods of BLB and which shall go to reader_rpg_helper
 
@@ -293,7 +293,6 @@ class BLB(BaseReader):
 
     def interpret_scanflag(self):
         pass  # TODO: implement scanflag interpreter
-
 
 
 class IRT(BaseReader):
@@ -383,7 +382,7 @@ class HKD(BaseReader):
             encodings_bin.append(dict(name='T_amb_1', type='f', shape=(1,), bytes=4))
             encodings_bin.append(dict(name='T_amb_2', type='f', shape=(1,), bytes=4))
             encodings_bin.append(dict(name='T_receiver_kband', type='f', shape=(1,), bytes=4))
-            encodings_bin.append(dict(name='T_receiver_vband', type='f', shape=(1,), bytes=4))  #TODO: Ask Volker if/how I could use inheritance for another instrument which has no V-Band ==> in Funktion auslagern. Eine macht was, andere nichts
+            encodings_bin.append(dict(name='T_receiver_vband', type='f', shape=(1,), bytes=4))  # TODO: Ask Volker if/how I could use inheritance for another instrument which has no V-Band ==> in Funktion auslagern. Eine macht was, andere nichts
         if self.data['has_stability']:
             encodings_bin.append(dict(name='Tstab_kband', type='f', shape=(1,), bytes=4))
             encodings_bin.append(dict(name='Tstab_vband', type='f', shape=(1,), bytes=4))
@@ -411,7 +410,7 @@ def main():
     brt = BRT(filename_noext + '.BRT')
     blb = BLB(filename_noext + '.BLB')  # TODO: first need to finish reader
     irt = IRT(filename_noext + '.IRT')
-    #met = MET(filename_noext + '.MET')
+    # met = MET(filename_noext + '.MET')
     hkd = HKD(filename_noext + '.HKD')
 
     # legacy readers
@@ -421,6 +420,7 @@ def main():
     met_old = read_met(filename_noext + '.MET')
     hkd_old = read_hkd(filename_noext + '.HKD')
     pass
+
 
 if __name__ == '__main__':
     main()

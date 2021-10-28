@@ -1,10 +1,9 @@
 """
 helper functions for the module reader_rpg
 """
-import numpy as np
 import datetime as dt
 
-
+import numpy as np
 
 
 def interpret_time(time_in):
@@ -126,7 +125,11 @@ def interpret_statusflag_series(flag_series, bit_order):
         all_flagdicts.append(interpret_statusflag(flag, bit_order))
 
     out = all_flagdicts[0]  # FIXME: return a dict with lists inside, first element is just for testing
-    # TODO: ask Volker how to return a dict of lists from a list of dicts. BUT this is slow for time dimension with up to 1e5 entires ==> rather ask how I could vectorize interpret_statusflag. Try something like that: http://tritemio.github.io/smbits/drafts/numpy-efficient-binary-data-decoding.html and what is done in np_decoder in reader_rpg
+    # TODO: ask Volker how to return a dict of lists from a list of dicts.
+    # BUT this is slow for time dimension with up to 1e5 entires ==> rather ask how I could vectorize
+    # interpret_statusflag.
+    # Try something like that: http://tritemio.github.io/smbits/drafts/numpy-efficient-binary-data-decoding.html
+    # and what is done in np_decoder in reader_rpg
 
     return out
 
@@ -144,21 +147,22 @@ def interpret_statusflag(flag_integer, bit_order):
     tstabflag_kband = statusflagbits[24] + 2 * statusflagbits[25]
     tstabflag_vband = statusflagbits[26] + 2 * statusflagbits[27]
 
-    out = {'channel_quality_ok_kband': statusflagbits[0:n_freq_kband],
-            'channel_quality_ok_vband': statusflagbits[8:(8 + n_freq_vband)],
-            'rainflag': statusflagbits[16],
-            'blowerspeed_status': statusflagbits[17],
-            'BLscan_active': statusflagbits[18],
-            'tipcal_active': statusflagbits[19],
-            'gaincal_active': statusflagbits[20],
-            'noisecal_active': statusflagbits[21],
-            'noisediode_ok_kband': statusflagbits[22],
-            'noisediode_ok_vband': statusflagbits[23],
-            'Tstab_ok_kband': interpret_tstab_flag(tstabflag_kband),
-            'Tstab_ok_vband': interpret_tstab_flag(tstabflag_vband),
-            'recent_powerfailure': statusflagbits[28],
-            'Tstab_ok_amb': interpret_tstab_flag(statusflagbits[29]),  # 1:ok, 0:not ok because sensors differ by >0.3 K
-            'noisediode_on': statusflagbits[30]}
+    out = {
+        'channel_quality_ok_kband': statusflagbits[0:n_freq_kband],
+        'channel_quality_ok_vband': statusflagbits[8:(8 + n_freq_vband)],
+        'rainflag': statusflagbits[16],
+        'blowerspeed_status': statusflagbits[17],
+        'BLscan_active': statusflagbits[18],
+        'tipcal_active': statusflagbits[19],
+        'gaincal_active': statusflagbits[20],
+        'noisecal_active': statusflagbits[21],
+        'noisediode_ok_kband': statusflagbits[22],
+        'noisediode_ok_vband': statusflagbits[23],
+        'Tstab_ok_kband': interpret_tstab_flag(tstabflag_kband),
+        'Tstab_ok_vband': interpret_tstab_flag(tstabflag_vband),
+        'recent_powerfailure': statusflagbits[28],
+        'Tstab_ok_amb': interpret_tstab_flag(statusflagbits[29]),  # 1:ok, 0:not ok because sensors differ by >0.3 K
+        'noisediode_on': statusflagbits[30]}
 
     return out
 
@@ -223,4 +227,3 @@ def scan_starttime_to_time(starttime, n_angles, inttime=40, caltime=40, idletime
         time[n] = time[n - 1] + dt.timedelta(seconds=caltime + idletime)
 
     return time
-
