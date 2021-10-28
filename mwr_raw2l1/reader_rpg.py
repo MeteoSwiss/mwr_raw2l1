@@ -1,19 +1,24 @@
 """
 reader for RPG HATPRO, TEMPRO or HUMPRO binary files
 """
-import numpy as np
-import struct
 import os
-from mwr_raw2l1.errors import (UnknownFileType, WrongFileType, FileTooShort,
-                    TimerefError, WrongNumberOfChannels)
+import struct
+
+import numpy as np
+
+from mwr_raw2l1.errors import (FileTooShort, TimerefError, UnknownFileType,
+                               WrongFileType, WrongNumberOfChannels)
+from mwr_raw2l1.legacy_reader_rpg import (read_blb, read_brt, read_hkd,
+                                          read_irt, read_met)
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.reader_rpg_helpers import (interpret_time, interpret_angle, interpret_coord,
-                                           interpret_hkd_contents_code, interpret_statusflag_series,
+from mwr_raw2l1.reader_rpg_helpers import (interpret_angle, interpret_coord,
+                                           interpret_hkd_contents_code,
+                                           interpret_statusflag_series,
+                                           interpret_time,
                                            scan_starttime_to_time)
 from mwr_raw2l1.utils.file_utils import get_binary
-from mwr_raw2l1.legacy_reader_rpg import read_brt, read_blb, read_irt, read_met, read_hkd
 
-BYTE_ORDER = '<'  # byte order in all RPG files assumed little-endian  #TODO: ask Harald whether this is true or whether it depends on the instrument PC (hopefully not!)
+BYTE_ORDER = '<'  # byte order in all RPG files assumed little-endian  #TODO: ask Harald whether this is true (PC/Unix)
 
 FILETYPE_CONFS = {  # assign metadata to each known filecode
     # BRT files
@@ -118,8 +123,6 @@ class BaseReader(object):
         for coord in ('lon_raw', 'lat_raw'):
             if coord in self.data.keys():
                 self.data[coord[0:3]] = interpret_coord(self.data[coord])
-        if 'statusflag' in self.data.keys():  # used for HKD only  #TODO: ask Volker if it makes sense to have this in BaseReader --> no. to HKD class with super
-            self.data.update(interpret_statusflag_series(self.data['statusflag'], bit_order=BYTE_ORDER))
 
     def check_data(self, accept_localtime):
         """general checks for the consistency of the data which can be applied to all file type readers"""
@@ -394,6 +397,10 @@ class HKD(BaseReader):
             encodings_bin.append(dict(name='statusflag', type='i', shape=(1,), bytes=4))
 
         self.decode_binary_np(encodings_bin, self.data['n_meas'])
+
+    def interpret_raw_data(self):
+        super(HKD, self).interpret_raw_data()
+        self.data.update(interpret_statusflag_series(self.data['statusflag'], bit_order=BYTE_ORDER))
 
 
 # TODO: Consider transforming to SI units. IRT/IRT_min/IRT_max -> K; wavelength -> m; frequency -> Hz. could be done in interpret_raw_data of BaseReader class
