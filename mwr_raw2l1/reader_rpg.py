@@ -13,7 +13,7 @@ from mwr_raw2l1.legacy_reader_rpg import (read_blb, read_brt, read_hkd,
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.reader_rpg_helpers import (interpret_angle, interpret_coord,
                                            interpret_hkd_contents_code,
-                                           interpret_statusflag_series,
+                                           interpret_statusflag,
                                            interpret_time,
                                            scan_starttime_to_time)
 from mwr_raw2l1.utils.file_utils import get_binary
@@ -275,28 +275,34 @@ class BLB(BaseReader):
         # transform single vector of elevations to time series of elevations
         self.data['ele'] = np.tile(self.data['scan_ele'], self.data['n_scans'])
 
-        # time is encoded as start time of scan (same time for all elevations). need to transform to time series
-        # self.data['time'] = scan_starttime_to_time(self.data['time'], self.data['n_ele'])  # TODO: vectorise scan starttime_to_time (and write test)
-
         # TODO: ask Volker what functions shall be methods of BLB and which shall go to reader_rpg_helper
 
     def interpret_scanobs(self):
         """transform scanobs 3D array to time series of spectra and temperature"""
+
+        # extract ambient temperature (ambient temperature equal for each frequency, one per scan)
+        self.data['T_per_scan'] = self.data['scanobs'][:, 0, -1]
+
+        # extract spectra of brightness temperatures for each ele in dimension (time, freq, ele)
+        self.data['Tb_scan'] = self.data['scanobs'][:, :, :-1]
+
+    def interpret_scanflag(self):
+        pass  # TODO: implement scanflag interpreter
+
+    def scan_to_timeseries(self):
+        """transform scans to time series of spectra and temperatures"""
+        # TODO find a place where this function should go (maybe reader_rpg_helpers and call after read in also hkd)
         n_freq = self.data['n_freq']
         n_ele = self.data['n_ele']
         n_scans = self.data['n_scans']
 
-        # extract and expand ambient temperature to time series with individual time step for each elevation
-        temperature_scan = self.data['scanobs'][:, 0, -1]  # ambient temperature equal for each frequency (one per scan)
-        self.data['T'] = temperature_scan.repeat(n_ele)  # repeat to have one T value for each new time
+        tb_tmp = self.data['Tb_scan'].swapaxes(0, 1)  # swap dim to (freq, time, ele)
+        self.data['Tb'] = tb_tmp.reshape(n_freq, n_scans*n_ele, order='C').transpose()
 
-        # extract and re-order brightness temperature to from timeseries of spectra with time step for each ele
-        tb_all = self.data['scanobs'][:, :, :-1]
-        tb_all = tb_all.swapaxes(0, 1)
-        self.data['Tb'] = tb_all.reshape(n_freq, n_scans*n_ele, order='C').transpose()
+        self.data['T'] = self.data['T_per_scan'].repeat(n_ele)  # repeat to have one T value for each new time
 
-    def interpret_scanflag(self):
-        pass  # TODO: implement scanflag interpreter
+        # time is encoded as start time of scan (same time for all elevations). need to transform to time series
+        # self.data['time'] = scan_starttime_to_time(self.data['time'], self.data['n_ele'])  # TODO: vectorise scan starttime_to_time (and write test)
 
 
 class IRT(BaseReader):
@@ -401,7 +407,7 @@ class HKD(BaseReader):
 
     def interpret_raw_data(self):
         super(HKD, self).interpret_raw_data()
-        self.data.update(interpret_statusflag_series(self.data['statusflag'], bit_order=BYTE_ORDER))
+        self.data.update(interpret_statusflag(self.data['statusflag']))
 
 
 # TODO: Consider transforming to SI units. IRT/IRT_min/IRT_max -> K; wavelength -> m; frequency -> Hz. could be done in interpret_raw_data of BaseReader class
