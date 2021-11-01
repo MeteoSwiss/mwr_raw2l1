@@ -5,6 +5,8 @@ import datetime as dt
 
 import numpy as np
 
+from mwr_raw2l1.errors import WrongInputFormat
+
 
 def interpret_time(time_in):
     """translate the time format of RPG files to datetime object"""
@@ -119,57 +121,51 @@ def interpret_hkd_contents_code(contents_code_integer, bit_order):
     return out
 
 
-def interpret_statusflag_series(flag_series, bit_order):
-    """interpret_statusflag applied to a series of flags"""
-    all_flagdicts = []
-    for flag in flag_series:
-        all_flagdicts.append(interpret_statusflag(flag, bit_order))
-
-    out = all_flagdicts[0]  # FIXME: return a dict with lists inside, first element is just for testing
-    # TODO: ask Volker how to return a dict of lists from a list of dicts.
-    # BUT this is slow for time dimension with up to 1e5 entires ==> rather ask how I could vectorize
-    # interpret_statusflag.
-    # Try something like that: http://tritemio.github.io/smbits/drafts/numpy-efficient-binary-data-decoding.html
-    # and what is done in np_decoder in reader_rpg
-
-    return out
-
-
-def interpret_statusflag(flag_integer, bit_order):
-    """interpret the integer statusflag from HKD files and return dict of status variables"""
+def interpret_statusflag(flag_integer):
+    """interpret the statusflag from HKD files and return a dict of status variables (input time series or scalar)"""
 
     n_freq_kband = 7  # number of frequency channels in K-band receiver
     n_freq_vband = 7  # number of frequency channels in V-band receiver
 
-    bit_order = interpret_bit_order(bit_order)
-    flag_int8 = np.array([flag_integer]).view(np.uint8)
-    statusflagbits = np.unpackbits(flag_int8, bitorder=bit_order)
+    # format input
+    if len(np.shape(flag_integer)) == 0:  # input is scalar
+        flag_integer = np.array([[flag_integer]])
+    elif not isinstance(flag_integer, np.ndarray):
+        raise WrongInputFormat('input must either be a numpy array or a scalar')
+    elif np.ndim(np.squeeze(flag_integer)) > 1:
+        raise WrongInputFormat('input can only be vector or scalar but not matrix')
+    else:  # input is vector
+        flag_integer = np.squeeze(flag_integer)[:, np.newaxis]
 
-    tstabflag_kband = statusflagbits[24] + 2 * statusflagbits[25]
-    tstabflag_vband = statusflagbits[26] + 2 * statusflagbits[27]
+    flag_int8 = flag_integer.view(np.uint8)
+    statusflagbits = np.unpackbits(flag_int8, axis=1, bitorder='little')
+
+    tstabflag_kband = statusflagbits[:, 24] + 2 * statusflagbits[:, 25]
+    tstabflag_vband = statusflagbits[:, 26] + 2 * statusflagbits[:, 27]
 
     out = {
-        'channel_quality_ok_kband': statusflagbits[0:n_freq_kband],
-        'channel_quality_ok_vband': statusflagbits[8:(8 + n_freq_vband)],
-        'rainflag': statusflagbits[16],
-        'blowerspeed_status': statusflagbits[17],
-        'BLscan_active': statusflagbits[18],
-        'tipcal_active': statusflagbits[19],
-        'gaincal_active': statusflagbits[20],
-        'noisecal_active': statusflagbits[21],
-        'noisediode_ok_kband': statusflagbits[22],
-        'noisediode_ok_vband': statusflagbits[23],
+        'channel_quality_ok_kband': statusflagbits[:, 0:n_freq_kband],
+        'channel_quality_ok_vband': statusflagbits[:, 8:(8 + n_freq_vband)],
+        'rainflag': statusflagbits[:, 16],
+        'blowerspeed_status': statusflagbits[:, 17],
+        'BLscan_active': statusflagbits[:, 18],
+        'tipcal_active': statusflagbits[:, 19],
+        'gaincal_active': statusflagbits[:, 20],
+        'noisecal_active': statusflagbits[:, 21],
+        'noisediode_ok_kband': statusflagbits[:, 22],
+        'noisediode_ok_vband': statusflagbits[:, 23],
         'Tstab_ok_kband': interpret_tstab_flag(tstabflag_kband),
         'Tstab_ok_vband': interpret_tstab_flag(tstabflag_vband),
-        'recent_powerfailure': statusflagbits[28],
-        'Tstab_ok_amb': interpret_tstab_flag(statusflagbits[29]),  # 1:ok, 0:not ok because sensors differ by >0.3 K
-        'noisediode_on': statusflagbits[30]}
+        'recent_powerfailure': statusflagbits[:, 28],
+        'Tstab_ok_amb': interpret_tstab_flag(statusflagbits[:, 29]),  # 1:ok, 0:not ok because sensors differ by >0.3 K
+        'noisediode_on': statusflagbits[:, 30]}
 
     return out
 
 
 def interpret_tstab_flag(flag):
     """interpret temperature stability flag and return a flag saying stability ok (1), not ok (0) or unknown (NaN)"""
+    # TODO: Vectorise this function. Should not be too hard but account for 1d numpy arrays (and POSSIBLY scalars)
     if flag == 0:  # unknown, not enough data samples recorded yet
         tstab_ok = np.nan
     elif flag == 1:  # stability ok
