@@ -137,12 +137,13 @@ def interpret_statusflag(flag_integer):
     else:  # input is vector
         flag_integer = np.squeeze(flag_integer)[:, np.newaxis]
 
+    # transform integer (time series) to flag bits
     flag_int8 = flag_integer.view(np.uint8)
     statusflagbits = np.unpackbits(flag_int8, axis=1, bitorder='little')
 
+    # interpret the different bits according to the manual
     tstabflag_kband = statusflagbits[:, 24] + 2 * statusflagbits[:, 25]
     tstabflag_vband = statusflagbits[:, 26] + 2 * statusflagbits[:, 27]
-
     out = {
         'channel_quality_ok_kband': statusflagbits[:, 0:n_freq_kband],
         'channel_quality_ok_vband': statusflagbits[:, 8:(8 + n_freq_vband)],
