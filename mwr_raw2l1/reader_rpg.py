@@ -9,7 +9,7 @@ import warnings
 import numpy as np
 
 from mwr_raw2l1.errors import (FileTooShort, TimerefError, UnknownFileType,
-                               WrongFileType, WrongNumberOfChannels, TimeInputMissing)
+                               WrongFileType, WrongNumberOfChannels, TimeInputMissing, FileTooLong)
 from mwr_raw2l1.legacy_reader_rpg import (read_blb, read_brt, read_hkd,
                                           read_irt, read_met)
 from mwr_raw2l1.log import logger
@@ -67,6 +67,9 @@ class BaseReader(object):
         self.interpret_header()
         self._read_meas()
         self.interpret_raw_data()
+        if self.byte_offset < len(self.data_bin):
+            raise FileTooLong('Not all bytes consumed. Interpreted {} bytes during read-in but {} contains {}'.format(
+                self.byte_offset, self.filename, len(self.data_bin)))
 
     def decode_binary(self, encoding_pattern, byte_order=BYTE_ORDER):
         """"
@@ -77,7 +80,7 @@ class BaseReader(object):
         for enc in encoding_pattern:
             full_type = byte_order + np.prod(enc['shape']) * enc['type']
             out = struct.unpack_from(full_type, self.data_bin, self.byte_offset)
-            self.byte_offset += enc['bytes']
+            self.byte_offset += struct.calcsize(full_type)  # multiplication with shape already done for full type
 
             if len(out) == 1:  # extract from tuple if it has only one element, otherwise return tuple
                 self.data[enc['name']] = out[0]
@@ -92,7 +95,7 @@ class BaseReader(object):
         """
         dtype_np = np.dtype([(ep['name'], byte_order+ep['type'], ep['shape']) for ep in encoding_pattern])
         names = [ep['name'] for ep in encoding_pattern]
-        bytes_per_var = np.array([ep['bytes'] for ep in encoding_pattern])
+        bytes_per_var = np.array([struct.calcsize(ep['type']) * np.prod(ep['shape']) for ep in encoding_pattern])
 
         byte_offset_start = self.byte_offset
         n_bytes = bytes_per_var.sum() * n_entries
@@ -161,27 +164,27 @@ class BRT(BaseReader):
     def _read_header(self):
         # quantities with fixed length
         encodings_bin_fix = [
-            dict(name='n_meas', type='i', shape=(1,), bytes=4),  # TODO: Ask Volker about calcsize ==> would be good to use
-            dict(name='timeref', type='i', shape=(1,), bytes=4),  # TODO: write more compact with list comprehension just looping over names (rest stays the same) (Volkers suggestion). But could also argue that want to keep same structure for all. Think about
-            dict(name='n_freq', type='i', shape=(1,), bytes=4)]
+            dict(name='n_meas', type='i', shape=(1,)),
+            dict(name='timeref', type='i', shape=(1,)),  # TODO: write more compact with list comprehension just looping over names (rest stays the same) (Volkers suggestion). But could also argue that want to keep same structure for all. Think about
+            dict(name='n_freq', type='i', shape=(1,))]
         self.decode_binary(encodings_bin_fix)
 
         # quantities with length dependent on number of spectral channels (n_freq) only possible after n_freq is read
         n_freq = self.data['n_freq']
         encodings_bin_var = [
-            dict(name='frequency', type='f', shape=(n_freq,), bytes=n_freq * 4),
-            dict(name='Tb_min', type='f', shape=(n_freq,), bytes=n_freq * 4),
-            dict(name='Tb_max', type='f', shape=(n_freq,), bytes=n_freq * 4)]
+            dict(name='frequency', type='f', shape=(n_freq,)),
+            dict(name='Tb_min', type='f', shape=(n_freq,)),
+            dict(name='Tb_max', type='f', shape=(n_freq,))]
         self.decode_binary(encodings_bin_var)
 
     def _read_meas(self):
         """read actual measurements. Filecode and Header needs to be read before as info is needed for decoding"""
         n_freq = self.data['n_freq']
         encodings_bin = (
-            dict(name='time_raw', type='i', shape=(1,), bytes=4),
-            dict(name='rainflag', type='B', shape=(1,), bytes=1),
-            dict(name='Tb', type='f', shape=(n_freq,), bytes=n_freq*4),
-            dict(name='pointing_raw', type=self.filestruct['formatchar_angle'], shape=(1,), bytes=4))
+            dict(name='time_raw', type='i', shape=(1,)),
+            dict(name='rainflag', type='B', shape=(1,)),
+            dict(name='Tb', type='f', shape=(n_freq,)),
+            dict(name='pointing_raw', type=self.filestruct['formatchar_angle'], shape=(1,)))
         self.decode_binary_np(encodings_bin, self.data['n_meas'])
 
 
@@ -207,49 +210,49 @@ class BLB(BaseReader):
         """Function for reading header for files with structver 1 (n_freq first assumed and read only afterwards)"""
         # quantities with fixed length
         encodings_bin_fix = [
-            dict(name='n_scans', type='i', shape=(1,), bytes=4)]
+            dict(name='n_scans', type='i', shape=(1,))]
         self.decode_binary(encodings_bin_fix)
 
         # quantities with length dependent on number of spectral channels (n_freq) only possible after n_freq is read
         self.data['n_freq'] = N_FREQ_DEFAULT  # need assumption as number of channels is encoded after used for read
         n_freq = self.data['n_freq']
         encodings_bin_var_1 = [
-            dict(name='Tb_min', type='f', shape=(n_freq,), bytes=n_freq * 4),
-            dict(name='Tb_max', type='f', shape=(n_freq,), bytes=n_freq * 4),
-            dict(name='timeref', type='i', shape=(1,), bytes=4),
-            dict(name='n_freq_file', type='i', shape=(1,), bytes=4),
-            dict(name='frequency', type='f', shape=(n_freq,), bytes=n_freq * 4),
-            dict(name='n_ele', type='i', shape=(1,), bytes=4)]
+            dict(name='Tb_min', type='f', shape=(n_freq,)),
+            dict(name='Tb_max', type='f', shape=(n_freq,)),
+            dict(name='timeref', type='i', shape=(1,)),
+            dict(name='n_freq_file', type='i', shape=(1,)),
+            dict(name='frequency', type='f', shape=(n_freq,)),
+            dict(name='n_ele', type='i', shape=(1,))]
         self.decode_binary(encodings_bin_var_1)
 
         # quantities with length dependent on number of elevations in scan (n_ele) only possible after n_ele is read
         n_ele = self.data['n_ele']
         encodings_bin_var_2 = [
-            dict(name='scan_ele', type='f', shape=(n_ele,), bytes=n_ele * 4)]
+            dict(name='scan_ele', type='f', shape=(n_ele,))]
         self.decode_binary(encodings_bin_var_2)
 
     def _read_header_2(self):
         """Function for reading header for files with structver 2 (no assumption on n_freq needed"""
         # quantities with fixed length
         encodings_bin_fix = [
-            dict(name='n_scans', type='i', shape=(1,), bytes=4),
-            dict(name='n_freq', type='i', shape=(1,), bytes=4)]
+            dict(name='n_scans', type='i', shape=(1,)),
+            dict(name='n_freq', type='i', shape=(1,))]
         self.decode_binary(encodings_bin_fix)
 
         # quantities with length dependent on number of spectral channels (n_freq) only possible after n_freq is read
         n_freq = self.data['n_freq']
         encodings_bin_var_1 = [
-            dict(name='Tb_min', type='f', shape=(n_freq,), bytes=n_freq * 4),
-            dict(name='Tb_max', type='f', shape=(n_freq,), bytes=n_freq * 4),
-            dict(name='timeref', type='i', shape=(1,), bytes=4),
-            dict(name='frequency', type='f', shape=(n_freq,), bytes=n_freq * 4),
-            dict(name='n_ele', type='i', shape=(1,), bytes=4)]
+            dict(name='Tb_min', type='f', shape=(n_freq,)),
+            dict(name='Tb_max', type='f', shape=(n_freq,)),
+            dict(name='timeref', type='i', shape=(1,)),
+            dict(name='frequency', type='f', shape=(n_freq,)),
+            dict(name='n_ele', type='i', shape=(1,))]
         self.decode_binary(encodings_bin_var_1)
 
         # quantities with length dependent on number of elevations in scan (n_ele) only possible after n_ele is read
         n_ele = self.data['n_ele']
         encodings_bin_var_2 = [
-            dict(name='scan_ele', type='f', shape=(n_ele,), bytes=n_ele * 4)]
+            dict(name='scan_ele', type='f', shape=(n_ele,))]
         self.decode_binary(encodings_bin_var_2)
 
     def interpret_header(self):
@@ -267,9 +270,9 @@ class BLB(BaseReader):
         n_ele = self.data['n_ele']
         n_freq = self.data['n_freq']
         encodings_bin = (
-            dict(name='time_raw', type='i', shape=(1,), bytes=4),  # scan starttime here, will be transformed to series
-            dict(name='scanflag', type='B', shape=(1,), bytes=1),
-            dict(name='scanobs', type='f', shape=(n_freq, n_ele+1), bytes=n_freq*(n_ele+1)*4))  # Tb on n_ele + T (stored at n_ele+1)
+            dict(name='time_raw', type='i', shape=(1,)),  # scan starttime here, will be transformed to series
+            dict(name='scanflag', type='B', shape=(1,)),
+            dict(name='scanobs', type='f', shape=(n_freq, n_ele+1)))  # Tb on n_ele + T (stored at n_ele+1)
         self.decode_binary_np(encodings_bin, self.data['n_scans'])
 
     def interpret_raw_data(self):
@@ -322,19 +325,19 @@ class IRT(BaseReader):
     def _read_header(self):
         # quantities with fixed length
         encodings_bin_fix = [
-            dict(name='n_meas', type='i', shape=(1,), bytes=4),
-            dict(name='IRT_min', type='f', shape=(1,), bytes=4),
-            dict(name='IRT_max', type='f', shape=(1,), bytes=4),
-            dict(name='timeref', type='i', shape=(1,), bytes=4)]  # define as list to be able to append. TODO: Ask Volker whether it is ok to have list here but tuple in BRT. Or should encodings in BRT also be declared as list, although they will not be changed
+            dict(name='n_meas', type='i', shape=(1,)),
+            dict(name='IRT_min', type='f', shape=(1,)),
+            dict(name='IRT_max', type='f', shape=(1,)),
+            dict(name='timeref', type='i', shape=(1,))]  # define as list to be able to append. TODO: Ask Volker whether it is ok to have list here but tuple in BRT. Or should encodings in BRT also be declared as list, although they will not be changed
         if self.filestruct['structver'] >= 2:
             encodings_bin_fix.append(
-                dict(name='n_wavelengths', type='i', shape=(1,), bytes=4))
+                dict(name='n_wavelengths', type='i', shape=(1,)))
         self.decode_binary(encodings_bin_fix)
 
         # quantities with length dependent on number of spectral channels (n_wavelenghts) only possible after read
         n_wl = self.data['n_wavelengths']
         encodings_bin_var = [
-            dict(name='wavelength', type='f', shape=(n_wl,), bytes=n_wl*4)]
+            dict(name='wavelength', type='f', shape=(n_wl,))]
         self.decode_binary(encodings_bin_var)
 
         # complete missing input for structver == 1
@@ -345,12 +348,12 @@ class IRT(BaseReader):
     def _read_meas(self):
         n_wl = self.data['n_wavelengths']
         encodings_bin = [
-            dict(name='time_raw', type='i', shape=(1,), bytes=4),
-            dict(name='rainflag', type='B', shape=(1,), bytes=1),
-            dict(name='IRT', type='f', shape=(n_wl,), bytes=n_wl*4)]
+            dict(name='time_raw', type='i', shape=(1,)),
+            dict(name='rainflag', type='B', shape=(1,)),
+            dict(name='IRT', type='f', shape=(n_wl,))]
         if self.filestruct['structver'] >= 2:
             encodings_bin.append(
-                dict(name='pointing_raw', type=self.filestruct['formatchar_angle'], shape=(1,), bytes=4))
+                dict(name='pointing_raw', type=self.filestruct['formatchar_angle'], shape=(1,)))
 
         self.decode_binary_np(encodings_bin, self.data['n_meas'])
 
@@ -378,9 +381,9 @@ class HKD(BaseReader):
 
     def _read_header(self):
         encodings_bin = [
-            dict(name='n_meas', type='i', shape=(1,), bytes=4),
-            dict(name='timeref', type='i', shape=(1,), bytes=4),
-            dict(name='hkd_contents_code', type='i', shape=(1,), bytes=4)]
+            dict(name='n_meas', type='i', shape=(1,)),
+            dict(name='timeref', type='i', shape=(1,)),
+            dict(name='hkd_contents_code', type='i', shape=(1,))]
         self.decode_binary(encodings_bin)
 
         file_contents = interpret_hkd_contents_code(self.data['hkd_contents_code'], bit_order=BYTE_ORDER)
@@ -388,25 +391,25 @@ class HKD(BaseReader):
 
     def _read_meas(self):
         encodings_bin = [
-            dict(name='time_raw', type='i', shape=(1,), bytes=4),
-            dict(name='alarm', type='B', shape=(1,), bytes=1)]
+            dict(name='time_raw', type='i', shape=(1,)),
+            dict(name='alarm', type='B', shape=(1,))]
         if self.data['has_coord']:
-            encodings_bin.append(dict(name='lon_raw', type='f', shape=(1,), bytes=4))
-            encodings_bin.append(dict(name='lat_raw', type='f', shape=(1,), bytes=4))
+            encodings_bin.append(dict(name='lon_raw', type='f', shape=(1,)))
+            encodings_bin.append(dict(name='lat_raw', type='f', shape=(1,)))
         if self.data['has_T']:
-            encodings_bin.append(dict(name='T_amb_1', type='f', shape=(1,), bytes=4))
-            encodings_bin.append(dict(name='T_amb_2', type='f', shape=(1,), bytes=4))
-            encodings_bin.append(dict(name='T_receiver_kband', type='f', shape=(1,), bytes=4))
-            encodings_bin.append(dict(name='T_receiver_vband', type='f', shape=(1,), bytes=4))  # TODO: Ask Volker if/how I could use inheritance for another instrument which has no V-Band ==> in Funktion auslagern. Eine macht was, andere nichts
+            encodings_bin.append(dict(name='T_amb_1', type='f', shape=(1,)))
+            encodings_bin.append(dict(name='T_amb_2', type='f', shape=(1,)))
+            encodings_bin.append(dict(name='T_receiver_kband', type='f', shape=(1,)))
+            encodings_bin.append(dict(name='T_receiver_vband', type='f', shape=(1,)))  # TODO: Ask Volker if/how I could use inheritance for another instrument which has no V-Band ==> in Funktion auslagern. Eine macht was, andere nichts
         if self.data['has_stability']:
-            encodings_bin.append(dict(name='Tstab_kband', type='f', shape=(1,), bytes=4))
-            encodings_bin.append(dict(name='Tstab_vband', type='f', shape=(1,), bytes=4))
+            encodings_bin.append(dict(name='Tstab_kband', type='f', shape=(1,)))
+            encodings_bin.append(dict(name='Tstab_vband', type='f', shape=(1,)))
         if self.data['has_flashmemoryinfo']:
-            encodings_bin.append(dict(name='flashmemory_remaining', type='i', shape=(1,), bytes=4))
+            encodings_bin.append(dict(name='flashmemory_remaining', type='i', shape=(1,)))
         if self.data['has_qualityflag']:
-            encodings_bin.append(dict(name='L2_qualityflag', type='i', shape=(1,), bytes=4))
+            encodings_bin.append(dict(name='L2_qualityflag', type='i', shape=(1,)))
         if self.data['has_statusflag']:
-            encodings_bin.append(dict(name='statusflag', type='i', shape=(1,), bytes=4))
+            encodings_bin.append(dict(name='statusflag', type='i', shape=(1,)))
 
         self.decode_binary_np(encodings_bin, self.data['n_meas'])
 
@@ -466,6 +469,6 @@ def main():
 
 
 if __name__ == '__main__':
-    all_data = read_all('data/rpg/', 'C00-V859')
-    # main()
+    # all_data = read_all('data/rpg/', 'C00-V859')
+    main()
     pass

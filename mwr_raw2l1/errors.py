@@ -20,6 +20,10 @@ class WrongFileType(MWRFileError):
     """Raised if the filetype does not match with the chosen reader"""
 
 
+class FileTooLong(MWRFileError):
+    """Raised if file seems too long, e.g. if binary stream is not entirely consumed after reading is finished"""
+
+
 class FileTooShort(MWRFileError):
     """Raised if file seems too short, e.g. if parameter n_meas > rest of buffer"""
 
