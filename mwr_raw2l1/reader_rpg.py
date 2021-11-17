@@ -1,13 +1,15 @@
 """
 reader for RPG HATPRO, TEMPRO or HUMPRO binary files
 """
+import glob
 import os
 import struct
+import warnings
 
 import numpy as np
 
 from mwr_raw2l1.errors import (FileTooShort, TimerefError, UnknownFileType,
-                               WrongFileType, WrongNumberOfChannels)
+                               WrongFileType, WrongNumberOfChannels, TimeInputMissing)
 from mwr_raw2l1.legacy_reader_rpg import (read_blb, read_brt, read_hkd,
                                           read_irt, read_met)
 from mwr_raw2l1.log import logger
@@ -118,7 +120,10 @@ class BaseReader(object):
         pass
 
     def interpret_raw_data(self):
-        self.data['time'] = interpret_time(self.data['time_raw'])  # assume data-dict in all subclasses contains time
+        try:  # assume data-dict in all subclasses contains time
+            self.data['time'] = interpret_time(self.data['time_raw'])
+        except KeyError as err:
+            raise TimeInputMissing('Did not find {} in read-in data from file {}'.format(err, self.filename))
         if 'pointing_raw' in self.data.keys():
             self.data['ele'], self.data['azi'] = interpret_angle(self.data['pointing_raw'], self.filestruct['anglever'])
         for coord in ('lon_raw', 'lat_raw'):
@@ -414,6 +419,30 @@ class HKD(BaseReader):
 ###############################################################################
 # main
 # ------------------------------------------------------------------------------
+def read_all(dir_in, basename, time_start=None, time_end=None):
+    """read all L1-related files in dir_in corresponding to basename (full identifier including station and inst id)"""
+    # TODO: ask Volker. ok to have this function def besides reader classes. or schould it also become class?
+
+    # assign reader (value) to lowercase file extension (key)
+    reader_for_ext = {'brt': BRT, 'blb': BLB, 'irt': IRT, 'met': MET, 'hkd': HKD}
+
+    files_all_times = glob.glob(os.path.join(dir_in, basename + '*'))
+
+    files = files_all_times  # TODO sort files according to time_start and time_end instead of using all
+
+    all_data = {name: [] for name in reader_for_ext}  # use file extension as name for list of instances of reader type
+    for file in files:
+        ext = os.path.splitext(file)[1].lower()[1:]  # omit dot from extension
+        if ext in reader_for_ext:
+            data_act = reader_for_ext[ext](file)
+            all_data[ext].append(data_act)
+            # TODO: decide what to do with processed files. Leave where they are, delete or move to other folder
+        else:
+            # TODO: decide what to do with unprocessable files. Leave where they are, delete or move to other folder
+            warnings.warn('Cannot read {} as no reader is specified for files with extension "{}"'.format(file, ext))
+
+    return all_data
+
 
 def main():
 
@@ -437,4 +466,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    all_data = read_all('data/rpg/', 'C00-V859')
+    # main()
+    pass
