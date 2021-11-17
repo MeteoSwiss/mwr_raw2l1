@@ -1,0 +1,24 @@
+Hi Rolf,
+
+                It’s good to see that you are making progress on the microwave radiometer reader code and that you are thinking about the hub processing!
+                
+We have made the hub software compatible to run on both python2 and python3 environments, however we will shortly drop the support for python2. 
+So to focus on python3 environments - we run our code in a virtual python environment and currently use Python 3.6.8 
+
+Python 3.6.8 (default, Aug 13 2020, 07:46:32) 
+[GCC 4.8.5 20150623 (Red Hat 4.8.5-39)] on Linux
+
+                We use github actions to run tests against both python 3.6 and python3.7 environments to ensure both are compatible – this should then capture any issues before we deploy the code to our test servers.
+
+                Please find attached the list of packages currently used (note the ‘hermes-‘ and ‘storm-‘ packages have been written by our team for our own processing requirements). This could be updated to include any additional packages that you may require but might be worth trying to use the following versions on netCDF4 and PyYAML:
+
+netCDF4                      1.5.3
+PyYAML                       5.4.1
+
+                It’s also be worth considering that we will be running this code operationally – so this may require avoiding/omitting any optional dependencies, which might be useful for development processing (e.g. do you need colourised logs as the hub will have it’s own methods of capturing error messages/raising alerts). 
+
+                I hope this helps.
+
+Best Regards
+
+Myles

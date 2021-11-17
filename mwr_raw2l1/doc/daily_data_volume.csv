@@ -1,0 +1,11 @@
+Manufacturer,file,daily file size in kB,sum filesizes kB
+RPG,BRT,580,
+RPG,BLB,112,
+RPG,IRT,935,
+RPG,MET,1223,
+RPG,HKD,3878,6728
+Radiometrics,lv1,254,
+Radiometrics,healthstatus,33,287
+ATTEX,tbr,27,
+ATTEX,txt,41,
+ATTEX,cod,54,122
