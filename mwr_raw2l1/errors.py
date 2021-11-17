@@ -28,6 +28,8 @@ class FileTooShort(MWRFileError):
 class WrongInputFormat(MWRInputError):
     """Raised if format of input to a function or class does not correspond to expectations"""
 
+class UnknownFlagValue(MWRInputError):
+    """Raised if the value of a flag in the input files does not correspond to the range of known values"""
 
 # --------------------------
 class TimerefError(MWRError):

@@ -5,7 +5,7 @@ import datetime as dt
 
 import numpy as np
 
-from mwr_raw2l1.errors import WrongInputFormat
+from mwr_raw2l1.errors import WrongInputFormat, UnknownFlagValue
 
 
 def interpret_time(time_in):
@@ -165,18 +165,22 @@ def interpret_statusflag(flag_integer):
 
 
 def interpret_tstab_flag(flag):
-    """interpret temperature stability flag and return a flag saying stability ok (1), not ok (0) or unknown (NaN)"""
-    # TODO: Vectorise this function. Should not be too hard but account for 1d numpy arrays (and POSSIBLY scalars)
-    if flag == 0:  # unknown, not enough data samples recorded yet
-        tstab_ok = np.nan
-    elif flag == 1:  # stability ok
-        tstab_ok = 1
-    elif flag == 2:  # not sufficiently stable
-        tstab_ok = 0
-    else:
-        ValueError('can interpret RPG temperature stability flag with values 0, 1 or 2 but received ' + flag)
+    """interpret temperature stability flag and return a flag saying stability ok (1), not ok (0) or unknown (NaN)
 
-    return tstab_ok
+    tstab flag (input) | tstab ok (output) | description
+    -------------------|-------------------|-------------------
+    0                  | NaN               | unknown stability (too short measurement series available)
+    1                  | 1                 | stability ok
+    2                  | 0                 | not ok (T sensors differ by >0.3 K)
+    """
+    flag2tstab_ok = {0: np.nan, 1: 1, 2: 0}  # correspondence of RPG stability flag (keys) with stability ok (value)
+    try:
+        if np.isscalar(flag):
+            return flag2tstab_ok[flag]
+        else:
+            return np.array([flag2tstab_ok[el] for el in flag])
+    except KeyError as err:
+        raise UnknownFlagValue('Expected 0, 1 or 2 for RPG temperature stability flag but found {}'.format(err))
 
 
 def interpret_bit_order(bit_order):
