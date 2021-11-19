@@ -17,7 +17,7 @@ from mwr_raw2l1.reader_rpg_helpers import (interpret_angle, interpret_coord,
                                            interpret_hkd_contents_code,
                                            interpret_statusflag,
                                            interpret_time,
-                                           scan_starttime_to_time)
+                                           scan_starttime_to_time, interpret_met_auxsens_code)
 from mwr_raw2l1.utils.file_utils import get_binary
 
 BYTE_ORDER = '<'  # byte order in all RPG files assumed little-endian  #TODO: ask Harald whether this is true (PC/Unix)
@@ -58,6 +58,8 @@ class BaseReader(object):
         self.data_bin = get_binary(self.filename)
         self.read()  # fills self.data
         self.check_data(accept_localtime)
+        del self.data_bin  # after read() all contents of data_bin have been interpreted to data
+        del self.byte_offset  # after read() has checked that all data have been read, this quantity is useless
 
     def read(self):
         # sequence must be preserved as self.byte_offset is increased by each method, hence they are all semi-private
@@ -266,7 +268,6 @@ class BLB(BaseReader):
                     'assumed number of channels ({}) for reading this BLB file seems wrong'.format(self.data['n_freq']))
 
     def _read_meas(self):
-        pass  # TODO: implement meas reader for BLB class. harder as 3 dimensional (time, freq, ele)
         n_ele = self.data['n_ele']
         n_freq = self.data['n_freq']
         encodings_bin = (
@@ -367,7 +368,48 @@ class MET(BaseReader):
             raise WrongFileType('filecode of input file corresponds to a {}-file but this reader is for MET'.format(
                                 self.filestruct['type']))
 
-    pass  # TODO: implement MET class. For structver >=2 has bit encoding presence of different sensors. Similar to HKD
+    def _read_header(self):
+        # quantities with fixed length
+        encodings_bin_fix = [dict(name='n_meas', type='i', shape=(1,))]
+        if self.filestruct['structver'] >= 2:
+            encodings_bin_fix.append(dict(name='auxsens_code', type='B', shape=(1,)))
+        for var in ['p_min', 'p_max', 'T_min', 'T_max', 'RH_min', 'RH_max']:
+            encodings_bin_fix.append(dict(name=var, type='f', shape=(1,)))  # the variables all have same type and shape
+        self.decode_binary(encodings_bin_fix)
+
+        # interpret availability of auxiliary sensor data
+        auxsens_input = None if 'auxsens_code' not in self.data else self.data['auxsens_code']
+        auxsens_contents = interpret_met_auxsens_code(auxsens_input)
+        self.data.update(auxsens_contents)
+
+        # quantities with existence depending on auxsens contents
+        encodings_bin_var = []
+        if self.data['has_windspeed']:
+            encodings_bin_var.append(dict(name='windspeed_min', type='f', shape=(1,)))
+            encodings_bin_var.append(dict(name='windspeed_max', type='f', shape=(1,)))
+        if self.data['has_winddir']:
+            encodings_bin_var.append(dict(name='winddir_min', type='f', shape=(1,)))
+            encodings_bin_var.append(dict(name='winddir_max', type='f', shape=(1,)))
+        if self.data['has_rainrate']:
+            encodings_bin_var.append(dict(name='rainrate_min', type='f', shape=(1,)))
+            encodings_bin_var.append(dict(name='rainrate_max', type='f', shape=(1,)))
+        encodings_bin_var.append(dict(name='timeref', type='i', shape=(1,)))
+        self.decode_binary(encodings_bin_var)
+
+    def _read_meas(self):
+        encodings_bin = [dict(name='time_raw', type='i', shape=(1,)),
+                         dict(name='rainflag', type='B', shape=(1,)),
+                         dict(name='p', type='f', shape=(1,)),
+                         dict(name='T', type='f', shape=(1,)),
+                         dict(name='RH', type='f', shape=(1,))]
+        if self.data['has_windspeed']:
+            encodings_bin.append(dict(name='windspeed', type='f', shape=(1,)))
+        if self.data['has_winddir']:
+            encodings_bin.append(dict(name='winddir', type='f', shape=(1,)))
+        if self.data['has_rainrate']:
+            encodings_bin.append(dict(name='rainrate', type='f', shape=(1,)))
+
+        self.decode_binary_np(encodings_bin, self.data['n_meas'])
 
 
 class HKD(BaseReader):
@@ -386,7 +428,7 @@ class HKD(BaseReader):
             dict(name='hkd_contents_code', type='i', shape=(1,))]
         self.decode_binary(encodings_bin)
 
-        file_contents = interpret_hkd_contents_code(self.data['hkd_contents_code'], bit_order=BYTE_ORDER)
+        file_contents = interpret_hkd_contents_code(self.data['hkd_contents_code'])
         self.data.update(file_contents)  # add variables 'has_...' used below to the data dictionary
 
     def _read_meas(self):
@@ -456,7 +498,7 @@ def main():
     brt = BRT(filename_noext + '.BRT')
     blb = BLB(filename_noext + '.BLB')  # TODO: first need to finish reader
     irt = IRT(filename_noext + '.IRT')
-    # met = MET(filename_noext + '.MET')
+    met = MET(filename_noext + '.MET')
     hkd = HKD(filename_noext + '.HKD')
 
     # legacy readers
@@ -469,6 +511,6 @@ def main():
 
 
 if __name__ == '__main__':
-    # all_data = read_all('data/rpg/', 'C00-V859')
+    all_data = read_all('data/rpg/', 'C00-V859')
     main()
     pass

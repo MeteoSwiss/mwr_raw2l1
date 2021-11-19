@@ -104,12 +104,27 @@ def interpret_coord(x, version=2):  # TODO: Ask Harald how to find out which coo
             version))
 
 
-def interpret_hkd_contents_code(contents_code_integer, bit_order):
-    """interpret the integer contents from HKD files and return dict of contents variables"""
+def interpret_met_auxsens_code(auxsenscode):
+    """interpret integer code for the availability of auxiliary sensors in MET files, return dict of contents vars"""
+    auxsenscode_int8 = np.uint8(auxsenscode)
+    auxsensbits = np.unpackbits(auxsenscode_int8, bitorder='little')
+    if auxsensbits is None:
+        out = {'has_windspeed': 0,
+              'has_winddir': 0,
+              'has_rainrate': 0}
+    else:
+        out = {'has_windspeed': auxsensbits[0],
+              'has_winddir': auxsensbits[1],
+              'has_rainrate': auxsensbits[2]}
 
-    bit_order = interpret_bit_order(bit_order)
+    return out
+
+
+def interpret_hkd_contents_code(contents_code_integer):
+    """interpret the integer contents code from HKD files and return dict of contents variables"""
+
     contents_code_int8 = np.array([contents_code_integer]).view(np.uint8)
-    hkdselbits = np.unpackbits(contents_code_int8, bitorder=bit_order)
+    hkdselbits = np.unpackbits(contents_code_int8, bitorder='little')
 
     out = {'has_coord': hkdselbits[0],
            'has_T': hkdselbits[1],
