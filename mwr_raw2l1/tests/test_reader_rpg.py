@@ -1,7 +1,9 @@
+import numpy as np
+import datetime as dt
 import unittest
 
 from mwr_raw2l1.reader_rpg import BLB, BRT, HKD, IRT, MET
-from mwr_raw2l1.utils.file_utils import abs_file_path
+from mwr_raw2l1.utils.file_utils import abs_file_path, pickle_load, get_corresponding_pickle
 
 PATH_DATA = 'mwr_raw2l1/tests/data/rpg/'
 
@@ -33,7 +35,21 @@ class TestReader(unittest.TestCase):
         for filename in filenames:
             with self.subTest(filename=filename):
                 infile = abs_file_path(PATH_DATA, filename)
-                reader(infile)
+                x = reader(infile)
+
+                # check whether data are same as previously read with actual reader
+                with self.subTest(ref_data='actual reader'):
+                    ref = get_corresponding_pickle(filename, PATH_DATA, legacy_reader=False)
+                    for var in ref:
+                        if var == 'time':
+                            pass  # TODO: find a way to intercompare time decoding
+                        else:
+                            np.testing.assert_almost_equal(x.data[var], ref[var])
+
+                # check if key variables match the ones read with the legacy reader
+                with self.subTest(ref_data='legacy reader'):
+                    ref = get_corresponding_pickle(filename, PATH_DATA, legacy_reader=True)
+                    pass  # TODO: implement custom checks for key variables of legacy reader
 
 
 if __name__ == '__main__':

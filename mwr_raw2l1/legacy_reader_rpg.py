@@ -3,6 +3,7 @@ import numpy as np
 import datetime as dt
 import struct
 from mwr_raw2l1.reader_rpg_helpers import interpret_time, interpret_angle, interpret_coord, scan_starttime_to_time
+from mwr_raw2l1.utils.file_utils import pickle_dump
 
 missing_float = -999.
 missing_int = -9
@@ -597,4 +598,19 @@ def read_hkd(filename, accept_localtime=False):
 
 
 if __name__ == '__main__':
-    blb = read_blb('data/rpg/C00-V859_190803.BLB')
+    base_filename = 'C00-V859_190803'
+    filename_noext = 'data/rpg/' + base_filename
+    brt = read_brt(filename_noext + '.BRT')
+    blb = read_blb(filename_noext + '.BLB')
+    irt = read_irt(filename_noext + '.IRT')
+    met = read_met(filename_noext + '.MET')
+    hkd = read_hkd(filename_noext + '.HKD')
+
+    # # generate new pickle of the read-in data
+    # dir_pickle = 'tests/data/rpg/'
+    # vars = [brt, blb, irt, met, hkd]
+    # varnames = ['brt', 'blb', 'irt', 'met', 'hkd']
+    # for var, varname in zip(vars, varnames):
+    #     var.pop('filecode', None)
+    #     outfile = dir_pickle + '/' + base_filename + '_' + varname + '_legacy.pkl'
+    #     pickle_dump(var, outfile)

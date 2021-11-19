@@ -18,7 +18,7 @@ from mwr_raw2l1.reader_rpg_helpers import (interpret_angle, interpret_coord,
                                            interpret_statusflag,
                                            interpret_time,
                                            scan_starttime_to_time, interpret_met_auxsens_code)
-from mwr_raw2l1.utils.file_utils import get_binary
+from mwr_raw2l1.utils.file_utils import get_binary, pickle_dump
 
 BYTE_ORDER = '<'  # byte order in all RPG files assumed little-endian  #TODO: ask Harald whether this is true (PC/Unix)
 
@@ -473,7 +473,7 @@ def read_all(dir_in, basename, time_start=None, time_end=None):
 
     files_all_times = glob.glob(os.path.join(dir_in, basename + '*'))
 
-    files = files_all_times  # TODO sort files according to time_start and time_end instead of using all
+    files = files_all_times  # TODO choose files according to time_start and time_end instead of using all
 
     all_data = {name: [] for name in reader_for_ext}  # use file extension as name for list of instances of reader type
     for file in files:
@@ -491,26 +491,34 @@ def read_all(dir_in, basename, time_start=None, time_end=None):
 
 def main():
 
-    filename = 'data/rpg/C00-V859_190803'
+    base_filename = 'C00-V859_190803'
 
-    filename_noext = os.path.splitext(filename)[0]  # make sure that filename has no extension
+    filename_noext = os.path.splitext('data/rpg/' + base_filename)[0]  # join path and make sure that filename has no extension
 
     brt = BRT(filename_noext + '.BRT')
-    blb = BLB(filename_noext + '.BLB')  # TODO: first need to finish reader
+    blb = BLB(filename_noext + '.BLB')
     irt = IRT(filename_noext + '.IRT')
     met = MET(filename_noext + '.MET')
     hkd = HKD(filename_noext + '.HKD')
 
-    # legacy readers
-    brt_old = read_brt(filename_noext + '.BRT')
-    blb_old = read_blb(filename_noext + '.BLB')
-    irt_old = read_irt(filename_noext + '.IRT')
-    met_old = read_met(filename_noext + '.MET')
-    hkd_old = read_hkd(filename_noext + '.HKD')
-    pass
+    # # generate new pickle of the read-in data
+    # dir_pickle = 'tests/data/rpg/'
+    # vars = [brt, blb, irt, met, hkd]
+    # varnames = ['brt', 'blb', 'irt', 'met', 'hkd']
+    # for var, varname in zip(vars, varnames):
+    #     outfile = dir_pickle + '/' + base_filename + '_' + varname + '.pkl'
+    #     pickle_dump(var.data, outfile)  # only store data dict in pickle
+
+    # # legacy readers
+    # brt_old = read_brt(filename_noext + '.BRT')
+    # blb_old = read_blb(filename_noext + '.BLB')
+    # irt_old = read_irt(filename_noext + '.IRT')
+    # met_old = read_met(filename_noext + '.MET')
+    # hkd_old = read_hkd(filename_noext + '.HKD')
+    # pass
 
 
 if __name__ == '__main__':
-    all_data = read_all('data/rpg/', 'C00-V859')
     main()
+    all_data = read_all('data/rpg/', 'C00-V859')
     pass
