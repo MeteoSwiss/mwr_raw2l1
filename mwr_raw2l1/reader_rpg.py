@@ -44,7 +44,7 @@ FILETYPE_CONFS = {  # assign metadata to each known filecode
 
 N_FREQ_DEFAULT = 14    # TODO: check how RPG deals with files from TEMPRO or HUMPRO how would have different n_freq. Other filecodes? Could also get frequency info from BRT files but ugly dependency.
 
-
+# TODO: bring base reader to one seperate file from the other readers
 ###############################################################################
 # readers for different RPG files
 # ------------------------------------------------------------------------------
@@ -55,6 +55,8 @@ class BaseReader(object):
         self.byte_offset = 0  # counter for consumed bytes, increased by each method
         self.filecode = None
         self.filestruct = None
+
+        # TODO: externalise all this below into a run method for better style
         self.data_bin = get_binary(self.filename)
         self.read()  # fills self.data
         self.check_data(accept_localtime)
