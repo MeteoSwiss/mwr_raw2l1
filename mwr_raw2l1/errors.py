@@ -51,3 +51,6 @@ class WrongNumberOfChannels(MWRError):
        -> this can happen for old-version BLB files where n_freq is read after being used"""
 
 
+class DimensionError(MWRError):  # TODO: ask Volker if this error class makes sense (used in xr_utils)
+    """Raised if specified dimensions do not match variable dimension"""
+
