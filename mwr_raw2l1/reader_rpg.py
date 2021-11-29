@@ -17,7 +17,7 @@ from mwr_raw2l1.reader_rpg_helpers import (interpret_angle, interpret_coord,
                                            interpret_hkd_contents_code,
                                            interpret_statusflag,
                                            interpret_time,
-                                           scan_starttime_to_time, interpret_met_auxsens_code)
+                                           scan_starttime_to_time, interpret_met_auxsens_code, interpret_scanflag)
 from mwr_raw2l1.utils.file_utils import get_binary, pickle_dump
 
 BYTE_ORDER = '<'  # byte order in all RPG files assumed little-endian  #TODO: ask Harald whether this is true (PC/Unix)
@@ -283,12 +283,10 @@ class BLB(BaseReader):
     def interpret_raw_data(self):
         super(BLB, self).interpret_raw_data()
         self.interpret_scanobs()
-        self.interpret_scanflag()
+        self.data.update(interpret_scanflag(self.data['scanflag']))
 
         # transform single vector of elevations to time series of elevations
         self.data['ele'] = np.tile(self.data['scan_ele'], self.data['n_scans'])
-
-        # TODO: ask Volker what functions shall be methods of BLB and which shall go to reader_rpg_helper
 
     def interpret_scanobs(self):
         """transform scanobs 3D array to time series of spectra and temperature"""
@@ -298,9 +296,6 @@ class BLB(BaseReader):
 
         # extract spectra of brightness temperatures for each ele in dimension (time, freq, ele)
         self.data['Tb_scan'] = self.data['scanobs'][:, :, :-1]
-
-    def interpret_scanflag(self):
-        pass  # TODO: implement scanflag interpreter
 
     def scan_to_timeseries(self):
         """transform scans to time series of spectra and temperatures"""

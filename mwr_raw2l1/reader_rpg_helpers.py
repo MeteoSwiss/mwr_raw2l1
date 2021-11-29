@@ -142,19 +142,7 @@ def interpret_statusflag(flag_integer):
     n_freq_kband = 7  # number of frequency channels in K-band receiver
     n_freq_vband = 7  # number of frequency channels in V-band receiver
 
-    # format input
-    if len(np.shape(flag_integer)) == 0:  # input is scalar
-        flag_integer = np.array([[flag_integer]])
-    elif not isinstance(flag_integer, np.ndarray):
-        raise WrongInputFormat('input must either be a numpy array or a scalar')
-    elif np.ndim(np.squeeze(flag_integer)) > 1:
-        raise WrongInputFormat('input can only be vector or scalar but not matrix')
-    else:  # input is vector
-        flag_integer = np.squeeze(flag_integer)[:, np.newaxis]
-
-    # transform integer (time series) to flag bits
-    flag_int8 = flag_integer.view(np.uint8)
-    statusflagbits = np.unpackbits(flag_int8, axis=1, bitorder='little')
+    statusflagbits = flag_int2bits(flag_integer)
 
     # interpret the different bits according to the manual
     tstabflag_kband = statusflagbits[:, 24] + 2 * statusflagbits[:, 25]
@@ -173,8 +161,29 @@ def interpret_statusflag(flag_integer):
         'Tstab_ok_kband': interpret_tstab_flag(tstabflag_kband),
         'Tstab_ok_vband': interpret_tstab_flag(tstabflag_vband),
         'recent_powerfailure': statusflagbits[:, 28],
-        'Tstab_ok_amb': interpret_tstab_flag(statusflagbits[:, 29]),  # 1:ok, 0:not ok because sensors differ by >0.3 K
+        'Tstab_ok_amb': interpret_tstab_flag(statusflagbits[:, 29]),
         'noisediode_on': statusflagbits[:, 30]}
+
+    return out
+
+
+def interpret_scanflag(flag_integer):
+    """interpret flag of BLB scan
+
+        first bit: rainflag
+
+        2nd/3rd bit (input) | scan_quadrant (output) | description
+        --------------------|------------------------|-------------------
+        0/0                 | 1                      | first quadrant
+        0/1                 | 2                      | second quadrant
+        1/0                 | 0                      | average over both quadrants
+        """
+
+    scanflagbits = flag_int2bits(flag_integer)
+    int_quadr = scanflagbits[:, 1] + 2 * scanflagbits[:, 2]
+    out = {
+        'rainflag': scanflagbits[:, 0],
+        'scan_quadrant': interpret_quadrant_int(int_quadr)}
 
     return out
 
@@ -196,6 +205,18 @@ def interpret_tstab_flag(flag):
             return np.array([flag2tstab_ok[el] for el in flag])
     except KeyError as err:
         raise UnknownFlagValue('Expected 0, 1 or 2 for RPG temperature stability flag but found {}'.format(err))
+
+
+def interpret_quadrant_int(int_quadr):
+    """helper function for interpret scanflag for interpreting 2nd and 3rd bit (as int). See documentation from there"""
+    int2quadrant = {0: 1, 1: 2, 2: 0}  # correspondence of int(2nd and 3rd bit) (keys) with quadrant (value)
+    try:
+        if np.isscalar(int_quadr):
+            int2quadrant[int_quadr]
+        else:
+            return np.array([int2quadrant[el] for el in int_quadr])
+    except KeyError as err:
+        raise UnknownFlagValue('Expected 0, 1 or 2 for scan quadrant encoding but found {}'.format(err))
 
 
 def interpret_bit_order(bit_order):
@@ -244,3 +265,20 @@ def scan_starttime_to_time(starttime, n_angles, inttime=40, caltime=40, idletime
         time[n] = time[n - 1] + dt.timedelta(seconds=caltime + idletime)
 
     return time
+
+
+def flag_int2bits(flag_integer):
+    """transform an integer value to bits. Input can be time series or scalars"""
+    # format input
+    if len(np.shape(flag_integer)) == 0:  # input is scalar
+        flag_integer = np.array([[flag_integer]])
+    elif not isinstance(flag_integer, np.ndarray):
+        raise WrongInputFormat('input must either be a numpy array or a scalar')
+    elif np.ndim(np.squeeze(flag_integer)) > 1:
+        raise WrongInputFormat('input can only be vector or scalar but not matrix')
+    else:  # input is vector
+        flag_integer = np.squeeze(flag_integer)[:, np.newaxis]
+
+    # transform integer (time series) to flag bits
+    flag_int8 = flag_integer.view(np.uint8)
+    return np.unpackbits(flag_int8, axis=1, bitorder='little')
