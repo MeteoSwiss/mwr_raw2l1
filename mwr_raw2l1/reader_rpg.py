@@ -125,8 +125,10 @@ class BaseReader(object):
                                   self.filecode, self.filename))
 
     def interpret_header(self):
-        if 'frequency' in self.data.keys():
-            self.data['frequency'] = np.array(self.data['frequency'])
+        # transform frequency and wavelength to numpy array for later import to xarray in Measurement classq
+        for var in ['frequency', 'wavelength']:
+            if var in self.data.keys():
+                self.data[var] = np.array(self.data[var])
 
     def interpret_raw_data(self):
         try:  # assume data-dict in all subclasses contains time
