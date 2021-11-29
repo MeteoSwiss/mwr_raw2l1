@@ -44,6 +44,7 @@ FILETYPE_CONFS = {  # assign metadata to each known filecode
 
 N_FREQ_DEFAULT = 14    # TODO: check how RPG deals with files from TEMPRO or HUMPRO how would have different n_freq. Other filecodes? Could also get frequency info from BRT files but ugly dependency.
 
+
 # TODO: bring base reader to one seperate file from the other readers
 ###############################################################################
 # readers for different RPG files
@@ -124,7 +125,8 @@ class BaseReader(object):
                                   self.filecode, self.filename))
 
     def interpret_header(self):
-        pass
+        if 'frequency' in self.data.keys():
+            self.data['frequency'] = np.array(self.data['frequency'])
 
     def interpret_raw_data(self):
         try:  # assume data-dict in all subclasses contains time
@@ -468,7 +470,7 @@ class HKD(BaseReader):
 # ------------------------------------------------------------------------------
 def read_all(dir_in, basename, time_start=None, time_end=None):
     """read all L1-related files in dir_in corresponding to basename (full identifier including station and inst id)"""
-    # TODO: ask Volker. ok to have this function def besides reader classes. or schould it also become class?
+    # TODO: ask Volker. ok to have this function def besides reader classes. or should it also become class?
 
     # assign reader (value) to lowercase file extension (key)
     reader_for_ext = {'brt': BRT, 'blb': BLB, 'irt': IRT, 'met': MET, 'hkd': HKD}
@@ -521,6 +523,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # main()
     all_data = read_all('data/rpg/', 'C00-V859')
     pass
