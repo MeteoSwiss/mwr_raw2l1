@@ -125,10 +125,10 @@ class BaseReader(object):
                                   self.filecode, self.filename))
 
     def interpret_header(self):
-        # transform frequency and wavelength to numpy array for later import to xarray in Measurement classq
-        for var in ['frequency', 'wavelength']:
+        # transform frequency and wavelength to 1D-numpy array for later import to xarray in Measurement classq
+        for var in ['frequency', 'wavelength', 'scan_ele']:
             if var in self.data.keys():
-                self.data[var] = np.array(self.data[var])
+                self.data[var] = np.array(self.data[var]).ravel()
 
     def interpret_raw_data(self):
         try:  # assume data-dict in all subclasses contains time
@@ -287,9 +287,6 @@ class BLB(BaseReader):
         self.interpret_scanobs()
         self.data.update(interpret_scanflag(self.data['scanflag']))
 
-        # transform single vector of elevations to time series of elevations
-        self.data['ele'] = np.tile(self.data['scan_ele'], self.data['n_scans'])
-
     def interpret_scanobs(self):
         """transform scanobs 3D array to time series of spectra and temperature"""
 
@@ -310,6 +307,9 @@ class BLB(BaseReader):
         self.data['Tb'] = tb_tmp.reshape(n_freq, n_scans*n_ele, order='C').transpose()
 
         self.data['T'] = self.data['T_per_scan'].repeat(n_ele)  # repeat to have one T value for each new time
+
+        # transform single vector of elevations to time series of elevations
+        self.data['ele'] = np.tile(self.data['scan_ele'], self.data['n_scans'])
 
         # time is encoded as start time of scan (same time for all elevations). need to transform to time series
         # self.data['time'] = scan_starttime_to_time(self.data['time'], self.data['n_ele'])  # TODO: vectorise scan starttime_to_time (and write test)
