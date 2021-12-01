@@ -40,7 +40,7 @@ class Measurement(object):
                 data_act.append(make_dataset(dat.data, dims[ext], vars[ext], vars_opt[ext]))
             all_data[ext] = xr.concat(data_act, dim='time')  # merge all datasets of the same type
 
-        out.data = all_data  # TODO: merge BRT and BLB (use HKD for evaluating scan time) & interpolate irt, met, hkd
+        out.data = all_data['brt']  # TODO: merge BRT and BLB (use HKD for evaluating scan time) & interpolate irt, met, hkd
         # TODO: ask Volker where to do transformation from BLB scan to timeseries. probably here as use HKD info. But it is still a very BLB-specific method
         return out
 

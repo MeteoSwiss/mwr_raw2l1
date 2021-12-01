@@ -33,7 +33,7 @@ variables:
       units: GHz
 
   Tb:
-    name: Tb
+    name: tb
     dim:
       - time
       - frequency

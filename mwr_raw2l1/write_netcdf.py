@@ -4,16 +4,18 @@ Create E-PROFILE NetCDF from input dictionary
 """
 import netCDF4 as nc
 import numpy as np
-import yaml
+
+from mwr_raw2l1.utils.file_utils import get_conf
 
 
-def write(data, filename, config, format='NETCDF4'):
+def write(data, filename, conf_file, format='NETCDF4'):
+    conf = get_conf(conf_file)
     with nc.Dataset(filename, 'w', format=format) as ncid:
-        for dimact in config['dimensions']['unlimited']:
-            ncid.createDimension(config['variables'][dimact]['name'], size=None)
-        for dimact in config['dimensions']['fixed']:
-            ncid.createDimension(config['variables'][dimact]['name'], size=len(data[dimact]))
-        for var, specs in config['variables'].items():
+        for dimact in conf['dimensions']['unlimited']:
+            ncid.createDimension(conf['variables'][dimact]['name'], size=None)
+        for dimact in conf['dimensions']['fixed']:
+            ncid.createDimension(conf['variables'][dimact]['name'], size=len(data[dimact]))
+        for var, specs in conf['variables'].items():
             ncvar = ncid.createVariable(specs['name'], specs['type'], specs['dim'], fill_value=specs['FillValue'])
             ncvar.setncatts(specs['attributes'])
             if var not in data.keys():
@@ -26,12 +28,7 @@ def write(data, filename, config, format='NETCDF4'):
                 ncvar[:] = nc.date2num(data[var], specs['attributes']['units'])
             else:
                 ncvar[:] = data[var]
-
-
-def read_config(file='L1_format.yaml'):
-    with open(file) as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
-    return config
+    print('data written to {}'.format(filename))
 
 
 def write_eprofile_netcdf_hardcode(filename, data):
@@ -92,9 +89,9 @@ def write_eprofile_netcdf_hardcode(filename, data):
 
 
 # testing the function
-conf = read_config()
-import reader_rpg
+if __name__ == '__main__':
+    from legacy_reader_rpg import read_brt
 
-data = reader_rpg.brt
-write_eprofile_netcdf_hardcode('nchardcode_test.nc', data)
-write(data, 'ncyaml_test.nc', conf)
+    data = read_brt('data/rpg/C00-V859_190803.BRT')
+    write_eprofile_netcdf_hardcode('nchardcode_test.nc', data)
+    write(data, 'ncyaml_test.nc', 'L1_format.yaml')

@@ -54,3 +54,10 @@ class WrongNumberOfChannels(MWRError):
 class DimensionError(MWRError):  # TODO: ask Volker if this error class makes sense (used in xr_utils)
     """Raised if specified dimensions do not match variable dimension"""
 
+    def __init__(self, dims, var, nd):
+        self.dims = dims
+        self.var = var
+        self.nd = nd
+
+    def __str__(self):
+        return "specified {} dimensions but data['{}'] is {}-dimensional".format(len(self.dims), self.var, self.nd)

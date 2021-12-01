@@ -36,7 +36,7 @@ def make_dataset(data, dims, vars, vars_opt=None):
     for var in all_vars:
         nd = np.ndim(data[var])
         if nd > len(dims):
-            raise DimensionError("specified {} dimensions but data['{}'] is {}-dimensional".format(len(dims), var, nd))
+            raise DimensionError(dims, var, nd)
         spec[var] = dict(dims=dims[0:nd], data=data[var])
 
     return xr.Dataset.from_dict(spec)
