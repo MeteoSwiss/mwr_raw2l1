@@ -30,7 +30,7 @@ def write_from_dict(data, filename, conf_file, format='NETCDF4'):
         for dimact in conf['dimensions']['fixed']:
             ncid.createDimension(conf['variables'][dimact]['name'], size=len(data[dimact]))
         for var, specs in conf['variables'].items():
-            ncvar = ncid.createVariable(specs['name'], specs['type'], specs['dim'], fill_value=specs['FillValue'])
+            ncvar = ncid.createVariable(specs['name'], specs['type'], specs['dim'], fill_value=specs['_FillValue'])
             ncvar.setncatts(specs['attributes'])
             if var not in data.keys():
                 if specs['optional']:
@@ -78,8 +78,8 @@ def write_from_xarray(data, filename, conf_file, format='NETCDF4'):
         if var in dims:
             data[var].encoding.update(_FillValue=enc_no_fillvalue)  # no fill value for dimensions (CF-compliance)
         else:
-            data[var] = data[var].fillna(specs['FillValue'])
-            data[var].encoding.update(_FillValue=specs['FillValue'])
+            data[var] = data[var].fillna(specs['_FillValue'])
+            data[var].encoding.update(_FillValue=specs['_FillValue'])
 
     # workaround for setting units and calendar of time variable (use encoding instead of attrs)
     encs = {}
@@ -114,10 +114,10 @@ def write_eprofile_netcdf_hardcode(filename, data):
     ncdims_unlimited = ['time']
     ncdims_fixed = ['frequency']
     ncvars = dict(
-        time={'dim': ('time',), 'type': 'f8', 'FillValue': None, 'optional': False},
-        frequency={'dim': ('frequency',), 'type': 'f4', 'FillValue': -999., 'optional': False},
-        Tb={'dim': ('time', 'frequency'), 'type': 'f4', 'FillValue': -999., 'optional': False},
-        dummyvar={'dim': ('time',), 'type': 'f4', 'FillValue': -999., 'optional': True}
+        time={'dim': ('time',), 'type': 'f8', '_FillValue': None, 'optional': False},
+        frequency={'dim': ('frequency',), 'type': 'f4', '_FillValue': -999., 'optional': False},
+        Tb={'dim': ('time', 'frequency'), 'type': 'f4', '_FillValue': -999., 'optional': False},
+        dummyvar={'dim': ('time',), 'type': 'f4', '_FillValue': -999., 'optional': True}
     )
     ncvaratt = dict(
         time={'standard_name': 'time',
@@ -145,7 +145,7 @@ def write_eprofile_netcdf_hardcode(filename, data):
             ncid.createDimension(dimact, size=len(data[dimact]))
 
         for var, specs in ncvars.items():
-            ncvar = ncid.createVariable(var, specs['type'], specs['dim'], fill_value=specs['FillValue'])
+            ncvar = ncid.createVariable(var, specs['type'], specs['dim'], fill_value=specs['_FillValue'])
             ncvar.setncatts(ncvaratt[var])
 
             if var not in data.keys():

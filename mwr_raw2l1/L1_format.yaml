@@ -12,7 +12,7 @@ variables:
     dim:
       - time
     type: f8
-    FillValue: null
+    _FillValue: null
     optional: False
     attributes:
       standard_name: time
@@ -26,7 +26,7 @@ variables:
     dim:
       - frequency
     type: f4
-    FillValue: -999.
+    _FillValue: -999.
     optional: False
     attributes:
       standard_name: sensor_band_spectral_radiation_frequency
@@ -38,7 +38,7 @@ variables:
       - time
       - frequency
     type: f4
-    FillValue: -999.
+    _FillValue: -999.
     optional: False
     attributes:
       standard_name: brightness_temperature
