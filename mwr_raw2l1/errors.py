@@ -11,6 +11,10 @@ class MWRInputError(MWRError):
     """Base exception for calling of MWR reader/helper function"""
 
 
+class MWROutputError(MWRError):
+    """Raised when something with the output file goes wrong"""
+
+
 ################################
 class UnknownFileType(MWRFileError):
     """Raised if the filetype of the datafile is not in the known range of file ID types"""
@@ -39,6 +43,11 @@ class UnknownFlagValue(MWRInputError):
 
 class TimeInputMissing(MWRInputError):
     """Raised if time is missing in an input file but is required by the reader"""
+
+
+# --------------------------
+class OutputDimensionError(MWROutputError):
+    """Raised if requested output dimensions do not match data"""
 
 
 # --------------------------

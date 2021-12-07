@@ -6,6 +6,7 @@ import netCDF4 as nc
 import numpy as np
 import xarray as xr
 
+from mwr_raw2l1.errors import OutputDimensionError
 from mwr_raw2l1.utils.file_utils import get_conf
 
 
@@ -51,17 +52,12 @@ def write_from_xarray(data, filename, conf_file, format='NETCDF4'):
     enc_no_fillvalue = None  # tutorials from 2017 said False must be used, but with xarray 0.20.1 only None works
 
     conf = get_conf(conf_file)
+
+    # dimensions
     dims = conf['dimensions']['unlimited'] + conf['dimensions']['fixed']
+    data.encoding.update(unlimited_dims=conf['dimensions']['unlimited'])  # acts during to_netcdf (default: fixed)
 
-    # TODO: find a way to set dimensions to unlimited and fixed
-    for dimact in conf['dimensions']['unlimited']:
-        pass
-        # ncid.createDimension(conf['variables'][dimact]['name'], size=None)
-    for dimact in conf['dimensions']['fixed']:
-        pass
-        # ncid.createDimension(conf['variables'][dimact]['name'], size=len(data[dimact]))
     for var, specs in conf['variables'].items():
-
         if var not in data.keys():
             if specs['optional']:
                 # TODO: must create a variable of fill values only
@@ -69,7 +65,10 @@ def write_from_xarray(data, filename, conf_file, format='NETCDF4'):
             else:
                 raise KeyError('Variable {} is a mandatory input but was not found in input dictionary'.format(var))
 
-        # TODO: check that data[var] variable has correct dimensions according to specs['dim']
+        # check dimensions (including order)
+        if list(data[var].coords) != specs['dim']:
+            raise OutputDimensionError('dimensions in data["{}"] ({}) do not match specs for output file ({})'.format(
+                var, ', '.join(list(data[var].coords)), ', '.join(specs['dim'])))
 
         # set all attributes and datatype
         data[var].attrs.update(specs['attributes'])
@@ -96,8 +95,10 @@ def write_from_xarray(data, filename, conf_file, format='NETCDF4'):
     data = data.drop_vars(vars_to_drop)
 
     # set variables names to the ones wished for output (CARE: must be last operation before save!!!)
-    rename_map = {var: specs['name'] for var, specs in conf['variables'].items()}
-    data = data.rename(rename_map)
+    varname_map = {var: specs['name'] for var, specs in conf['variables'].items()}
+    data = data.rename(varname_map)
+    renamed_unlim_dim = [varname_map[dim] for dim in data.encoding['unlimited_dims']]
+    data.encoding['unlimited_dims'] = renamed_unlim_dim
 
     data.to_netcdf(filename, format=format)
     print('data written to ' + filename)
