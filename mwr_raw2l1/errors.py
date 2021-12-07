@@ -51,13 +51,14 @@ class WrongNumberOfChannels(MWRError):
        -> this can happen for old-version BLB files where n_freq is read after being used"""
 
 
-class DimensionError(MWRError):  # TODO: ask Volker if this error class makes sense (used in xr_utils)
+class DimensionError(MWRError):
     """Raised if specified dimensions do not match variable dimension"""
 
-    def __init__(self, dims, var, nd):
-        self.dims = dims
+    def __init__(self, dims_required, var, n_dims_var):
+        self.dims_required = dims_required
         self.var = var
-        self.nd = nd
+        self.n_dims_var = n_dims_var
 
     def __str__(self):
-        return "specified {} dimensions but data['{}'] is {}-dimensional".format(len(self.dims), self.var, self.nd)
+        return "specified {} dimensions but data['{}'] is {}-dimensional".format(
+            len(self.dims_required), self.var, self.n_dims_var)

@@ -11,3 +11,4 @@ meas = Measurement.from_rpg(all_data)
 # data_simple = {}
 # for
 write(meas.data, 'maintest.nc', 'L1_format.yaml')
+pass

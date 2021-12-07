@@ -1,14 +1,27 @@
 # -*- coding: utf-8 -*-
 """
-Create E-PROFILE NetCDF from input dictionary
+Create E-PROFILE NetCDF from input dictionary or xarray Dataset
 """
 import netCDF4 as nc
 import numpy as np
+import xarray as xr
 
 from mwr_raw2l1.utils.file_utils import get_conf
 
 
-def write(data, filename, conf_file, format='NETCDF4'):
+def write(data, filename, conf_file, *args, **kwargs):
+    """wrapper picking the right writer according to the type of data"""
+
+    if isinstance(data, dict):
+        write_from_dict(data, filename, conf_file, *args, **kwargs)
+    elif isinstance(data, xr.Dataset) or isinstance(data, xr.DataArray):
+        write_from_xarray(data, filename, conf_file, *args, **kwargs)
+    else:
+        raise NotImplementedError('no writer for data of type ' + type(data))
+
+
+def write_from_dict(data, filename, conf_file, format='NETCDF4'):
+    """write data dictionary to NetCDF according to the format definition in conf_file by using the netCDF4 module"""
     conf = get_conf(conf_file)
     with nc.Dataset(filename, 'w', format=format) as ncid:
         for dimact in conf['dimensions']['unlimited']:
@@ -31,8 +44,67 @@ def write(data, filename, conf_file, format='NETCDF4'):
     print('data written to {}'.format(filename))
 
 
+def write_from_xarray(data, filename, conf_file, format='NETCDF4'):
+    """write data (Dataset) to NetCDF according to the format definition in conf_file by using the xarray module"""
+
+    # value for _FillValue attribute of variables encoding field to have unset _FillValue in NetCDF
+    enc_no_fillvalue = None  # tutorials from 2017 said False must be used, but with xarray 0.20.1 only None works
+
+    conf = get_conf(conf_file)
+    dims = conf['dimensions']['unlimited'] + conf['dimensions']['fixed']
+
+    # TODO: find a way to set dimensions to unlimited and fixed
+    for dimact in conf['dimensions']['unlimited']:
+        pass
+        # ncid.createDimension(conf['variables'][dimact]['name'], size=None)
+    for dimact in conf['dimensions']['fixed']:
+        pass
+        # ncid.createDimension(conf['variables'][dimact]['name'], size=len(data[dimact]))
+    for var, specs in conf['variables'].items():
+
+        if var not in data.keys():
+            if specs['optional']:
+                # TODO: must create a variable of fill values only
+                continue
+            else:
+                raise KeyError('Variable {} is a mandatory input but was not found in input dictionary'.format(var))
+
+        # TODO: check that data[var] variable has correct dimensions according to specs['dim']
+
+        # set all attributes and datatype
+        data[var].attrs.update(specs['attributes'])
+        data[var].encoding.update(dtype=specs['type'])
+
+        # set fill value
+        if var in dims:
+            data[var].encoding.update(_FillValue=enc_no_fillvalue)  # no fill value for dimensions (CF-compliance)
+        else:
+            data[var] = data[var].fillna(specs['FillValue'])
+            data[var].encoding.update(_FillValue=specs['FillValue'])
+
+    # workaround for setting units and calendar of time variable (use encoding instead of attrs)
+    encs = {}
+    for att in ['units', 'calendar']:
+        encs[att] = data['time'].attrs.pop(att)
+    data['time'].encoding.update(encs)
+
+    # remove undesired variables from data (all that are not in the config file)
+    vars_to_drop = []
+    for var in list(data.keys()):
+        if var not in conf['variables']:
+            vars_to_drop.append(var)
+    data = data.drop_vars(vars_to_drop)
+
+    # set variables names to the ones wished for output (CARE: must be last operation before save!!!)
+    rename_map = {var: specs['name'] for var, specs in conf['variables'].items()}
+    data = data.rename(rename_map)
+
+    data.to_netcdf(filename, format=format)
+    print('data written to ' + filename)
+
+
 def write_eprofile_netcdf_hardcode(filename, data):
-    # TODO: This function can be removed once happy wiht the outcome of write()
+    # TODO: This function can be removed once happy with the outcome of write()
 
     # configuration
     ncformat = 'NETCDF4'
