@@ -2,6 +2,8 @@
 """
 Create E-PROFILE NetCDF from input dictionary or xarray Dataset
 """
+from copy import deepcopy
+
 import netCDF4 as nc
 import numpy as np
 import xarray as xr
@@ -45,13 +47,28 @@ def write_from_dict(data, filename, conf_file, format='NETCDF4'):
     print('data written to {}'.format(filename))
 
 
-def write_from_xarray(data, filename, conf_file, format='NETCDF4'):
-    """write data (Dataset) to NetCDF according to the format definition in conf_file by using the xarray module"""
+def write_from_xarray(data_in, filename, conf_file, format='NETCDF4', copy_data=False):
+    """write data (Dataset) to NetCDF according to the format definition in conf_file by using the xarray module
+
+    Args:
+        data_in: xarray Dataset or DataArray containing data to write to file
+        filename: name and path of output NetCDF file
+        conf_file: yaml configuration file defining the format and contents of the output NetCDF file
+        format: NetCDF format type of the output file. Default is NETCDF4
+        copy_data (bool): In case of False, the dataset will experience in-place modifications which is suitable when
+            the dataset is not used in its original form after calling the write function, for True a copy is modified.
+            Defaults to False.
+    """
 
     # value for _FillValue attribute of variables encoding field to have unset _FillValue in NetCDF
     enc_no_fillvalue = None  # tutorials from 2017 said False must be used, but with xarray 0.20.1 only None works
 
     conf = get_conf(conf_file)
+
+    if copy_data:
+        data = deepcopy(data_in)
+    else:
+        data = data_in
 
     # dimensions
     dims = conf['dimensions']['unlimited'] + conf['dimensions']['fixed']
