@@ -40,3 +40,16 @@ def make_dataset(data, dims, vars, vars_opt=None):
         spec[var] = dict(dims=dims[0:nd], data=data[var])
 
     return xr.Dataset.from_dict(spec)
+
+def drop_duplicates(ds, dim):
+    """drop duplicates from all data in ds for duplicates in dimension vector
+
+    Args:
+        ds: xarray Dataset or DataArray
+        dim: string indicating the dimension name to check for duplicates
+    Returns:
+        ds with unique dimension vector
+    """
+
+    _, ind = np.unique(ds[dim], return_index=True)  # keep first index but assume duplicate values identical anyway
+    return ds.isel({dim: ind})
