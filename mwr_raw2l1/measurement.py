@@ -46,15 +46,22 @@ class Measurement(object):
         out.data = all_data['brt']
         # TODO: merge BRT and BLB as sketched in next lines
         # blb_ts = cls.scan_to_timeseries(all_data['blb'], all_data['brt'], all_data['hkd'])
-        # out.data.merge(blb_ts, join='outer')  # hope merge works, but don't forget to test
+        # out.data = out.data.merge(blb_ts, join='outer')  # hope merge works, but don't forget to test
 
-        # TODO: enable the below after sorting out merge problem between irt ele and azi and brt/blb.
-        # # bring other data to time grid of brightness temperatures
-        # for src in readin_data:
-        #     if src in ['brt', 'blb']:
-        #         continue
-        #     out.data.merge(all_data[src], join='left')
-        #
+        # bring other data to time grid of brightness temperatures
+        for src in readin_data:
+            # BRT and BLB data already treated
+            if src in ['brt', 'blb']:
+                continue
+
+            # to make sure no variable is overwritten rename duplicates by suffixing it with its source
+            for var in out.data:
+                if var in all_data[src]:
+                    varname_map = {var: var + '_' + src}
+                    all_data[src] = all_data[src].rename(varname_map)
+
+            # merge into out.data
+            out.data = out.data.merge(all_data[src], join='left')
 
         return out
 
