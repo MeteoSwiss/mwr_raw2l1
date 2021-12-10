@@ -7,7 +7,6 @@ from copy import deepcopy
 import netCDF4 as nc
 import numpy as np
 import xarray as xr
-
 from mwr_raw2l1.errors import OutputDimensionError
 from mwr_raw2l1.utils.file_utils import get_conf
 
@@ -177,11 +176,3 @@ def write_eprofile_netcdf_hardcode(filename, data):
             else:
                 ncvar[:] = data[var]
 
-
-# testing the function
-if __name__ == '__main__':
-    from legacy_reader_rpg import read_brt
-
-    data = read_brt('data/rpg/C00-V859_190803.BRT')
-    write_eprofile_netcdf_hardcode('nchardcode_test.nc', data)
-    write(data, 'ncyaml_test.nc', 'L1_format.yaml')

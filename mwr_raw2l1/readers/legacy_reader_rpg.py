@@ -1,8 +1,12 @@
 # TODO: once happy with the classes BRT, BLB, IRT, MET, HKD (incl doc) in reader_rpg.py the present file can be removed
-import numpy as np
 import datetime as dt
 import struct
-from mwr_raw2l1.reader_rpg_helpers import interpret_time, interpret_angle, interpret_coord, scan_starttime_to_time
+
+import numpy as np
+from mwr_raw2l1.readers.reader_rpg_helpers import (interpret_angle,
+                                                   interpret_coord,
+                                                   interpret_time,
+                                                   scan_starttime_to_time)
 from mwr_raw2l1.utils.file_utils import pickle_dump
 
 missing_float = -999.

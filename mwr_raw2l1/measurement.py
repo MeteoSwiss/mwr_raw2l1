@@ -1,6 +1,4 @@
-import xarray as xr
-
-from mwr_raw2l1.measurement_helpers import drop_duplicates, make_dataset
+from mwr_raw2l1.measurement_helpers import rpg_to_datasets
 
 
 class Measurement(object):
@@ -34,13 +32,7 @@ class Measurement(object):
         # TODO : check what other hkd variables are needed for output statusflag and monitoring!!!
 
         out = cls()
-        all_data = {}
-        for src, data_series in readin_data.items():
-            data_act = []
-            for dat in data_series:  # make an xarray dataset from the data dict in each class instance
-                data_act.append(make_dataset(dat.data, dims[src], vars[src], vars_opt[src]))
-            all_data[src] = xr.concat(data_act, dim='time')  # merge all datasets of the same type
-            all_data[src] = drop_duplicates(all_data[src], dim='time')
+        all_data = rpg_to_datasets(readin_data, dims, vars, vars_opt)
 
         # merge BRT and BLB data to time series of brightness temperatures
         out.data = all_data['brt']
@@ -83,7 +75,7 @@ class Measurement(object):
 
 
 if __name__ == '__main__':
-    from mwr_raw2l1.reader_rpg import read_all
+    from mwr_raw2l1.readers.reader_rpg import read_all
 
     all_data = read_all('data/rpg/', 'C00-V859')
     meas = Measurement.from_rpg(all_data)

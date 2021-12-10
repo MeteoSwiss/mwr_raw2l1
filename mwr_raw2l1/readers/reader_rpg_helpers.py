@@ -4,8 +4,7 @@ helper functions for the module reader_rpg
 import datetime as dt
 
 import numpy as np
-
-from mwr_raw2l1.errors import WrongInputFormat, UnknownFlagValue
+from mwr_raw2l1.errors import UnknownFlagValue, WrongInputFormat
 
 
 def interpret_time(time_in):

@@ -2,12 +2,11 @@
 """
 reader for RPG HATPRO, TEMPRO or HUMPRO binary files
 """
-import numpy as np
 import datetime as dt
-import struct
 import os
+import struct
 
-
+import numpy as np
 #configuration to be exported to config file
 # ToDo : into constants.py
 from mwr_raw2l1.errors import UnknownFileType

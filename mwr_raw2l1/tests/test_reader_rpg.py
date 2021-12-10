@@ -1,9 +1,8 @@
-import numpy as np
-import datetime as dt
 import unittest
 
-from mwr_raw2l1.reader_rpg import BLB, BRT, HKD, IRT, MET
-from mwr_raw2l1.utils.file_utils import abs_file_path, pickle_load, get_corresponding_pickle
+import numpy as np
+from mwr_raw2l1.readers.reader_rpg import BLB, BRT, HKD, IRT, MET
+from mwr_raw2l1.utils.file_utils import abs_file_path, get_corresponding_pickle
 
 PATH_DATA = 'mwr_raw2l1/tests/data/rpg/'
 

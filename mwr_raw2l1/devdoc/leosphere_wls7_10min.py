@@ -1,15 +1,13 @@
     #!/usr/bin/env python
     # -*- encoding: utf-8 -*-
 
-    from __future__ import print_function
-    from __future__ import division
-    from __future__ import absolute_import
+    from __future__ import absolute_import, division, print_function
 
-    import sys
-    import os
-    import re
     import ast
     import datetime as dt
+    import os
+    import re
+    import sys
 
     import numpy as np
 

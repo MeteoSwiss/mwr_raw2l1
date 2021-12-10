@@ -1,7 +1,6 @@
 from filters.sal import SalitzkiGolay
 from filters.sal_fast import SalitzkiGolayFast
 
-
 FILTER = {'salitzki_golay' : (SalitzkiGolay, ['height', 'window']),
           'salitzki_golay_fast': (SalitzkiGolayFast,['height', 'window','add_param'])
           }
