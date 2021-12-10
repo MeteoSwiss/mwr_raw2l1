@@ -33,7 +33,7 @@ class Measurement(object):
                             'Tstab_kband', 'Tstab_vband', 'flashmemory_remaining', 'BLscan_active']}
         # TODO : check what other hkd variables are needed for output statusflag and monitoring!!!
 
-        out = cls
+        out = cls()
         all_data = {}
         for src, data_series in readin_data.items():
             data_act = []
