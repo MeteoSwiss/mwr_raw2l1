@@ -152,24 +152,6 @@ class BLB(BaseReader):
         # extract spectra of brightness temperatures for each ele in dimension (time, freq, ele)
         self.data['Tb_scan'] = self.data['scanobs'][:, :, :-1]
 
-    def scan_to_timeseries(self):
-        """transform scans to time series of spectra and temperatures"""
-        # TODO find a place where this function should go (maybe reader_rpg_helpers and call after read in also hkd)
-        n_freq = self.data['n_freq']
-        n_ele = self.data['n_ele']
-        n_scans = self.data['n_scans']
-
-        tb_tmp = self.data['Tb_scan'].swapaxes(0, 1)  # swap dim to (freq, time, ele)
-        self.data['Tb'] = tb_tmp.reshape(n_freq, n_scans*n_ele, order='C').transpose()
-
-        self.data['T'] = self.data['T_per_scan'].repeat(n_ele)  # repeat to have one T value for each new time
-
-        # transform single vector of elevations to time series of elevations
-        self.data['ele'] = np.tile(self.data['scan_ele'], self.data['n_scans'])
-
-        # time is encoded as start time of scan (same time for all elevations). need to transform to time series
-        # self.data['time'] = scan_starttime_to_time(self.data['time'], self.data['n_ele'])  # TODO: vectorise scan starttime_to_time (and write test)
-
 
 class IRT(BaseReader):
     def interpret_filecode(self):

@@ -5,8 +5,8 @@ import struct
 import numpy as np
 from mwr_raw2l1.readers.reader_rpg_helpers import (interpret_angle,
                                                    interpret_coord,
-                                                   interpret_time,
-                                                   scan_starttime_to_time)
+                                                   interpret_time)
+from mwr_raw2l1.measurement_helpers import scan_endtime_to_time
 from mwr_raw2l1.utils.file_utils import pickle_dump
 
 missing_float = -999.
@@ -196,8 +196,7 @@ def read_blb(filename, accept_localtime=False):
         data['scan_starttime'][i0:i1] = interpret_time(
             struct.unpack_from('<i', d, byte_offset)[0])
         byte_offset += 4
-        data['time'][i0:i1] = scan_starttime_to_time(
-            data['scan_starttime'][i0], data['n_ele'])  # no byte offset here
+        data['time'][i0:i1] = scan_endtime_to_time(data['scan_starttime'][i0], data['n_ele'])  # no byte offset here
         flagbits = np.unpackbits(np.uint8(
             struct.unpack_from('<B', d, byte_offset)[0]), bitorder='little')
         byte_offset += 1

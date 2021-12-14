@@ -1,4 +1,4 @@
-from mwr_raw2l1.measurement_helpers import rpg_to_datasets
+from mwr_raw2l1.measurement_helpers import rpg_to_datasets, scan_to_timeseries_from_aux
 
 
 class Measurement(object):
@@ -37,7 +37,7 @@ class Measurement(object):
         # merge BRT and BLB data to time series of brightness temperatures
         out.data = all_data['brt']
         # TODO: merge BRT and BLB as sketched in next lines
-        # blb_ts = cls.scan_to_timeseries(all_data['blb'], all_data['brt'], all_data['hkd'])
+        blb_ts = scan_to_timeseries_from_aux(all_data['blb'], all_data['brt'], all_data['hkd'])
         # out.data = out.data.merge(blb_ts, join='outer')  # hope merge works, but don't forget to test
 
         # bring other data to time grid of brightness temperatures
@@ -65,14 +65,6 @@ class Measurement(object):
     def from_attex(cls, read_in_data):
         pass
 
-    def scan_to_timeseries(self, blb, brt, hkd=None):
-        pass
-        # TODO: re-use method from reader (should not stay there)
-        # find last time in brt before scan: brt.sel(time=blb['time'][ind_act], method='pad')
-        # find first time in brt after scan: brt.sel(time=blb['time'][ind_act], method='backfill')
-        # ind_act = 0 (-1) might cause an error with pad (backfill)
-        # don't forget to remove elevation dimension
-
 
 if __name__ == '__main__':
     from mwr_raw2l1.readers.reader_rpg import read_all
@@ -80,4 +72,5 @@ if __name__ == '__main__':
     all_data = read_all('data/rpg/', 'C00-V859')
     meas = Measurement.from_rpg(all_data)
     pass
+
 

@@ -230,42 +230,6 @@ def interpret_bit_order(bit_order):
         raise ValueError("argument bit_order can receive '<', '>', 'little' or 'big' but got " + bit_order)
 
 
-def scan_starttime_to_time(starttime, n_angles, inttime=40, caltime=40, idletime=1.4):
-    """
-    RPG scan files only have one timestamp per scan. This function returns the
-    approximative timestamp for the observations at each angle
-
-    Parameters
-    ----------
-    scan_starttime : datetime.datetime
-        the single timestamp saved with the angle scan. Assumed as the start
-        time of the scan
-    n_angles : int
-        number of angles per scan.
-    inttime : int, optional
-        integration time at each angle in seconds. The default is 40.
-    caltime : int, optional
-        integration time for the internal calibration before each scan [s].
-        The default is 40.
-    idletime : float, optional
-        time duration for moving the pointing to the respective scan position.
-        The default is 1.4.
-
-    Returns
-    -------
-    time : np.array of datetime.datetime objects
-        list of timestamps for each observed angle
-
-    """
-
-    time = np.empty(n_angles, dtype=np.dtype(dt.datetime))
-    time[0] = starttime + dt.timedelta(seconds=caltime)
-    for n in range(1, n_angles):
-        time[n] = time[n - 1] + dt.timedelta(seconds=caltime + idletime)
-
-    return time
-
-
 def flag_int2bits(flag_integer):
     """transform an integer value to bits. Input can be time series or scalars"""
     # format input
