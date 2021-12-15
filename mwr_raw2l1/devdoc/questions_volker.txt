@@ -1,0 +1,11 @@
+General:
+- check program flow and what is too much procedural of functional or unstructured
+
+Specific to programming:
+- having a Measurement class without methods but functions in measurement_helpers
+   - when making these methods of class instance I cannot call them anymore with classmethod
+- idem for scan_to_timeseries. attached to Measurement or as function in measurement_helpers
+- split measurement_helpers to two files, one for generating dataset, one for transforming scan? how to name/organise?
+
+Specific to organisation:
+- why requirements.txt and setup.py along with pyproject.toml (in ELDAmwl)
