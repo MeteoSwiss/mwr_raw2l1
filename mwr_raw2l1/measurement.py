@@ -37,7 +37,7 @@ class Measurement(object):
         # merge BRT and BLB data to time series of brightness temperatures
         out.data = all_data['brt']
         # TODO: merge BRT and BLB as sketched in next lines
-        blb_ts = scan_to_timeseries_from_aux(all_data['blb'], all_data['brt'], all_data['hkd'])
+        blb_ts = scan_to_timeseries_from_aux(all_data['blb'], all_data['hkd'], all_data['brt'])
         # out.data = out.data.merge(blb_ts, join='outer')  # hope merge works, but don't forget to test
 
         # bring other data to time grid of brightness temperatures
