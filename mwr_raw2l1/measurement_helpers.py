@@ -1,4 +1,5 @@
 import datetime as dt
+
 import numpy as np
 import xarray as xr
 
@@ -28,11 +29,11 @@ def make_dataset(data, dims, vars, vars_opt=None):
     for dim in dims:
         spec[dim] = dict(dims=dim, data=data[dim])
 
-    # add optional variables as NaN-series to data
+    # add optional variables as NaN-series to data if not in input data
     for varo in vars_opt:
         if varo not in data:
             data[varo] = np.full_like(data[dims[0]], np.nan)
-            # TODO: add logger here to give info that varo is not in data
+            logger.info('Optional variable {} not found in input data. Will create a all-NaN placeholder'.format(varo))
 
     # add vars to spec
     all_vars = vars + vars_opt
@@ -81,6 +82,9 @@ def rpg_to_datasets(data, dims, vars, vars_opt):
     return out
 
 
+########################################################################################################################
+# scan transformations                                                                                                 #
+########################################################################################################################
 def scan_endtime_to_time(endtime, n_angles, time_per_angle=17):
     """
     RPG scan files only have one timestamp per scan. This function returns the approximate timestamp for the observation

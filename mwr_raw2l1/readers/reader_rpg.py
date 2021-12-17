@@ -3,17 +3,19 @@ readers for the different binary files from RPG radiometers (HATPRO, TEMPRO or H
 """
 import glob
 import os
-import warnings
 
 import numpy as np
+
 from mwr_raw2l1.errors import WrongFileType, WrongNumberOfChannels
+from mwr_raw2l1.log import logger
 from mwr_raw2l1.readers.base_reader_rpg import BaseReader
 from mwr_raw2l1.readers.reader_rpg_helpers import (interpret_hkd_contents_code,
                                                    interpret_met_auxsens_code,
                                                    interpret_scanflag,
                                                    interpret_statusflag)
 
-N_FREQ_DEFAULT = 14    # TODO: check how RPG deals with files from TEMPRO or HUMPRO how would have different n_freq. Other filecodes? Could also get frequency info from BRT files but ugly dependency.
+N_FREQ_DEFAULT = 14    # needed before as freq used before read-in in old BRT file format
+# TODO: check how RPG deals with files from TEMPRO or HUMPRO how would have different n_freq. Other filecodes?
 
 
 class BRT(BaseReader):
@@ -281,7 +283,7 @@ class HKD(BaseReader):
             encodings_bin.append(dict(name='T_amb_1', type='f', shape=(1,)))
             encodings_bin.append(dict(name='T_amb_2', type='f', shape=(1,)))
             encodings_bin.append(dict(name='T_receiver_kband', type='f', shape=(1,)))
-            encodings_bin.append(dict(name='T_receiver_vband', type='f', shape=(1,)))  # TODO: Ask Volker if/how I could use inheritance for another instrument which has no V-Band ==> in Funktion auslagern. Eine macht was, andere nichts
+            encodings_bin.append(dict(name='T_receiver_vband', type='f', shape=(1,)))
         if self.data['has_stability']:
             encodings_bin.append(dict(name='Tstab_kband', type='f', shape=(1,)))
             encodings_bin.append(dict(name='Tstab_vband', type='f', shape=(1,)))
@@ -300,9 +302,8 @@ class HKD(BaseReader):
 
 
 # TODO: Consider transforming to SI units. IRT/IRT_min/IRT_max -> K; wavelength -> m; frequency -> Hz. could be done in interpret_raw_data of BaseReader class
-###############################################################################
-# main
-# ------------------------------------------------------------------------------
+
+
 def read_all(dir_in, basename, time_start=None, time_end=None):
     """read all L1-related files in dir_in corresponding to basename (full identifier including station and inst id)"""
     # TODO: ask Volker. ok to have this function def besides reader classes. or should it also become class?
@@ -323,7 +324,7 @@ def read_all(dir_in, basename, time_start=None, time_end=None):
             # TODO: decide what to do with processed files. Leave where they are, delete or move to other folder
         else:
             # TODO: decide what to do with unprocessable files. Leave where they are, delete or move to other folder
-            warnings.warn('Cannot read {} as no reader is specified for files with extension "{}"'.format(file, ext))
+            logger.warn('Cannot read {} as no reader is specified for files with extension "{}"'.format(file, ext))
 
     return all_data
 
@@ -354,7 +355,8 @@ def main():
     # irt_old = read_irt(filename_noext + '.IRT')
     # met_old = read_met(filename_noext + '.MET')
     # hkd_old = read_hkd(filename_noext + '.HKD')
-    # pass
+
+    del(brt, blb, irt, met, hkd)  # to avoid warning for unused variables by pylint
 
 
 if __name__ == '__main__':

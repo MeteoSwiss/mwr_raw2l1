@@ -4,6 +4,7 @@ helper functions for the module reader_rpg
 import datetime as dt
 
 import numpy as np
+
 from mwr_raw2l1.errors import UnknownFlagValue, WrongInputFormat
 
 
@@ -109,12 +110,12 @@ def interpret_met_auxsens_code(auxsenscode):
     auxsensbits = np.unpackbits(auxsenscode_int8, bitorder='little')
     if auxsensbits is None:
         out = {'has_windspeed': 0,
-              'has_winddir': 0,
-              'has_rainrate': 0}
+               'has_winddir': 0,
+               'has_rainrate': 0}
     else:
         out = {'has_windspeed': auxsensbits[0],
-              'has_winddir': auxsensbits[1],
-              'has_rainrate': auxsensbits[2]}
+               'has_winddir': auxsensbits[1],
+               'has_rainrate': auxsensbits[2]}
 
     return out
 

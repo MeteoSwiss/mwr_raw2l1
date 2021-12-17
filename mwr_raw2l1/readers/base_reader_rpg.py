@@ -1,6 +1,7 @@
 import struct
 
 import numpy as np
+
 from mwr_raw2l1.errors import (FileTooLong, FileTooShort, TimeInputMissing,
                                TimerefError, UnknownFileType)
 from mwr_raw2l1.log import logger
@@ -30,6 +31,8 @@ FILETYPE_CONFS = {  # assign metadata to each known filecode
     # HKD files
     837854832: dict(type='hkd'),
 }
+
+
 class BaseReader(object):
     def __init__(self, filename, accept_localtime=False):
         self.filename = filename

@@ -5,9 +5,10 @@ Create E-PROFILE NetCDF from input dictionary or xarray Dataset
 from copy import deepcopy
 
 import netCDF4 as nc
-import numpy as np
 import xarray as xr
+
 from mwr_raw2l1.errors import OutputDimensionError
+from mwr_raw2l1.log import logger
 from mwr_raw2l1.utils.file_utils import get_conf
 
 
@@ -43,7 +44,7 @@ def write_from_dict(data, filename, conf_file, format='NETCDF4'):
                 ncvar[:] = nc.date2num(data[var], specs['attributes']['units'])
             else:
                 ncvar[:] = data[var]
-    print('data written to {}'.format(filename))
+    logger.info('data written to {}'.format(filename))
 
 
 def write_from_xarray(data_in, filename, conf_file, format='NETCDF4', copy_data=False):
@@ -117,7 +118,7 @@ def write_from_xarray(data_in, filename, conf_file, format='NETCDF4', copy_data=
     data.encoding['unlimited_dims'] = renamed_unlim_dim
 
     data.to_netcdf(filename, format=format)
-    print('data written to ' + filename)
+    logger.info('data written to ' + filename)
 
 
 def write_eprofile_netcdf_hardcode(filename, data):
@@ -133,7 +134,7 @@ def write_eprofile_netcdf_hardcode(filename, data):
         time={'dim': ('time',), 'type': 'f8', '_FillValue': None, 'optional': False},
         frequency={'dim': ('frequency',), 'type': 'f4', '_FillValue': -999., 'optional': False},
         Tb={'dim': ('time', 'frequency'), 'type': 'f4', '_FillValue': -999., 'optional': False},
-        dummyvar={'dim': ('time',), 'type': 'f4', '_FillValue': -999., 'optional': True}
+        dummyvar={'dim': ('time',), 'type': 'f4', '_FillValue': -999., 'optional': True},
     )
     ncvaratt = dict(
         time={'standard_name': 'time',
@@ -146,7 +147,7 @@ def write_eprofile_netcdf_hardcode(filename, data):
         # TODO: check whether time bounds is correct here or whether it should be removed
         Tb={'standard_name': 'brightness_temperature',
             'units': 'K'},
-        dummyvar={'comment': 'this is just a dummyvar for testing'}
+        dummyvar={'comment': 'this is just a dummyvar for testing'},
     )
 
     # writer
@@ -156,8 +157,8 @@ def write_eprofile_netcdf_hardcode(filename, data):
             ncid.createDimension(dimact, size=None)
 
         for dimact in ncdims_fixed:
-            print(dimact)
-            print(np.shape(data[dimact]))
+            # print(dimact)
+            # print(np.shape(data[dimact]))
             ncid.createDimension(dimact, size=len(data[dimact]))
 
         for var, specs in ncvars.items():
@@ -175,4 +176,3 @@ def write_eprofile_netcdf_hardcode(filename, data):
                 ncvar[:] = nc.date2num(data[var], ncdateformat)
             else:
                 ncvar[:] = data[var]
-
