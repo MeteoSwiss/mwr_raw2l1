@@ -1,5 +1,5 @@
-from mwr_raw2l1.measurement_helpers import (rpg_to_datasets,
-                                            scan_to_timeseries_from_aux)
+from mwr_raw2l1.measurement.measurement_helpers import rpg_to_datasets
+from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries_from_aux
 
 
 class Measurement(object):
@@ -72,6 +72,6 @@ class Measurement(object):
 if __name__ == '__main__':
     from mwr_raw2l1.readers.reader_rpg import read_all
 
-    all_data = read_all('data/rpg/', 'C00-V859')
+    all_data = read_all('../data/rpg/', 'C00-V859')
     meas = Measurement.from_rpg(all_data)
     pass

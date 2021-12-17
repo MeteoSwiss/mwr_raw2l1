@@ -6,8 +6,7 @@ import numpy as np
 from mwr_raw2l1.readers.reader_rpg_helpers import (interpret_angle,
                                                    interpret_coord,
                                                    interpret_time)
-from mwr_raw2l1.measurement_helpers import scan_endtime_to_time
-from mwr_raw2l1.utils.file_utils import pickle_dump
+from mwr_raw2l1.measurement.scan_transform import scan_endtime_to_time
 
 missing_float = -999.
 missing_int = -9
