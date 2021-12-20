@@ -305,10 +305,18 @@ class HKD(BaseReader):
 
 
 def read_all(dir_in, basename, time_start=None, time_end=None):
-    """read all L1-related files in dir_in corresponding to basename (full identifier including station and inst id)"""
-    # TODO: ask Volker. ok to have this function def besides reader classes. or should it also become class?
+    """read all L1-related files in dir_in corresponding to basename
 
-    # assign reader (value) to lowercase file extension (key)
+    Args:
+        dir_in: directory where files of the respective instrument are located
+        basename: full identifier including station and inst id
+        time_start/time_end: To be implemented: Filter to just read files between these times
+    Returns:
+        dictionary with keys brt, blb, irt, met, hkd containing list with all read-in class instances for the
+        corresponding file extension matching basename and the timing requirement.
+        """
+
+    # assign reader (value) to lowercase file extension (key). All keys will have an entry in the output dictionary
     reader_for_ext = {'brt': BRT, 'blb': BLB, 'irt': IRT, 'met': MET, 'hkd': HKD}
 
     files_all_times = glob.glob(os.path.join(dir_in, basename + '*'))

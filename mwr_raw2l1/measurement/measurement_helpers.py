@@ -1,39 +1,63 @@
 import numpy as np
 import xarray as xr
 
-from mwr_raw2l1.errors import DimensionError
+from mwr_raw2l1.errors import DimensionError, MissingInputArgument
 from mwr_raw2l1.log import logger
+from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries_from_aux
 
 
-def make_dataset(data, dims, vars, vars_opt=None):
+def make_dataset(data, dims, vars, vars_opt=None, time_vector=None):
     """generate a xarray Dataset from 'data' using the dimensions and variables specified
 
     Args:
-        data: dictionary containing the data
+        data: dictionary containing the data. If set to None or empty a placeholder dataset with all-NaN time series
+            (except variable IRT, which is 2d) is returned. If set to None or empty time_vector must be specified.
         dims: list of keys that are a dimension (must correspond to the order of dimensions in data)
         vars: list of keys that are data variables (dimensions don't need to be specified again)
-        vars_opt: list of keys that are optional data variables (added as 1-dim series of NaN if missing in 'data')
+        vars_opt (optional): list of keys that are optional data variables (added as 1-d series of NaN if not in 'data')
+        time_vector: numpy array of datetime64 to take as time dimension for generating all-NaN datasets. This argument
+            will be ignored as long as data is not None or empty
     Returns:
         xarray.Dataset
     """
 
+    # config for empty datasets or variables
+    missing_val = np.nan
+    multidim_vars = {'IRT': 2, 'Tb': 2, 'Tb_scan': 3}  # variables that are not timeseries (key: varname; value: ndims)
+
     # init
-    spec = {}
     if vars_opt is None:
         vars_opt = []
+    all_vars = vars + vars_opt
 
-    # add dimensions to spec
-    for dim in dims:
-        spec[dim] = dict(dims=dim, data=data[dim])
+    # prepare for empty variables
+    ndims_per_var = {var: 1 for var in dims + all_vars}
+    for var, nd in multidim_vars.items():  # can grow larger than keys that  shall be in dataset, only accessed by key
+        ndims_per_var[var] = nd
+
+    # prepare all NaN-variables for case of data==None or empty
+    if data is None or not data:
+        if time_vector is None:
+            raise MissingInputArgument('if data is empty or None the input argument time_vector must be specified')
+        data = {'time': time_vector}  # start overwriting empty data variable
+        for dim in dims[1:]:  # assume first dimension to be 'time'
+            data[dim] = np.array([missing_val])  # other dimensions all one-element
+        for var in all_vars:
+            shape_act = [len(data[dims[k]]) for k in range(ndims_per_var[var])]
+            data[var] = np.full(shape_act, missing_val)
 
     # add optional variables as NaN-series to data if not in input data
     for varo in vars_opt:
         if varo not in data:
-            data[varo] = np.full_like(data[dims[0]], np.nan)
+            shape_act = [len(data[dims[k]]) for k in range(ndims_per_var[varo])]
+            data[varo] = np.full(shape_act, missing_val)
             logger.info('Optional variable {} not found in input data. Will create a all-NaN placeholder'.format(varo))
 
+    # collect specifications and data for generating xarray Dataset from dict
+    spec = {}
+    for dim in dims:
+        spec[dim] = dict(dims=dim, data=data[dim])
     # add vars to spec
-    all_vars = vars + vars_opt
     for var in all_vars:
         nd = np.ndim(data[var])
         if nd > len(dims):
@@ -67,13 +91,37 @@ def rpg_to_datasets(data, dims, vars, vars_opt):
         vars: list of keys that are data variables (dimensions don't need to be specified again)
         vars_opt: list of keys that are optional data variables (added as 1-dim series of NaN if missing in 'data')
     Returns:
-        dictionary of xarray.Dataset
+        dictionary of xarray.Dataset's. It contains one item for each key in data
     """
     out = {}
     for src, data_series in data.items():
         data_act = []
-        for dat in data_series:  # make a xarray dataset from the data dict in each class instance
+        if not data_series:  # fill in NaN variables if meas source does not exist (loop over empty data_series skipped)
+            logger.info('No {}-data available. Will generate a dataset fill values only for {}'.format(src, src))
+            min_time = min([x.data['time'][0] for x in data['hkd']])  # class instances in data['hkd'] can be unordered
+            max_time = max([x.data['time'][-1] for x in data['hkd']])  # class instances in data['hkd'] can be unordered
+            data_act.append(make_dataset(None, dims[src], vars[src], vars_opt[src], time_vector=[min_time, max_time]))
+        for dat in data_series:  # make a xarray dataset from the data dict in each class instance of the list
             data_act.append(make_dataset(dat.data, dims[src], vars[src], vars_opt[src]))
         out[src] = xr.concat(data_act, dim='time')  # merge all datasets of the same type
         out[src] = drop_duplicates(out[src], dim='time')  # remove duplicate measurements
+    return out
+
+
+def rpg_merge_brt_blb(all_data):
+    """merge brt (zenith MWR) and blb (scanning MWR) observations from an RPG instrument
+
+    Args:
+        all_data: dictionary of xarray.Dataset's (output of rpg_to_datasets)
+    """
+    if 'brt' in all_data:
+        out = all_data['brt']
+    if 'blb' in all_data:
+        if 'brt' in all_data:
+            # TODO: merge BRT and BLB as sketched in next lines after finishing transform to scan
+            blb_ts = scan_to_timeseries_from_aux(all_data['blb'], hkd=all_data['hkd'], brt=all_data['brt'])
+            # out = out.data.merge(blb_ts, join='outer')  # hope merge works, but don't forget to test
+        else:
+            out = scan_to_timeseries_from_aux(all_data['blb'], hkd=all_data['hkd'])
+
     return out

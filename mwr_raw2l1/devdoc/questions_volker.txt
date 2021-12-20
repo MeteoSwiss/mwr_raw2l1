@@ -7,6 +7,8 @@ Specific to programming:
 - idem for scan_to_timeseries. attached to Measurement or as function in measurement_helpers
 - split measurement_helpers to two files, one for generating dataset, one for transforming scan? how to name/organise?
 - Measurement with derived classes instead of classmethod
+- measurement_helpers.make_dataset: code copy with shape_act = ... and following line (ca 44-45 and 52-53)
+- read_all function besides reader classes for RPG. does this make sense here?
 
 Specific to organisation:
 - why requirements.txt and setup.py along with pyproject.toml (in ELDAmwl)

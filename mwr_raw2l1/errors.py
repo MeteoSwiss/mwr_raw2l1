@@ -8,7 +8,7 @@ class MWRFileError(MWRError):
 
 
 class MWRInputError(MWRError):
-    """Base exception for calling of MWR reader/helper function"""
+    """Base exception for calling of MWR reader/helper function or generating measurement from it"""
 
 
 class MWROutputError(MWRError):
@@ -44,6 +44,13 @@ class UnknownFlagValue(MWRInputError):
 class TimeInputMissing(MWRInputError):
     """Raised if time is missing in an input file but is required by the reader"""
 
+
+class MissingDataSource(MWRInputError):
+    """Raised if a mandatory data source for creation of Measurement is missing in input"""
+
+
+class MissingInputArgument(MWRInputError):
+    """Raised if a required input argument to a function or class initiation is missing"""
 
 # --------------------------
 class OutputDimensionError(MWROutputError):

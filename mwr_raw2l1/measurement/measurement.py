@@ -1,7 +1,7 @@
 import numpy as np
 
-from mwr_raw2l1.measurement.measurement_helpers import rpg_to_datasets
-from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries_from_aux
+from mwr_raw2l1.errors import MissingDataSource
+from mwr_raw2l1.measurement.measurement_helpers import rpg_to_datasets, rpg_merge_brt_blb
 from mwr_raw2l1.utils.file_utils import abs_file_path
 
 
@@ -16,6 +16,7 @@ class Measurement(object):
         Args:
             readin_data: dictionary with list of instances for each RPG read-in class (keys correspond to filetype)
         """
+
         # dimensions and variable names for usage with make_dataset
         dims = {'brt': ['time', 'frequency'],
                 'blb': ['time', 'frequency', 'scan_ele'],
@@ -36,32 +37,34 @@ class Measurement(object):
         # TODO : check what other hkd variables are needed for output statusflag and monitoring!!!
         scanflag_values = {'brt': 0, 'blb': 1}  # for generating a scan flag indicating whether scanning or zenith obs
 
-        all_data = rpg_to_datasets(readin_data, dims, vars, vars_opt)
-        # TODO: account (in rpg_to_datasets and here) for fact that one of brt/blb plus irt and met might be missing
+        # require mandatory data sources
+        if 'brt' not in readin_data and 'blb' not in readin_data:
+            raise MissingDataSource('At least one file of BRT (zenith MWR) or BLB (scanning MWR) must be present')
+        if 'hkd' not in readin_data:
+            raise MissingDataSource('The housekeeping file (HKD) must be present')
 
-        # add scanflag
+        # construct datasets
+        all_data = rpg_to_datasets(readin_data, dims, vars, vars_opt)
+
+        # add scanflag and merge data from MWR (BRT and BLB)
         for src, flagval in scanflag_values.items():
-            all_data[src]['scaflag'] = ('time', flagval * np.ones(np.shape(all_data[src].time), dtype='u1'))
+            if src in all_data:
+                all_data[src]['scaflag'] = ('time', flagval * np.ones(np.shape(all_data[src].time), dtype='u1'))
+        mwr_data = rpg_merge_brt_blb(all_data)
 
         # init measurement class and merge BRT and BLB data to time series of brightness temperatures
         out = cls()
-        out.data = all_data['brt']
-        # TODO: merge BRT and BLB as sketched in next lines after finishing transform to scan
-        blb_ts = scan_to_timeseries_from_aux(all_data['blb'], hkd=all_data['hkd'], brt=all_data['brt'])
-        # out.data = out.data.merge(blb_ts, join='outer')  # hope merge works, but don't forget to test
+        out.data = mwr_data
 
         # bring other data to time grid of brightness temperatures
         for src in readin_data:
-            # BRT and BLB data already treated
-            if src in ['brt', 'blb']:
+            if src in ['brt', 'blb']:  # BRT and BLB data already treated
                 continue
-
             # to make sure no variable is overwritten rename duplicates by suffixing it with its source
             for var in all_data[src]:
                 if var in out.data:
                     varname_map = {var: var + '_' + src}
                     all_data[src] = all_data[src].rename(varname_map)
-
             # merge into out.data
             out.data = out.data.merge(all_data[src], join='left')
 
@@ -75,10 +78,17 @@ class Measurement(object):
     def from_attex(cls, read_in_data):
         pass
 
+    def encode_statusflag(self):
+        pass
+
+    def run(self):
+        self.encode_statusflag()
+
 
 if __name__ == '__main__':
     from mwr_raw2l1.readers.reader_rpg import read_all
 
     all_data = read_all(abs_file_path('mwr_raw2l1/data/rpg/'), 'C00-V859')
     meas = Measurement.from_rpg(all_data)
+    meas.run()
     pass
