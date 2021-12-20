@@ -1,0 +1,11 @@
+This document lists the minimal requirements an instrument must have to participate in E-PROIFLE
+
+General
+-------
+- send all required files with same timing to one directory on MetOffice FTP
+
+RPG
+---
+- binary level 1 files
+- for each time step the HKD file plus either BRT or BLB or both must be provided
+- IRT and MET files are optional
