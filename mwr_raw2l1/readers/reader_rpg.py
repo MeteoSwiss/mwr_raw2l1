@@ -147,10 +147,10 @@ class BLB(BaseReader):
         """transform scanobs 3D array to time series of spectra and temperature"""
 
         # extract ambient temperature (ambient temperature equal for each frequency, one per scan)
-        self.data['T_per_scan'] = self.data['scanobs'][:, 0, -1]
+        self.data['T'] = self.data['scanobs'][:, 0, -1]
 
         # extract spectra of brightness temperatures for each ele in dimension (time, freq, ele)
-        self.data['Tb_scan'] = self.data['scanobs'][:, :, :-1]
+        self.data['Tb'] = self.data['scanobs'][:, :, :-1]
 
 
 class IRT(BaseReader):

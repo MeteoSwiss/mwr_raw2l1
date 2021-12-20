@@ -105,13 +105,14 @@ def scan_to_timeseries_from_aux(blb, *args, **kwargs):
     # n_ele = data['n_ele']
     # n_scans = data['n_scans']
     #
-    # tb_tmp = data['Tb_scan'].swapaxes(0, 1)  # swap dim to (freq, time, ele)
+    # tb_tmp = data['Tb'].swapaxes(0, 1)  # swap dim to (freq, time, ele)
     # data['Tb'] = tb_tmp.reshape(n_freq, n_scans * n_ele, order='C').transpose()
     #
-    # data['T'] = data['T_per_scan'].repeat(n_ele)  # repeat to have one T value for each new time
+    # data['T'] = data['T'].repeat(n_ele)  # repeat to have one T value for each new time
     #
     # # transform single vector of elevations to time series of elevations
     # data['ele'] = np.tile(data['scan_ele'], data['n_scans'])
+
 
     return blb
 
@@ -127,10 +128,10 @@ def scan_to_timeseries_from_dict(data, *args, **kwargs):
     n_ele = data['n_ele']
     n_scans = data['n_scans']
 
-    tb_tmp = data['Tb_scan'].swapaxes(0, 1)  # swap dim to (freq, time, ele)
+    tb_tmp = data['Tb'].swapaxes(0, 1)  # swap dim to (freq, time, ele)
     data['Tb'] = tb_tmp.reshape(n_freq, n_scans * n_ele, order='C').transpose()
 
-    data['T'] = data['T_per_scan'].repeat(n_ele)  # repeat to have one T value for each new time
+    data['T'] = data['T'].repeat(n_ele)  # repeat to have one T value for each new time
 
     # transform single vector of elevations to time series of elevations
     data['ele'] = np.tile(data['scan_ele'], data['n_scans'])

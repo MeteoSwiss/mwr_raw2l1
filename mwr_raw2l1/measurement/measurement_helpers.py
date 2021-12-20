@@ -22,7 +22,7 @@ def make_dataset(data, dims, vars, vars_opt=None, time_vector=None):
 
     # config for empty datasets or variables
     missing_val = np.nan
-    multidim_vars = {'IRT': 2, 'Tb': 2, 'Tb_scan': 3}  # variables that are not timeseries (key: varname; value: ndims)
+    multidim_vars = {'IRT': 2, 'Tb': 2, 'Tb': 3}  # variables that are not timeseries (key: varname; value: ndims)
 
     # init
     if vars_opt is None:

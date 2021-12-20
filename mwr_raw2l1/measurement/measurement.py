@@ -24,7 +24,7 @@ class Measurement(object):
                 'met': ['time'],
                 'hkd': ['time']}
         vars = {'brt': ['Tb', 'rainflag', 'ele', 'azi'],
-                'blb': ['Tb_scan', 'T_per_scan', 'rainflag', 'scan_quadrant'],
+                'blb': ['Tb', 'T', 'rainflag', 'scan_quadrant'],
                 'irt': ['IRT', 'rainflag', 'ele', 'azi'],
                 'met': ['p', 'T', 'RH'],
                 'hkd': ['alarm']}
