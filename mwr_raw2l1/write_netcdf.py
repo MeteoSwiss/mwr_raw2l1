@@ -71,7 +71,7 @@ def write_from_xarray(data_in, filename, conf_file, format='NETCDF4', copy_data=
         data = data_in
 
     # dimensions
-    dims = conf['dimensions']['unlimited'] + conf['dimensions']['fixed']
+    config_dims = conf['dimensions']['unlimited'] + conf['dimensions']['fixed']
     data.encoding.update(unlimited_dims=conf['dimensions']['unlimited'])  # acts during to_netcdf (default: fixed)
 
     for var, specs in conf['variables'].items():
@@ -92,7 +92,7 @@ def write_from_xarray(data_in, filename, conf_file, format='NETCDF4', copy_data=
         data[var].encoding.update(dtype=specs['type'])
 
         # set fill value
-        if var in dims:
+        if var in config_dims:
             data[var].encoding.update(_FillValue=enc_no_fillvalue)  # no fill value for dimensions (CF-compliance)
         else:
             data[var] = data[var].fillna(specs['_FillValue'])
@@ -104,14 +104,19 @@ def write_from_xarray(data_in, filename, conf_file, format='NETCDF4', copy_data=
         encs[att] = data['time'].attrs.pop(att)
     data['time'].encoding.update(encs)
 
-    # remove undesired variables from data (all that are not in the config file)
+    # remove undesired variables and dimensions from data (all that are not in the config file)
     vars_to_drop = []
-    for var in list(data.keys()):
+    for var in data.variables:
         if var not in conf['variables']:
             vars_to_drop.append(var)
     data = data.drop_vars(vars_to_drop)
+    dims_to_drop = []
+    for var in data.dims:
+        if var not in config_dims:
+            dims_to_drop.append(var)
+    data = data.drop_dims(dims_to_drop)
 
-    # set variables names to the ones wished for output (CARE: must be last operation before save!!!)
+    # set variable and dimension names to the ones wished for output (CARE: must be last operation before save!!!)
     varname_map = {var: specs['name'] for var, specs in conf['variables'].items()}
     data = data.rename(varname_map)
     renamed_unlim_dim = [varname_map[dim] for dim in data.encoding['unlimited_dims']]
