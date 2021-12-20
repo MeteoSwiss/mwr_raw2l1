@@ -12,7 +12,8 @@ class TestReader(unittest.TestCase):
     """integration tests for rpg_reader.py"""
 
     def test_read_brt(self):
-        filenames = ['C00-V859_190803.BRT', 'C00-V859_190804.BRT']  # TODO: instead of C00-V859_190804 add files with other filecodes (structver)
+        filenames = ['C00-V859_190803.BRT', 'C00-V859_190804.BRT']
+        # TODO: instead of C00-V859_190804 add files with other filecodes (structver)
         self.reader_call_series(BRT, filenames)
 
     def test_read_blb(self):

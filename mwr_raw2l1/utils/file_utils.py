@@ -2,8 +2,9 @@ import os
 import pickle
 from pathlib import Path
 
-import mwr_raw2l1
 import yaml
+
+import mwr_raw2l1
 
 
 def abs_file_path(*file_path):

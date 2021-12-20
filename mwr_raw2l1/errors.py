@@ -52,6 +52,7 @@ class MissingDataSource(MWRInputError):
 class MissingInputArgument(MWRInputError):
     """Raised if a required input argument to a function or class initiation is missing"""
 
+
 # --------------------------
 class OutputDimensionError(MWROutputError):
     """Raised if requested output dimensions do not match data"""

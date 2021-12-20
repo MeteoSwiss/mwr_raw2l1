@@ -1,7 +1,7 @@
 import numpy as np
 
 from mwr_raw2l1.errors import MissingDataSource
-from mwr_raw2l1.measurement.measurement_helpers import rpg_to_datasets, rpg_merge_brt_blb
+from mwr_raw2l1.measurement.rpg_helpers import merge_brt_blb, to_datasets
 from mwr_raw2l1.utils.file_utils import abs_file_path
 
 
@@ -44,13 +44,13 @@ class Measurement(object):
             raise MissingDataSource('The housekeeping file (HKD) must be present')
 
         # construct datasets
-        all_data = rpg_to_datasets(readin_data, dims, vars, vars_opt)
+        all_data = to_datasets(readin_data, dims, vars, vars_opt)
 
         # add scanflag and merge data from MWR (BRT and BLB)
         for src, flagval in scanflag_values.items():
             if src in all_data:
                 all_data[src]['scaflag'] = ('time', flagval * np.ones(np.shape(all_data[src].time), dtype='u1'))
-        mwr_data = rpg_merge_brt_blb(all_data)
+        mwr_data = merge_brt_blb(all_data)
 
         # init measurement class and merge BRT and BLB data to time series of brightness temperatures
         out = cls()

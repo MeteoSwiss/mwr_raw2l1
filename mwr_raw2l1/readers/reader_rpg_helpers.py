@@ -73,7 +73,8 @@ def interpret_angle(x, version):
     return ele, azi
 
 
-def interpret_coord(x, version=2):  # TODO: Ask Harald how to find out which coord version used. In manual 06/2020 version=1 is described
+def interpret_coord(x, version=2):
+    # TODO: Ask Harald how to find out which coord version used. In manual 06/2020 version=1 is described
     """
     Translate coordinate encoding from RPG to degrees with decimal digits.
 

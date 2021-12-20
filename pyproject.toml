@@ -33,3 +33,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 rpg_reader = "mwr_raw2l1.reader_rpg:main"
+
+[tool.isort]
+line_length = 120

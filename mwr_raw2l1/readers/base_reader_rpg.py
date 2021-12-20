@@ -2,12 +2,9 @@ import struct
 
 import numpy as np
 
-from mwr_raw2l1.errors import (FileTooLong, FileTooShort, TimeInputMissing,
-                               TimerefError, UnknownFileType)
+from mwr_raw2l1.errors import FileTooLong, FileTooShort, TimeInputMissing, TimerefError, UnknownFileType
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.readers.reader_rpg_helpers import (interpret_angle,
-                                                   interpret_coord,
-                                                   interpret_time)
+from mwr_raw2l1.readers.reader_rpg_helpers import interpret_angle, interpret_coord, interpret_time
 from mwr_raw2l1.utils.file_utils import get_binary
 
 BYTE_ORDER = '<'  # byte order in all RPG files assumed little-endian  #TODO: ask Harald whether this is true (PC/Unix)

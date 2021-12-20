@@ -131,7 +131,8 @@ def write_eprofile_netcdf_hardcode(filename, data):
 
     # configuration
     ncformat = 'NETCDF4'
-    ncdateformat = 'seconds since 1970-01-01-00:00:00'  # TODO: Transform to DAYS since ... for consistency with other E-PROFILE data formats
+    ncdateformat = 'seconds since 1970-01-01-00:00:00'
+    # TODO: Consider transforming to DAYS since ... for consistency with other E-PROFILE data formats
 
     ncdims_unlimited = ['time']
     ncdims_fixed = ['frequency']

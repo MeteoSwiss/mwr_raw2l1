@@ -9,10 +9,8 @@ import numpy as np
 from mwr_raw2l1.errors import WrongFileType, WrongNumberOfChannels
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.readers.base_reader_rpg import BaseReader
-from mwr_raw2l1.readers.reader_rpg_helpers import (interpret_hkd_contents_code,
-                                                   interpret_met_auxsens_code,
-                                                   interpret_scanflag,
-                                                   interpret_statusflag)
+from mwr_raw2l1.readers.reader_rpg_helpers import (interpret_hkd_contents_code, interpret_met_auxsens_code,
+                                                   interpret_scanflag, interpret_statusflag)
 
 N_FREQ_DEFAULT = 14    # needed before as freq used before read-in in old BRT file format
 # TODO: check how RPG deals with files from TEMPRO or HUMPRO how would have different n_freq. Other filecodes?
@@ -301,7 +299,8 @@ class HKD(BaseReader):
         self.data.update(interpret_statusflag(self.data['statusflag']))
 
 
-# TODO: Consider transforming to SI units. IRT/IRT_min/IRT_max -> K; wavelength -> m; frequency -> Hz. could be done in interpret_raw_data of BaseReader class
+# TODO: Consider transforming to SI units. IRT/IRT_min/IRT_max -> K; wavelength -> m; frequency -> Hz.
+#  could be done in interpret_raw_data of BaseReader class
 
 
 def read_all(dir_in, basename, time_start=None, time_end=None):
@@ -341,7 +340,7 @@ def main():
 
     base_filename = 'C00-V859_190803'
 
-    filename_noext = os.path.splitext('data/rpg/' + base_filename)[0]  # join path and make sure that filename has no extension
+    filename_noext = os.path.splitext('data/rpg/' + base_filename)[0]  # join path and make sure filename has no ext
 
     brt = BRT(filename_noext + '.BRT')
     blb = BLB(filename_noext + '.BLB')
