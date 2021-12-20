@@ -72,7 +72,6 @@ def scantime_from_aux(blb, hkd=None, brt=None):
         else:
             logger.warning(
                 'Cannot infer scan duration as first scan might extend to previous period. Using default values')
-
     elif brt is not None:
         # less accurate than hkd because things happen before scan starts (e.g. ambload obs).
         # Assume after last hkd measure it takes 2x time_per_angle before first scanobs ends.
@@ -87,7 +86,7 @@ def scantime_from_aux(blb, hkd=None, brt=None):
     return scan_endtime_to_time(**endtime2time_params)
 
 
-def scan_to_timeseries_from_aux(blb, *args, **kwargs):
+def scan_to_timeseries(blb, *args, **kwargs):
     """Transform scanning datasete to time series of Tb spectra and temperatures flattening the elevation dimension.
 
     The time vector of each elevation in scan comes from scan_endtime_to_time inferring scan duration from aux data
@@ -98,27 +97,49 @@ def scan_to_timeseries_from_aux(blb, *args, **kwargs):
     Returns:
         blb with elevation-dimension transformed to time series
     """
-    time_all_angles = scantime_from_aux(blb, *args, **kwargs)
-    # TODO: use the following code to reformat the dimensions
-    #
-    # n_freq = data['n_freq']
-    # n_ele = data['n_ele']
-    # n_scans = data['n_scans']
-    #
-    # tb_tmp = data['Tb'].swapaxes(0, 1)  # swap dim to (freq, time, ele)
-    # data['Tb'] = tb_tmp.reshape(n_freq, n_scans * n_ele, order='C').transpose()
-    #
-    # data['T'] = data['T'].repeat(n_ele)  # repeat to have one T value for each new time
-    #
-    # # transform single vector of elevations to time series of elevations
-    # data['ele'] = np.tile(data['scan_ele'], data['n_scans'])
 
+    time_dim = 'time'
+    ele_dim = 'scan_ele'
+    n_ele = len(blb[ele_dim])
+    n_scans = len(blb[time_dim])
+
+    # transform time vector and assign as temporary dimension
+    time_all_angles = scantime_from_aux(blb, *args, **kwargs)
+    blb = blb.assign_coords({'time_tmp': time_all_angles})
+
+    # reshape data variables to correct dimension
+    for var in blb.data_vars:
+        var_tmp = blb[var].values
+        if len(blb[var].dims) == 3 and blb[var].dims[-1] == ele_dim and blb[var].dims[0] == time_dim:  # 3 dimensional
+            var_tmp = var_tmp.swapaxes(0, 1)  # swap dim to (xxx, time, ele) where xxx is usually frequency
+            var_tmp = var_tmp.reshape(-1, n_scans*n_ele, order='C').transpose()
+            dims_act = ('time_tmp', blb[var].dims[1])
+        elif len(blb[var].dims) == 1 and blb[var].dims[0] == time_dim:
+            var_tmp = var_tmp.repeat(n_ele)
+            dims_act = ('time_tmp',)
+        else:
+            raise NotImplementedError('transformation only implemented for 1d timeseries and 3d variables with'
+                                      + ' time as first and elevation as third dimension')
+        blb = blb.drop_vars(var)  # remove original variable from dataset
+        blb = blb.assign({var: (dims_act, var_tmp)})  # assign reshaped variable to dataset
+
+    # reshape elevation remove as dimension and assign as variable
+    ele_tmp = blb[ele_dim].values
+    ele_tmp = np.tile(ele_tmp, n_scans)
+    blb = blb.drop_dims(ele_dim)
+    blb = blb.assign({'ele': (('time_tmp',), ele_tmp)})
+
+    # replace old time dimension by the freshly created one
+    blb = blb.drop_dims(time_dim)
+    blb = blb.rename({'time_tmp': time_dim})
 
     return blb
 
 
 def scan_to_timeseries_from_dict(data, *args, **kwargs):
-    """transform scans to time series of spectra and temperatures
+    """transform scans to time series of spectra and temperatures starting from dict.
+
+    Not routinely used anymore. More hard coding than for scan_to_timeseries
 
     Args:
         data: dictioinary containing the scan observations (BLB)

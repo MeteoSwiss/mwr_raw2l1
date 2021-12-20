@@ -2,7 +2,7 @@ import xarray as xr
 
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement_helpers import drop_duplicates, make_dataset
-from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries_from_aux
+from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries
 
 
 def to_datasets(data, dims, vars, vars_opt):
@@ -43,9 +43,9 @@ def merge_brt_blb(all_data):
     if 'blb' in all_data:
         if 'brt' in all_data:
             # TODO: merge BRT and BLB as sketched in next lines after finishing transform to scan
-            blb_ts = scan_to_timeseries_from_aux(all_data['blb'], hkd=all_data['hkd'], brt=all_data['brt'])
-            # out = out.data.merge(blb_ts, join='outer')  # hope merge works, but don't forget to test
+            blb_ts = scan_to_timeseries(all_data['blb'], hkd=all_data['hkd'], brt=all_data['brt'])
+            out = out.merge(blb_ts, join='outer')  # hope merge works, but don't forget to test
         else:
-            out = scan_to_timeseries_from_aux(all_data['blb'], hkd=all_data['hkd'])
+            out = scan_to_timeseries(all_data['blb'], hkd=all_data['hkd'])
 
     return out

@@ -68,6 +68,9 @@ class Measurement(object):
             # merge into out.data
             out.data = out.data.merge(all_data[src], join='left')
 
+        # TODO: HKD, IRT and MET data cannot be merged to transformed scan times.
+        #  merge to BRT and BLB before scan transformation and merge BRT and BLB outer at the end.
+        #  Or try sth with interp, but probably more difficult
         return out
 
     @classmethod
