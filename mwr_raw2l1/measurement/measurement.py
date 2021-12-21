@@ -13,8 +13,12 @@ class Measurement(object):
     def from_rpg(cls, readin_data):
         """constructor for data read in from RPG instruments.
 
+        Auxiliary data are merged to time grid of MWR data. Scanning MWR data are returned as time series (no ele dim)
+
         Args:
             readin_data: dictionary with list of instances for each RPG read-in class (keys correspond to filetype)
+        Returns:
+            an instance of the Measurement class with observations filled to self.data
         """
 
         # dimensions and variable names for usage with make_dataset
@@ -39,16 +43,18 @@ class Measurement(object):
 
         # require mandatory data sources
         if 'brt' not in readin_data and 'blb' not in readin_data:
-            raise MissingDataSource('At least one file of BRT (zenith MWR) or BLB (scanning MWR) must be present')
+            raise MissingDataSource('At least one file of brt (zenith MWR) or blb (scanning MWR) must be present')
         if 'hkd' not in readin_data:
-            raise MissingDataSource('The housekeeping file (HKD) must be present')
+            raise MissingDataSource('The housekeeping file (hkd) must be present')
 
         # construct datasets
         all_data = to_datasets(readin_data, dims, vars, vars_opt)
 
-        # add scanflag and merge data from MWR (BRT and BLB)
+        # infer MWR data sources (BRT and/or BLB) and add scanflag
+        mwr_sources_present = []
         for src, flagval in scanflag_values.items():
-            if src in all_data:
+            if src in all_data and all_data[src]:  # check corresponding data series is not an empty list
+                mwr_sources_present.append(src)
                 all_data[src]['scaflag'] = ('time', flagval * np.ones(np.shape(all_data[src].time), dtype='u1'))
         mwr_data = merge_brt_blb(all_data)
 

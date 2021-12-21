@@ -312,7 +312,8 @@ def read_all(dir_in, basename, time_start=None, time_end=None):
         time_start/time_end: To be implemented: Filter to just read files between these times
     Returns:
         dictionary with keys brt, blb, irt, met, hkd containing list with all read-in class instances for the
-        corresponding file extension matching basename and the timing requirement.
+        corresponding file extension matching basename and the timing requirement. If no file of the corresponding type
+        is found an empty list is returned for this key.
         """
 
     # assign reader (value) to lowercase file extension (key). All keys will have an entry in the output dictionary

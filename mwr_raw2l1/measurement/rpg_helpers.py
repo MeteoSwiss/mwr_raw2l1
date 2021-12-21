@@ -21,6 +21,8 @@ def to_datasets(data, dims, vars, vars_opt):
     for src, data_series in data.items():
         data_act = []
         if not data_series:  # fill in NaN variables if meas source does not exist (loop over empty data_series skipped)
+            if src in ('brt', 'blb'):  # don't create empty datasets for missing MWR data
+                continue
             logger.info('No {}-data available. Will generate a dataset fill values only for {}'.format(src, src))
             min_time = min([x.data['time'][0] for x in data['hkd']])  # class instances in data['hkd'] can be unordered
             max_time = max([x.data['time'][-1] for x in data['hkd']])  # class instances in data['hkd'] can be unordered
@@ -44,7 +46,7 @@ def merge_brt_blb(all_data):
         if 'brt' in all_data:
             # TODO: merge BRT and BLB as sketched in next lines after finishing transform to scan
             blb_ts = scan_to_timeseries(all_data['blb'], hkd=all_data['hkd'], brt=all_data['brt'])
-            out = out.merge(blb_ts, join='outer')  # hope merge works, but don't forget to test
+            out = out.merge(blb_ts, join='outer')
         else:
             out = scan_to_timeseries(all_data['blb'], hkd=all_data['hkd'])
 
