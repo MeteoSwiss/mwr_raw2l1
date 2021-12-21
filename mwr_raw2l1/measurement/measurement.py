@@ -66,17 +66,18 @@ class Measurement(object):
         for src in readin_data:
             if src in ['brt', 'blb']:  # BRT and BLB data already treated
                 continue
+
             # to make sure no variable is overwritten rename duplicates by suffixing it with its source
             for var in all_data[src]:
                 if var in out.data:
                     varname_map = {var: var + '_' + src}
                     all_data[src] = all_data[src].rename(varname_map)
-            # merge into out.data
-            out.data = out.data.merge(all_data[src], join='left')
 
-        # TODO: HKD, IRT and MET data cannot be merged to transformed scan times.
-        #  merge to BRT and BLB before scan transformation and merge BRT and BLB outer at the end.
-        #  Or try sth with interp, but probably more difficult
+            # interp to same time grid (time grid from blb now stems from some interp) and merge into out.data
+            srcdat_interp = all_data[src].interp(time=out.data['time'], method='nearest')  # nearest: flags stay integer
+            out.data = out.data.merge(srcdat_interp, join='left')
+
+        # TODO: check out.data for consistency, possibly with plotting etc.
         return out
 
     @classmethod
