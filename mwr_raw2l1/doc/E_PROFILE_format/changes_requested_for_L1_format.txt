@@ -1,0 +1,3 @@
+- add variable scanflag: 1 for scanning, 0 for zenith. Makes it much easier to filter for zenith (not strictly 90deg)
+- drop attributes in global_atts.yaml under per_instrument_aux_accuracy for E-PROFILE
+    - if they shall be kept in data format, consider adding the same for IR sensor

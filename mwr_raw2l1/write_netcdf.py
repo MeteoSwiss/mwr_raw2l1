@@ -121,6 +121,7 @@ def prepare_global_atts(data, conf):
     data.attrs['history'] = history
     return data
 
+
 def write_from_dict(data, filename, conf_file, format='NETCDF4'):
     """write data dictionary to NetCDF according to the format definition in conf_file by using the netCDF4 module
 

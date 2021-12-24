@@ -1,0 +1,47 @@
+common:
+  - conventions: CF-1.8
+  - history: from_code
+  - source: Ground Based Remote Sensing
+  - references: E-PROFILE data format description document
+  - network_name: E-PROFILE  # set in first place to all instruments
+  - dependencies: None
+  - license: BSD 3-Clause License  # TODO: check for appropriate license
+
+per_instrument:
+  - from_code
+  - institution
+  - comment
+  - site_location
+  - instrument_id
+  - wigos_station_id
+  - principal_investigator
+  - instrument_manufacturer
+  - instrument_model
+  - instrument_generation
+  - instrument_hw_id
+  - network_name  # in addition to the network_names specified in the common section
+  - campaign_name
+  - license  # this license can overwrite attribute defined by common section
+
+per_instrument_temporal:  # subject to change with time. related to calibration except factory_history
+  - instrument_calibration_status
+  - date_of_last_absolute_calibration
+  - date_of_last_covariance_matrix
+  - type_of_automatic_calibrations_performed
+  - factory_history
+
+per_instrument_aux:  # info on auxiliary sensors of instrument which may or may not be there
+  - ir_instrument_manufacturer
+  - ir_instrument_model
+  - ir_instrument_fabrication_year
+  - met_instrument_manufacturer
+  - met_instrument_model
+  - met_instrument_fabrication_year
+
+per_instrument_aux_accuracy:  # propose to drop these. moreover, why is IRT accuracy missing?
+  - air_temperature_accuracy
+  - relative_humidity_accuracy
+  - air_pressure_accuracy
+  - rain_rate_accuracy
+  - wind_direction_accuracy
+  - wind_speed_accuracy
