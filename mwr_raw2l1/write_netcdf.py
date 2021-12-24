@@ -3,10 +3,13 @@
 Create E-PROFILE NetCDF from input dictionary or xarray Dataset
 """
 from copy import deepcopy
+import datetime as dt
 
 import netCDF4 as nc
 import xarray as xr
+from pkg_resources import get_distribution
 
+import mwr_raw2l1
 from mwr_raw2l1.errors import OutputDimensionError
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.utils.file_utils import get_conf
@@ -23,30 +26,6 @@ def write(data, filename, conf_file, *args, **kwargs):
         raise NotImplementedError('no writer for data of type ' + type(data))
 
 
-def write_from_dict(data, filename, conf_file, format='NETCDF4'):
-    """write data dictionary to NetCDF according to the format definition in conf_file by using the netCDF4 module"""
-    conf = get_conf(conf_file)
-    with nc.Dataset(filename, 'w', format=format) as ncid:
-        for dimact in conf['dimensions']['unlimited']:
-            ncid.createDimension(conf['variables'][dimact]['name'], size=None)
-        for dimact in conf['dimensions']['fixed']:
-            ncid.createDimension(conf['variables'][dimact]['name'], size=len(data[dimact]))
-        for var, specs in conf['variables'].items():
-            ncvar = ncid.createVariable(specs['name'], specs['type'], specs['dim'], fill_value=specs['_FillValue'])
-            ncvar.setncatts(specs['attributes'])
-            if var not in data.keys():
-                if specs['optional']:
-                    # TODO: check that this creates variable of right size with only fill values
-                    continue
-                else:
-                    raise KeyError('Variable {} is a mandatory input but was not found in input dictionary'.format(var))
-            if var == 'time':
-                ncvar[:] = nc.date2num(data[var], specs['attributes']['units'])
-            else:
-                ncvar[:] = data[var]
-    logger.info('data written to {}'.format(filename))
-
-
 def write_from_xarray(data_in, filename, conf_file, format='NETCDF4', copy_data=False):
     """write data (Dataset) to NetCDF according to the format definition in conf_file by using the xarray module
 
@@ -60,9 +39,6 @@ def write_from_xarray(data_in, filename, conf_file, format='NETCDF4', copy_data=
             Defaults to False.
     """
 
-    # value for _FillValue attribute of variables encoding field to have unset _FillValue in NetCDF
-    enc_no_fillvalue = None  # tutorials from 2017 said False must be used, but with xarray 0.20.1 only None works
-
     conf = get_conf(conf_file)
 
     if copy_data:
@@ -70,10 +46,22 @@ def write_from_xarray(data_in, filename, conf_file, format='NETCDF4', copy_data=
     else:
         data = data_in
 
+    data = prepare_datavars(data, conf)
+    data = prepare_global_atts(data, conf)
+
+    data.to_netcdf(filename, format=format)
+    logger.info('data written to ' + filename)
+
+
+def prepare_datavars(data, conf):
+    """prepare xarray Dataset's data variables for writing to file standard specified in conf"""
+
+    # value for _FillValue attribute of variables encoding field to have unset _FillValue in NetCDF
+    enc_no_fillvalue = None  # tutorials from 2017 said False must be used, but with xarray 0.20.1 only None works
+
     # dimensions
     config_dims = conf['dimensions']['unlimited'] + conf['dimensions']['fixed']
     data.encoding.update(unlimited_dims=conf['dimensions']['unlimited'])  # acts during to_netcdf (default: fixed)
-
     for var, specs in conf['variables'].items():
         if var not in data.keys():
             if specs['optional']:
@@ -122,8 +110,45 @@ def write_from_xarray(data_in, filename, conf_file, format='NETCDF4', copy_data=
     renamed_unlim_dim = [varname_map[dim] for dim in data.encoding['unlimited_dims']]
     data.encoding['unlimited_dims'] = renamed_unlim_dim
 
-    data.to_netcdf(filename, format=format)
-    logger.info('data written to ' + filename)
+    return data
+
+
+def prepare_global_atts(data, conf):
+    current_time = dt.datetime.now()
+    proj_dir = mwr_raw2l1.__file__.split('/')[-2]
+    proj_dist = get_distribution(proj_dir)
+    history = '{} {} {}'.format(current_time.strftime('%Y%m%d'), proj_dist.project_name, proj_dist.version)
+    data.attrs['history'] = history
+    return data
+
+def write_from_dict(data, filename, conf_file, format='NETCDF4'):
+    """write data dictionary to NetCDF according to the format definition in conf_file by using the netCDF4 module
+
+    CARE: This is a legacy function here for completeness but not maintained any further
+    """
+
+    logger.warn('This function is not maintained any further and comes with no guarantee at all. Consider using'
+                + 'write_from_xarray instead.')
+    conf = get_conf(conf_file)
+    with nc.Dataset(filename, 'w', format=format) as ncid:
+        for dimact in conf['dimensions']['unlimited']:
+            ncid.createDimension(conf['variables'][dimact]['name'], size=None)
+        for dimact in conf['dimensions']['fixed']:
+            ncid.createDimension(conf['variables'][dimact]['name'], size=len(data[dimact]))
+        for var, specs in conf['variables'].items():
+            ncvar = ncid.createVariable(specs['name'], specs['type'], specs['dim'], fill_value=specs['_FillValue'])
+            ncvar.setncatts(specs['attributes'])
+            if var not in data.keys():
+                if specs['optional']:
+                    # TODO: check that this creates variable of right size with only fill values
+                    continue
+                else:
+                    raise KeyError('Variable {} is a mandatory input but was not found in input dictionary'.format(var))
+            if var == 'time':
+                ncvar[:] = nc.date2num(data[var], specs['attributes']['units'])
+            else:
+                ncvar[:] = data[var]
+    logger.info('data written to {}'.format(filename))
 
 
 def write_eprofile_netcdf_hardcode(filename, data):
