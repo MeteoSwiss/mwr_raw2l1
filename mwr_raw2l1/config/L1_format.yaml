@@ -170,7 +170,7 @@ variables:
       units: m/s
 
 
-atrributes:  # global attributes common to all instruments. Additional instrument-specific attributes in their config
+attributes:  # global attributes common to all instruments. Additional instrument-specific attributes in their config
   conventions: CF-1.8
   source: Ground Based Remote Sensing
   references: E-PROFILE data format description document

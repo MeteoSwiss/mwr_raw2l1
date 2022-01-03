@@ -123,6 +123,9 @@ def prepare_datavars(data, conf):
 
 def prepare_global_attrs(data, conf):
 
+    for attname, attval in conf['attributes'].items():
+        data.attrs[attname] = attval
+
     # set history
     current_time = dt.datetime.now()
     proj_dir = mwr_raw2l1.__file__.split('/')[-2]
