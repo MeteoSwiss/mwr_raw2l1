@@ -171,22 +171,22 @@ class IRT(BaseReader):
             dict(name='timeref', type='i', shape=(1,))]  # define as list to be able to append.
         if self.filestruct['structver'] >= 2:
             encodings_bin_fix.append(
-                dict(name='n_wavelengths', type='i', shape=(1,)))
+                dict(name='n_ir_wavelengths', type='i', shape=(1,)))
         self.decode_binary(encodings_bin_fix)
 
         # quantities with length dependent on number of spectral channels (n_wavelenghts) only possible after read
-        n_wl = self.data['n_wavelengths']
+        n_wl = self.data['n_ir_wavelengths']
         encodings_bin_var = [
-            dict(name='wavelength', type='f', shape=(n_wl,))]
+            dict(name='ir_wavelength', type='f', shape=(n_wl,))]
         self.decode_binary(encodings_bin_var)
 
         # complete missing input for structver == 1
         if self.filestruct['structver'] == 1:
-            self.data['n_wavelengths'] = 1
-            self.data['wavelength'] = np.nan
+            self.data['n_ir_wavelengths'] = 1
+            self.data['ir_wavelength'] = np.nan
 
     def _read_meas(self):
-        n_wl = self.data['n_wavelengths']
+        n_wl = self.data['n_ir_wavelengths']
         encodings_bin = [
             dict(name='time_raw', type='i', shape=(1,)),
             dict(name='rainflag', type='B', shape=(1,)),
@@ -299,7 +299,7 @@ class HKD(BaseReader):
         self.data.update(interpret_statusflag(self.data['statusflag']))
 
 
-# TODO: Consider transforming to SI units. IRT/IRT_min/IRT_max -> K; wavelength -> m; frequency -> Hz.
+# TODO: Consider transforming to SI units. IRT/IRT_min/IRT_max -> K; ir_wavelength -> m; frequency -> Hz.
 #  could be done in interpret_raw_data of BaseReader class
 
 

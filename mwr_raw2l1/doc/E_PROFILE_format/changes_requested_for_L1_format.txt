@@ -5,3 +5,4 @@
     - met_valid_flag should also have 0 for ok instead of 1 to be consistent with quality flag
 - drop attributes in global_atts.yaml under per_instrument_aux_accuracy for E-PROFILE
     - if they shall be kept in data format, consider adding the same for IR sensor
+- date format in seconds for MWR (quasi-standard) but in days for other data

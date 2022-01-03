@@ -362,13 +362,13 @@ def read_irt(filename, accept_localtime=False):
     data['timeref'] = struct.unpack_from('<i', d, byte_offset)[0]
     byte_offset += 4
     if structver <= 2:
-        data['n_wavelengths'] = struct.unpack_from('<i', d, byte_offset)[0]
+        data['n_ir_wavelengths'] = struct.unpack_from('<i', d, byte_offset)[0]
         byte_offset += 4
-        data['wavelength'] = struct.unpack_from('<' + data['n_wavelengths']*'f', d, byte_offset)
-        byte_offset += data['n_wavelengths']*4
+        data['ir_wavelength'] = struct.unpack_from('<' + data['n_ir_wavelengths']*'f', d, byte_offset)
+        byte_offset += data['n_ir_wavelengths']*4
     else:
-        data['n_wavelengths'] = 1
-        data['n_wavelength'] = missing_float
+        data['n_ir_wavelengths'] = 1
+        data['n_ir_wavelength'] = missing_float
 
     # tests on header
     if not accept_localtime and data['timeref'] == 0:
@@ -381,7 +381,7 @@ def read_irt(filename, accept_localtime=False):
     # init measurements
     data['time'] = np.empty(data['n_meas'], dtype=np.dtype(dt.datetime))
     data['rainflag'] = np.ones(data['n_meas'], dtype=np.int8) * missing_int
-    data['IRT'] = np.ones((data['n_meas'],data['n_wavelengths']), dtype=np.float32) * missing_float
+    data['IRT'] = np.ones((data['n_meas'],data['n_ir_wavelengths']), dtype=np.float32) * missing_float
     data['ele'] = np.ones(data['n_meas'], dtype=np.float32) * missing_float
     data['azi'] = np.ones(data['n_meas'], dtype=np.float32) * missing_float
 
@@ -391,8 +391,8 @@ def read_irt(filename, accept_localtime=False):
         byte_offset += 4
         data['rainflag'][n] = struct.unpack_from('<B', d, byte_offset)[0]
         byte_offset += 1
-        data['IRT'][n] = struct.unpack_from('<' + data['n_wavelengths']*'f', d, byte_offset)
-        byte_offset += data['n_wavelengths']*4
+        data['IRT'][n] = struct.unpack_from('<' + data['n_ir_wavelengths']*'f', d, byte_offset)
+        byte_offset += data['n_ir_wavelengths']*4
         if structver == 2:
             data['ele'][n], data['azi'][n] = interpret_angle(struct.unpack_from(
                 '<'+formatchar_angle, d, byte_offset)[0], anglever)

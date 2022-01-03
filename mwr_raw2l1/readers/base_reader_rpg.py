@@ -106,8 +106,8 @@ class BaseReader(object):
                                   self.filecode, self.filename))
 
     def interpret_header(self):
-        # transform frequency and wavelength to 1D-numpy array for later import to xarray in Measurement classq
-        for var in ['frequency', 'wavelength', 'scan_ele']:
+        # transform frequency and ir_wavelength to 1D-numpy array for later import to xarray in Measurement classq
+        for var in ['frequency', 'ir_wavelength', 'scan_ele']:
             if var in self.data.keys():
                 self.data[var] = np.array(self.data[var]).ravel()
 

@@ -7,6 +7,7 @@ Specific to programming:
 - idem for scan_to_timeseries. attached to Measurement or as function in measurement_helpers
 - Measurement with derived classes instead of classmethod
 - measurement_helpers.make_dataset: code copy with shape_act = ... and following line (ca 44-45 and 52-53)
+- would it make sense to go make writer classes instead of functions?
 
 Specific to organisation:
 - why requirements.txt and setup.py along with pyproject.toml (in ELDAmwl)

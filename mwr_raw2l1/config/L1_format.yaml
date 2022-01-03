@@ -3,6 +3,7 @@ dimensions:
     - time  # refers to variable name in data dictionary
   fixed:
     - frequency
+    - ir_wavelength
 
 
 
@@ -31,6 +32,17 @@ variables:
     attributes:
       standard_name: sensor_band_spectral_radiation_frequency
       units: GHz
+
+  ir_wavelength:
+    name: ir_wavelength
+    dim:
+      - ir_wavelength
+    type: f4
+    _FillValue: -999.
+    optional: True
+    attributes:
+      standard_name: sensor_band_central_radiation_wavelength
+      units: um
 
   Tb:
     name: tb

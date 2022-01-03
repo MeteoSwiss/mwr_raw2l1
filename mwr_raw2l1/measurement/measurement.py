@@ -24,7 +24,7 @@ class Measurement(object):
         # dimensions and variable names for usage with make_dataset
         dims = {'brt': ['time', 'frequency'],
                 'blb': ['time', 'frequency', 'scan_ele'],
-                'irt': ['time', 'wavelength'],
+                'irt': ['time', 'ir_wavelength'],
                 'met': ['time'],
                 'hkd': ['time']}
         vars = {'brt': ['Tb', 'rainflag', 'ele', 'azi'],
