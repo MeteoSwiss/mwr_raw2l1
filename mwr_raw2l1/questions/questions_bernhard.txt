@@ -1,0 +1,2 @@
+- how to use scan_quadrant to determine azimuth. how to determine azi in general
+- in what unit is wind speed encoded in RPG files (assumed m/s)
