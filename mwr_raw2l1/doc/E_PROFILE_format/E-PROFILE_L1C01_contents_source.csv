@@ -27,7 +27,7 @@ tb_accuracy,,,x,,
 tb_cov,,,x,,
 quality_flag,x,x,,,x
 t_amb,x,,,x,
-t_rec,x,,,x,
+t_rec,x,,,,x
 ir_wavelength,x,,,x,
 ir_bandwidth,,x,,,
 ir_beamwidth,,x,,,
