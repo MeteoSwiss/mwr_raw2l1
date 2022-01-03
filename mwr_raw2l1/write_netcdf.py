@@ -47,7 +47,7 @@ def write_from_xarray(data_in, filename, conf_file, format='NETCDF4', copy_data=
         data = data_in
 
     data = prepare_datavars(data, conf)
-    data = prepare_global_atts(data, conf)
+    data = prepare_global_attrs(data, conf)
 
     data.to_netcdf(filename, format=format)
     logger.info('data written to ' + filename)
@@ -71,9 +71,17 @@ def prepare_datavars(data, conf):
                 raise KeyError('Variable {} is a mandatory input but was not found in input dictionary'.format(var))
 
         # check dimensions (including order)
-        if list(data[var].coords) != specs['dim']:
-            raise OutputDimensionError('dimensions in data["{}"] ({}) do not match specs for output file ({})'.format(
-                var, ', '.join(list(data[var].coords)), ', '.join(specs['dim'])))
+        if list(specs['dim']) != specs['dim']:
+            if list(data[var].coords) == specs['dim'][:-1] \
+                    and specs['dim'][-1] in data and len(data[specs['dim'][-1]]) == 1:
+                # if last dimension is missing and scalar, it can be added to the data (no need for subsequent check)
+                newdim = specs['dim'][-1]
+                tmp = data[var].expand_dims({newdim: 1}, axis=-1)
+                data[var] = tmp.assign_coords({newdim: data[newdim]})
+            else:
+                err_msg = 'dimensions in data["{}"] ({}) do not match specs for output file ({})'.format(
+                    var, ', '.join(list(data[var].coords)), ', '.join(specs['dim']))
+                raise OutputDimensionError(err_msg)
 
         # set all attributes and datatype
         data[var].attrs.update(specs['attributes'])
@@ -113,12 +121,15 @@ def prepare_datavars(data, conf):
     return data
 
 
-def prepare_global_atts(data, conf):
+def prepare_global_attrs(data, conf):
+
+    # set history
     current_time = dt.datetime.now()
     proj_dir = mwr_raw2l1.__file__.split('/')[-2]
     proj_dist = get_distribution(proj_dir)
     history = '{} {} {}'.format(current_time.strftime('%Y%m%d'), proj_dist.project_name, proj_dist.version)
     data.attrs['history'] = history
+
     return data
 
 
