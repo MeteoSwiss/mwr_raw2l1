@@ -52,4 +52,9 @@ def get_corresponding_pickle(filename_rawdata, path_pickle, legacy_reader=False)
 def get_conf(file):
     with open(file) as f:
         conf = yaml.load(f, Loader=yaml.FullLoader)
+    # TODO: do checks on completeness and correctness of yaml file.
+    #  - dim is a list for each var
+    #  - all needed info present
+    #  - etc
+
     return conf
