@@ -8,7 +8,6 @@ common:
   - license: BSD 3-Clause License  # TODO: check for appropriate license
 
 per_instrument:
-  - from_code
   - institution
   - comment
   - site_location

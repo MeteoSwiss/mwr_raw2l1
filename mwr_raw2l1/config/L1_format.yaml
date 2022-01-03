@@ -72,6 +72,17 @@ variables:
       units: degree
       comment: 0=horizon, 90=zenith
 
+  BLscan_active:
+    name: scanflag
+    dim:
+      - time
+    type: i1
+    _FillValue: -128
+    attributes:
+      long_name: Flag elevation scan
+      flag_values: 0b, 1b, 2b
+      flag_meanings: zenith_observation elevation_scan_ongoing unknown
+
   Tb:
     name: tb
     dim:
