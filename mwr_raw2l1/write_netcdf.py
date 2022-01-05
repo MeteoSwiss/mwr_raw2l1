@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 """
-Create E-PROFILE NetCDF from input dictionary or xarray Dataset
+Create NetCDF from xarray Dataset (or dictionary) according to specifications in the config file
 """
 from copy import deepcopy
 import datetime as dt
@@ -12,42 +11,48 @@ from pkg_resources import get_distribution
 import mwr_raw2l1
 from mwr_raw2l1.errors import OutputDimensionError
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.utils.config_utils import get_nc_format_config
+from mwr_raw2l1.utils.config_utils import get_nc_format_config, get_inst_config
 
 
-def write(data, filename, conf_file, *args, **kwargs):
-    """wrapper picking the right writer according to the type of data"""
+def write(data, filename, nc_conf_file, inst_conf_file, *args, **kwargs):
+    """wrapper picking the right writer according to the type of data
+
+    Args:
+        inst_conf_file:
+    """
 
     if isinstance(data, dict):
-        write_from_dict(data, filename, conf_file, *args, **kwargs)
+        write_from_dict(data, filename, nc_conf_file, inst_conf_file)
     elif isinstance(data, xr.Dataset) or isinstance(data, xr.DataArray):
-        write_from_xarray(data, filename, conf_file, *args, **kwargs)
+        write_from_xarray(data, filename, nc_conf_file, inst_conf_file, **kwargs)
     else:
         raise NotImplementedError('no writer for data of type ' + type(data))
 
 
-def write_from_xarray(data_in, filename, conf_file, format='NETCDF4', copy_data=False):
+def write_from_xarray(data_in, filename, nc_conf_file, inst_conf_file, format='NETCDF4', copy_data=False):
     """write data (Dataset) to NetCDF according to the format definition in conf_file by using the xarray module
 
     Args:
         data_in: xarray Dataset or DataArray containing data to write to file
         filename: name and path of output NetCDF file
-        conf_file: yaml configuration file defining the format and contents of the output NetCDF file
+        nc_conf_file: yaml configuration file defining the format and contents of the output NetCDF file
+        inst_conf_file: yaml configuration file with instrument specifications (contains global atts for NetCDF)
         format: NetCDF format type of the output file. Default is NETCDF4
         copy_data (bool): In case of False, the dataset will experience in-place modifications which is suitable when
             the dataset is not used in its original form after calling the write function, for True a copy is modified.
             Defaults to False.
     """
 
-    conf = get_nc_format_config(conf_file)
-
+    conf_nc = get_nc_format_config(nc_conf_file)
+    conf_inst = get_inst_config(inst_conf_file)
     if copy_data:
         data = deepcopy(data_in)
     else:
         data = data_in
 
-    data = prepare_datavars(data, conf)
-    data = prepare_global_attrs(data, conf)
+    data = prepare_datavars(data, conf_nc)
+    data = prepare_global_attrs(data, conf_nc, attr_key='attributes', set_history=False)  # only need history once
+    data = prepare_global_attrs(data, conf_inst, attr_key='nc_attributes', set_history=True)
 
     data.to_netcdf(filename, format=format)
     logger.info('data written to ' + filename)
@@ -121,30 +126,42 @@ def prepare_datavars(data, conf):
     return data
 
 
-def prepare_global_attrs(data, conf):
+def prepare_global_attrs(data, conf, attr_key, set_history=True):
+    """add global attributes from configuration dictionary
 
-    for attname, attval in conf['attributes'].items():
+    Args:
+        data: xarray.Dataset
+        conf: configuration dictionary with global attributes under the key given by attr_key
+        attr_key: string specifying the key under which attributes are stored in conf dict. Usually 'attributes' or
+            'nc_attributes'
+        set_history: add history attribute specifying when and how file was generated. Defaults to True.
+    """
+    for attname, attval in conf[attr_key].items():
         data.attrs[attname] = attval
 
-    # set history
-    current_time = dt.datetime.now()
-    proj_dir = mwr_raw2l1.__file__.split('/')[-2]
-    proj_dist = get_distribution(proj_dir)
-    history = '{} {} {}'.format(current_time.strftime('%Y%m%d'), proj_dist.project_name, proj_dist.version)
-    data.attrs['history'] = history
+    if set_history:
+        data.attrs['history'] = generate_history_str()
 
     return data
 
 
-def write_from_dict(data, filename, conf_file, format='NETCDF4'):
+def generate_history_str():
+    current_time = dt.datetime.now()
+    proj_dir = mwr_raw2l1.__file__.split('/')[-2]
+    proj_dist = get_distribution(proj_dir)
+    return '{}: {} ({})'.format(current_time.strftime('%Y%m%d'), proj_dist.project_name, proj_dist.version)
+
+
+def write_from_dict(data, filename, nc_conf_file, inst_conf_file=None, format='NETCDF4'):
     """write data dictionary to NetCDF according to the format definition in conf_file by using the netCDF4 module
 
-    CARE: This is a legacy function here for completeness but not maintained any further
+    CARE: This is a legacy function here for completeness but not maintained any further.
+          Especially, writing of global attributes is not yet included.
     """
 
     logger.warn('This function is not maintained any further and comes with no guarantee at all. Consider using'
                 + 'write_from_xarray instead.')
-    conf = get_nc_format_config(conf_file)
+    conf = get_nc_format_config(nc_conf_file)
     with nc.Dataset(filename, 'w', format=format) as ncid:
         for dimact in conf['dimensions']['unlimited']:
             ncid.createDimension(conf['variables'][dimact]['name'], size=None)
@@ -165,60 +182,3 @@ def write_from_dict(data, filename, conf_file, format='NETCDF4'):
                 ncvar[:] = data[var]
     logger.info('data written to {}'.format(filename))
 
-
-def write_eprofile_netcdf_hardcode(filename, data):
-    # TODO: This function can be removed once happy with the outcome of write()
-
-    # configuration
-    ncformat = 'NETCDF4'
-    ncdateformat = 'seconds since 1970-01-01-00:00:00'
-    # TODO: Consider transforming to DAYS since ... for consistency with other E-PROFILE data formats
-
-    ncdims_unlimited = ['time']
-    ncdims_fixed = ['frequency']
-    ncvars = dict(
-        time={'dim': ('time',), 'type': 'f8', '_FillValue': None, 'optional': False},
-        frequency={'dim': ('frequency',), 'type': 'f4', '_FillValue': -999., 'optional': False},
-        Tb={'dim': ('time', 'frequency'), 'type': 'f4', '_FillValue': -999., 'optional': False},
-        dummyvar={'dim': ('time',), 'type': 'f4', '_FillValue': -999., 'optional': True},
-    )
-    ncvaratt = dict(
-        time={'standard_name': 'time',
-              'units': ncdateformat,
-              'bounds': 'time_bounds',
-              'comment': 'Time indication of samples is at the end of integration time'},
-        frequency={'standard_name': 'sensor_band_spectral_radiation_frequency',
-                   'units': 'GHz',
-                   'bounds': 'time_bounds'},
-        # TODO: check whether time bounds is correct here or whether it should be removed
-        Tb={'standard_name': 'brightness_temperature',
-            'units': 'K'},
-        dummyvar={'comment': 'this is just a dummyvar for testing'},
-    )
-
-    # writer
-    with nc.Dataset(filename, 'w', format=ncformat) as ncid:
-
-        for dimact in ncdims_unlimited:
-            ncid.createDimension(dimact, size=None)
-
-        for dimact in ncdims_fixed:
-            # print(dimact)
-            # print(np.shape(data[dimact]))
-            ncid.createDimension(dimact, size=len(data[dimact]))
-
-        for var, specs in ncvars.items():
-            ncvar = ncid.createVariable(var, specs['type'], specs['dim'], fill_value=specs['_FillValue'])
-            ncvar.setncatts(ncvaratt[var])
-
-            if var not in data.keys():
-                if specs['optional']:
-                    # TODO: check that this creates variable of righ size with only fill values
-                    continue
-                else:
-                    raise KeyError('Variable {} is a mandatory input but was not found in input dictionary'.format(var))
-
-            if var == 'time':
-                ncvar[:] = nc.date2num(data[var], ncdateformat)
-            else:
-                ncvar[:] = data[var]

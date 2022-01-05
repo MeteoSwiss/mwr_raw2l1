@@ -6,5 +6,5 @@ all_data = read_rpg('data/rpg/', 'C00-V859')
 meas = Measurement.from_rpg(all_data)
 meas.run()
 
-write(meas.data, 'maintest.nc', 'config/L1_format.yaml')
+write(meas.data, 'maintest.nc', 'config/L1_format.yaml', 'config/config_0-20000-0-06610_A.yaml')
 pass

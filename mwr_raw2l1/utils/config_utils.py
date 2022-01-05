@@ -13,6 +13,7 @@ def get_conf(file):
 
 def get_inst_config(file):
     """get configuration for each instrument and check for completeness of config file"""
+
     mandatory_keys = ['station_latitude', 'station_longitude', 'station_altitude', 'nc_attributes']
     mandatory_ncattrs = ['wigos_station_id', 'instrument_id', 'site_location', 'institution', 'principal_investigator',
                          'instrument_manufacturer', 'instrument_model', 'instrument_generation', 'instrument_hw_id',
@@ -31,12 +32,16 @@ def get_inst_config(file):
             err_msg = ("'{}' is a mandatory global attribute under 'nc_attributes' in instrument config files "
                        'but is missing in {}'.format(attname, file))
             raise MissingConfig(err_msg)
+    for attname, attval in conf['nc_attributes'].items():
+        if attname[:5].lower() == 'date_' and not isinstance(attval, str):
+            raise MWRConfigError('Dates for global attrs must be given as str. Not the case for ' + attname)
 
     return conf
 
 
 def get_nc_format_config(file):
     """get configuration for output NetCDF format and check for completeness of config file"""
+
     mandatory_keys = ['dimensions', 'variables', 'attributes']
     mandatory_variable_keys = ['name', 'dim', 'type', '_FillValue', 'optional', 'attributes']
     mandatory_dimension_keys = ['unlimited', 'fixed']

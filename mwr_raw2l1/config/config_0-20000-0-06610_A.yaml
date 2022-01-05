@@ -24,8 +24,8 @@ nc_attributes:
   met_instrument_fabrication_year: to_be_specified
   # the following attributes are potentially varying with time:
   instrument_calibration_status: calibrated
-  date_of_last_absolute_calibration: 2021-12-31 23:59:59
-  date_of_last_covariance_matrix: 2021-12-31 23:59:59
+  date_of_last_absolute_calibration: '2021-12-31 23:59:59'
+  date_of_last_covariance_matrix: '2021-12-31 23:59:59'
   type_of_automatic_calibrations: gain calibration with ambient temperature target
   factory_history: to_be_specified
 
