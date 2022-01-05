@@ -2,8 +2,6 @@ import os
 import pickle
 from pathlib import Path
 
-import yaml
-
 import mwr_raw2l1
 
 
@@ -47,14 +45,3 @@ def get_corresponding_pickle(filename_rawdata, path_pickle, legacy_reader=False)
         raise FileNotFoundError(pickle_file + 'does not exist. Cannot check if data is correct')
 
     return pickle_load(pickle_file)
-
-
-def get_conf(file):
-    with open(file) as f:
-        conf = yaml.load(f, Loader=yaml.FullLoader)
-    # TODO: do checks on completeness and correctness of yaml file.
-    #  - dim is a list for each var
-    #  - all needed info present
-    #  - etc
-
-    return conf

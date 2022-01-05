@@ -1,0 +1,41 @@
+reader: reader_rpg
+
+station_latitude: 46.81
+station_longitude: 6.94
+station_altitude: 491
+
+nc_attributes:
+  wigos_station_id: 0-20000-0-06610
+  instrument_id: A
+  site_location: Payerne, Switzerland
+  institution: METEOSWISS Remote Sensing Group
+  principal_investigator: Remote Sensing Group
+  campaign_name: ''
+  comment: ''
+  instrument_manufacturer: RPG
+  instrument_model: RPG-HATPRO
+  instrument_generation: G2
+  instrument_hw_id: R-DPR-09-016
+  ir_instrument_manufacturer: to_be_specified
+  ir_instrument_model: to_be_specified
+  ir_instrument_fabrication_year: to_be_specified
+  met_instrument_manufacturer: to_be_specified
+  met_instrument_model: to_be_specified
+  met_instrument_fabrication_year: to_be_specified
+  # the following attributes are potentially varying with time:
+  instrument_calibration_status: calibrated
+  date_of_last_absolute_calibration: 2021-12-31 23:59:59
+  date_of_last_covariance_matrix: 2021-12-31 23:59:59
+  type_of_automatic_calibrations: gain calibration with ambient temperature target
+  factory_history: to_be_specified
+
+
+# additional optional fields for nc_attributes
+  # network: E-PROFILE, ...
+  # license: ...
+  # air_temperature_accuracy: ...
+  # relative_humidity_accuracy: ...
+  # air_pressure_accuracy: ...
+  # rain_rate_accuracy: ...
+  # wind_direction_accuracy: ...
+  # wind_speed_accuracy: ...

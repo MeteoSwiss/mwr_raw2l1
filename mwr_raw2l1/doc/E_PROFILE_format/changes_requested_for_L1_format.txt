@@ -14,7 +14,8 @@
     - long_name: Brightness temperatures -> Microwave brightness temperatures
 - air_pressure:
     - units: Pa -> hPa (makes sense in line with use of GHz, um, mm/h, ...)
-
+- global attrs:
+    - type_of_automatic_calibrations_performed -> type_of_automatic_calibrations
 where to get the following data from:
 - time_bounds: must know integration time from somewhere
 - t_rec: not in data for RPG

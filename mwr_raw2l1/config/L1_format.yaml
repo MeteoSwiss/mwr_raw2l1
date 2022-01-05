@@ -17,7 +17,7 @@ variables:
     attributes:
       long_name: Time (UTC) of the measurement
       standard_name: time
-      units: seconds since 1970-01-01 00:00:00  # TODO modify to DAYS since ....
+      units: seconds since 1970-01-01 00:00:00  # TODO consider modifying to DAYS since ....
       calendar: standard
       bounds: time_bounds
       comment: Time indication of samples is at the end of integration time
@@ -63,6 +63,7 @@ variables:
     name: ele
     dim:
       - time
+      - frequency
     type: f4
     _FillValue: -999.
     optional: False
@@ -78,6 +79,7 @@ variables:
       - time
     type: i1
     _FillValue: -128
+    optional: True
     attributes:
       long_name: Flag elevation scan
       flag_values: 0b, 1b, 2b
@@ -180,12 +182,13 @@ variables:
       standard_name: wind_speed
       units: m/s
 
-
-attributes:  # global attributes common to all instruments. Additional instrument-specific attributes in their config
+# global attributes common to all instruments. Additional instrument-specific attrs in their config under nc_attributes.
+# If the same fields are present in the instrument-specific config, the general ones from below will be overwritten
+attributes:
   conventions: CF-1.8
   source: Ground Based Remote Sensing
   references: E-PROFILE data format description document
-  network_name: E-PROFILE  # additional networks can be specified in the instrumen-specific config files
+  network_name: E-PROFILE
   dependencies: None
   license: BSD 3-Clause License  # TODO: check for appropriate license
   # history is directly set in NetCDF writer

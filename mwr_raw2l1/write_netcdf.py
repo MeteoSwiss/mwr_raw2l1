@@ -12,7 +12,7 @@ from pkg_resources import get_distribution
 import mwr_raw2l1
 from mwr_raw2l1.errors import OutputDimensionError
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.utils.file_utils import get_conf
+from mwr_raw2l1.utils.config_utils import get_nc_format_config
 
 
 def write(data, filename, conf_file, *args, **kwargs):
@@ -39,7 +39,7 @@ def write_from_xarray(data_in, filename, conf_file, format='NETCDF4', copy_data=
             Defaults to False.
     """
 
-    conf = get_conf(conf_file)
+    conf = get_nc_format_config(conf_file)
 
     if copy_data:
         data = deepcopy(data_in)
@@ -144,7 +144,7 @@ def write_from_dict(data, filename, conf_file, format='NETCDF4'):
 
     logger.warn('This function is not maintained any further and comes with no guarantee at all. Consider using'
                 + 'write_from_xarray instead.')
-    conf = get_conf(conf_file)
+    conf = get_nc_format_config(conf_file)
     with nc.Dataset(filename, 'w', format=format) as ncid:
         for dimact in conf['dimensions']['unlimited']:
             ncid.createDimension(conf['variables'][dimact]['name'], size=None)
