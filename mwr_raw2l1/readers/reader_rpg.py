@@ -1,7 +1,6 @@
 """
 readers for the different binary files from RPG radiometers (HATPRO, TEMPRO or HUMPRO)
 """
-import glob
 import os
 
 import numpy as np
@@ -11,6 +10,7 @@ from mwr_raw2l1.log import logger
 from mwr_raw2l1.readers.base_reader_rpg import BaseReader
 from mwr_raw2l1.readers.reader_rpg_helpers import (interpret_hkd_contents_code, interpret_met_auxsens_code,
                                                    interpret_scanflag, interpret_statusflag)
+
 
 N_FREQ_DEFAULT = 14    # needed before as freq used before read-in in old BRT file format
 # TODO: check how RPG deals with files from TEMPRO or HUMPRO how would have different n_freq. Other filecodes?
@@ -303,25 +303,19 @@ class HKD(BaseReader):
 #  could be done in interpret_raw_data of BaseReader class
 
 
-def read_all(dir_in, basename, time_start=None, time_end=None):
-    """read all L1-related files in dir_in corresponding to basename
+def read_multiple_files(files):
+    """read multiple L1-related files and return dictionary of executed read-in class instances
 
     Args:
-        dir_in: directory where files of the respective instrument are located
-        basename: full identifier including station and inst id
-        time_start/time_end: To be implemented: Filter to just read files between these times
+        files: list of files to read in
     Returns:
         dictionary with keys brt, blb, irt, met, hkd containing list with all read-in class instances for the
         corresponding file extension matching basename and the timing requirement. If no file of the corresponding type
         is found an empty list is returned for this key.
         """
 
-    # assign reader (value) to lowercase file extension (key). All keys will have an entry in the output dictionary
+    # assign reader class (value) to lowercase file extension (key). All keys will have an entry in the output dict
     reader_for_ext = {'brt': BRT, 'blb': BLB, 'irt': IRT, 'met': MET, 'hkd': HKD}
-
-    files_all_times = glob.glob(os.path.join(dir_in, basename + '*'))
-
-    files = files_all_times  # TODO choose files according to time_start and time_end instead of using all
 
     all_data = {name: [] for name in reader_for_ext}  # use file extension as name for list of instances of reader type
     for file in files:
@@ -368,6 +362,8 @@ def main():
 
 
 if __name__ == '__main__':
+    from mwr_raw2l1.utils.file_utils import abs_file_path, get_files
+
     # main()
-    all_data = read_all('../data/rpg/', 'C00-V859')
-    pass
+    files = get_files(abs_file_path('mwr_raw2l1/data/rpg/'), 'C00-V859')
+    all_data = read_multiple_files(files)

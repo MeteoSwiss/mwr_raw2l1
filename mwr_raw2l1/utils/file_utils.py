@@ -1,3 +1,4 @@
+import glob
 import os
 import pickle
 from pathlib import Path
@@ -45,3 +46,19 @@ def get_corresponding_pickle(filename_rawdata, path_pickle, legacy_reader=False)
         raise FileNotFoundError(pickle_file + 'does not exist. Cannot check if data is correct')
 
     return pickle_load(pickle_file)
+
+
+def get_files(dir_in, basename, time_start=None, time_end=None):
+    """get all L1-related files in dir_in corresponding to basename
+
+    Args:
+        dir_in: directory where files of the respective instrument are located
+        basename: full identifier including wigos-station-id and inst-id
+        time_start/time_end: To be implemented: Filter to just read files between these times
+    Returns:
+        list of files in dictionary corresponding to basename and time criteria
+    """
+
+    files_all_times = glob.glob(os.path.join(dir_in, basename + '*'))
+    files = files_all_times  # TODO choose files according to time_start and time_end instead of using all
+    return files
