@@ -1,4 +1,4 @@
 [flake8]
 max-line-length = 120
-ignore = E226, E704, P101, C101, T000
+ignore = E226, E704, P101, C101, W503, T000
 exclude = mwr_raw2l1/devdoc, mwr_raw2l1/readers/legacy_reader_rpg*

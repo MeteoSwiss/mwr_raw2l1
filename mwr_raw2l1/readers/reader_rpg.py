@@ -11,7 +11,6 @@ from mwr_raw2l1.readers.base_reader_rpg import BaseReader
 from mwr_raw2l1.readers.reader_rpg_helpers import (interpret_hkd_contents_code, interpret_met_auxsens_code,
                                                    interpret_scanflag, interpret_statusflag)
 
-
 N_FREQ_DEFAULT = 14    # needed before as freq used before read-in in old BRT file format
 # TODO: check how RPG deals with files from TEMPRO or HUMPRO how would have different n_freq. Other filecodes?
 

@@ -1,4 +1,9 @@
 reader: reader_rpg
+meas_constructor: from_rpg
+input_directory: data/rpg/0-20000-0-06610/  # use absolute path (or relative to location of main.py)
+outpu_directory: output/  # use absolute path (or relative to location of main.py)
+base_filename: 0-20000-0-06610_A
+#TODO: use the values from the above block for running program in main
 
 station_latitude: 46.81
 station_longitude: 6.94
@@ -24,8 +29,8 @@ nc_attributes:
   met_instrument_fabrication_year: to_be_specified
   # the following attributes are potentially varying with time:
   instrument_calibration_status: calibrated
-  date_of_last_absolute_calibration: '2021-12-31 23:59:59'
-  date_of_last_covariance_matrix: '2021-12-31 23:59:59'
+  date_of_last_absolute_calibration: '2021-12-31 23:59:59'  # dates for global attrs need to be specified as str
+  date_of_last_covariance_matrix: '2021-12-31 23:59:59'  # dates for global attrs need to be specified as str
   type_of_automatic_calibrations: gain calibration with ambient temperature target
   factory_history: to_be_specified
 

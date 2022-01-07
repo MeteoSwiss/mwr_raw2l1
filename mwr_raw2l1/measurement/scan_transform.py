@@ -118,8 +118,8 @@ def scan_to_timeseries(blb, *args, **kwargs):
             var_tmp = var_tmp.repeat(n_ele)
             dims_act = ('time_tmp',)
         else:
-            raise NotImplementedError('transformation only implemented for 1d timeseries and 3d variables with'
-                                      + ' time as first and elevation as third dimension')
+            raise NotImplementedError('transformation only implemented for 1d timeseries and 3d variables with '
+                                      'time as first and elevation as third dimension')
         blb = blb.drop_vars(var)  # remove original variable from dataset
         blb = blb.assign({var: (dims_act, var_tmp)})  # assign reshaped variable to dataset
 

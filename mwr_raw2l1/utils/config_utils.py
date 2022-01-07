@@ -18,7 +18,7 @@ def get_inst_config(file):
     mandatory_ncattrs = ['wigos_station_id', 'instrument_id', 'site_location', 'institution', 'principal_investigator',
                          'instrument_manufacturer', 'instrument_model', 'instrument_generation', 'instrument_hw_id',
                          'instrument_calibration_status', 'date_of_last_absolute_calibration',
-                         'type_of_automatic_calibrations', ]
+                         'type_of_automatic_calibrations']
 
     conf = get_conf(file)
 
@@ -52,12 +52,12 @@ def get_nc_format_config(file):
     for key in mandatory_keys:
         if key not in conf:
             err_msg = ("'{}' is a mandatory key in config files defining output NetCDF format "
-                       "but is missing in {}".format(key, file))
+                       'but is missing in {}'.format(key, file))
             raise MissingConfig(err_msg)
     for dimkey in mandatory_dimension_keys:
         if dimkey not in conf['dimensions']:
             err_msg = ("'{}' is a mandatory key to 'dimensions' in config files defining output NetCDF format "
-                       "but is missing in {}".format(dimkey, file))
+                       'but is missing in {}'.format(dimkey, file))
             raise MissingConfig(err_msg)
     for varname, varval in conf['variables'].items():
         for varkey in mandatory_variable_keys:

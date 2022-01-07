@@ -1,8 +1,8 @@
 """
 Create NetCDF from xarray Dataset (or dictionary) according to specifications in the config file
 """
-from copy import deepcopy
 import datetime as dt
+from copy import deepcopy
 
 import netCDF4 as nc
 import xarray as xr
@@ -11,15 +11,11 @@ from pkg_resources import get_distribution
 import mwr_raw2l1
 from mwr_raw2l1.errors import OutputDimensionError
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.utils.config_utils import get_nc_format_config, get_inst_config
+from mwr_raw2l1.utils.config_utils import get_inst_config, get_nc_format_config
 
 
 def write(data, filename, nc_conf_file, inst_conf_file, *args, **kwargs):
-    """wrapper picking the right writer according to the type of data
-
-    Args:
-        inst_conf_file:
-    """
+    """wrapper picking the right writer according to the type of data"""
 
     if isinstance(data, dict):
         write_from_dict(data, filename, nc_conf_file, inst_conf_file)
@@ -159,8 +155,8 @@ def write_from_dict(data, filename, nc_conf_file, inst_conf_file=None, format='N
           Especially, writing of global attributes is not yet included.
     """
 
-    logger.warn('This function is not maintained any further and comes with no guarantee at all. Consider using'
-                + 'write_from_xarray instead.')
+    logger.warn('This function is not maintained any further and comes with no guarantee at all. Consider using '
+                'write_from_xarray instead.')
     conf = get_nc_format_config(nc_conf_file)
     with nc.Dataset(filename, 'w', format=format) as ncid:
         for dimact in conf['dimensions']['unlimited']:
@@ -181,4 +177,3 @@ def write_from_dict(data, filename, nc_conf_file, inst_conf_file=None, format='N
             else:
                 ncvar[:] = data[var]
     logger.info('data written to {}'.format(filename))
-
