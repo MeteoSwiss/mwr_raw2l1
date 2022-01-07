@@ -1,22 +1,73 @@
+import os.path
+
+from mwr_raw2l1.errors import MWRConfigError
+from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement import Measurement
-from mwr_raw2l1.readers.reader_rpg import read_multiple_files as reader_rpg
 from mwr_raw2l1.utils.config_utils import get_inst_config, get_nc_format_config
 from mwr_raw2l1.utils.file_utils import get_files
 from mwr_raw2l1.write_netcdf import write
+# ------------------------------------------------------
+# import readers (ignore flake8 for unused (accessed through globals() not understood by flake) & wrong isort position)
+from mwr_raw2l1.readers.reader_rpg import read_multiple_files as reader_rpg  # noqa: F401, I001, I004
 
 
-def main():
-    conf_inst = get_inst_config('config/config_0-20000-0-06610_A.yaml')
-    conf_nc = get_nc_format_config('config/L1_format.yaml')
+def main(inst_config_file, nc_format_config_file, **kwargs):
+    """main function reading in raw files, generating and processing measurement instance and writing output file
 
-    files = get_files('data/rpg/', 'C00-V859')
-    all_data = reader_rpg(files)
-    meas = Measurement.from_rpg(all_data)
+    Args:
+        inst_config_file: yaml configuration file for the instrument to process
+        nc_format_config_file: yaml configuration file defining the output NetCDF format
+        **kwargs: Keyword arguments passed over to get_files function
+    """
+
+    logger.info('Running main function for ' + inst_config_file)
+
+    conf_inst = get_inst_config(inst_config_file)
+    conf_nc = get_nc_format_config(nc_format_config_file)
+
+    reader = get_reader(conf_inst['reader'])
+    meas_constructor = get_meas_constructor(conf_inst['meas_constructor'])
+
+    files = get_files('data/rpg/', 'C00-V859', **kwargs)  # TODO: replace path and basename with values from config file
+
+    all_data = reader(files)
+    meas = meas_constructor(all_data)
     meas.run()
 
-    write(meas.data, 'maintest.nc', conf_nc, conf_inst)
-    pass
+    outfile = generate_output_filename(conf_inst['base_filename'], meas.data['time'])
+    outfile_with_path = os.path.join(conf_inst['output_directory'], outfile)
+    write(meas.data, 'maintest.nc', conf_nc, conf_inst)  # TODO: replace 'maintest.nc' by outfile_with_path
 
+    logger.info('main function ended successfully')
+
+
+def get_reader(name):
+    """get data reader from name string"""
+    try:
+        reader = globals()[name]  # need globals() here, not locals()
+    except KeyError:
+        raise MWRConfigError("The reader '{}' specified in the config file is unknown to {}".format(name, __file__))
+    return reader
+
+
+def get_meas_constructor(name):
+    """get constructor method for measurement class from name string"""
+    try:
+        meas_constructor = getattr(Measurement, name)
+    except AttributeError:
+        raise MWRConfigError("The measurement constructor '{}' specified in the config file is not defined in the "
+                             'Measurement class'.format(name))
+    return meas_constructor
+
+
+def generate_output_filename(basename, time):
+    """generate filename of output file from basename and end time inferred from data time vector
+
+    Args:
+        basename: the first part of the filename without the date
+        time: xarray.Datarray time vector of the data in np.datetime64 format. Assumed to be sorted
+    """
+    return '{}{}.nc'.format(basename, time[-1].dt.strftime('%Y%m%d%H%M').data)
 
 if __name__ == '__main__':
-    main()
+    main('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml')

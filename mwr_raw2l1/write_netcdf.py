@@ -18,9 +18,9 @@ def write(data, filename, nc_conf_file, inst_conf_file, *args, **kwargs):
     """wrapper picking the right writer according to the type of data"""
 
     if isinstance(data, dict):
-        write_from_dict(data, filename, nc_conf_file, inst_conf_file)
+        write_from_dict(data, filename, nc_conf_file, inst_conf_file, *args, **kwargs)
     elif isinstance(data, xr.Dataset) or isinstance(data, xr.DataArray):
-        write_from_xarray(data, filename, nc_conf_file, inst_conf_file, **kwargs)
+        write_from_xarray(data, filename, nc_conf_file, inst_conf_file, *args, **kwargs)
     else:
         raise NotImplementedError('no writer for data of type ' + type(data))
 
