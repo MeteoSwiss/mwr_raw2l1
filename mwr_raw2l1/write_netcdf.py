@@ -160,7 +160,7 @@ def write_from_dict(data, filename, nc_conf_file, inst_conf_file=None, format='N
           Especially, writing of global attributes is not yet included.
     """
 
-    logger.warn('This function is not maintained any further and comes with no guarantee at all. Consider using '
+    logger.warning('This function is not maintained any further and comes with no guarantee at all. Consider using '
                 'write_from_xarray instead.')
     conf = get_nc_format_config(nc_conf_file)
     with nc.Dataset(filename, 'w', format=format) as ncid:
