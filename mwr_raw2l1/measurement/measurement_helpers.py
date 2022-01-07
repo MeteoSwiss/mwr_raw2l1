@@ -5,7 +5,7 @@ from mwr_raw2l1.errors import DimensionError, MissingInputArgument
 from mwr_raw2l1.log import logger
 
 
-def make_dataset(data, dims, vars, vars_opt=None, time_vector=None):
+def make_dataset(data, dims, vars, vars_opt=None, multidim_vars=None, time_vector=None):
     """generate a xarray Dataset from 'data' using the dimensions and variables specified
 
     Args:
@@ -14,15 +14,18 @@ def make_dataset(data, dims, vars, vars_opt=None, time_vector=None):
         dims: list of keys that are a dimension (must correspond to the order of dimensions in data)
         vars: list of keys that are data variables (dimensions don't need to be specified again)
         vars_opt (optional): list of keys that are optional data variables (added as 1-d series of NaN if not in 'data')
-        time_vector: numpy array of datetime64 to take as time dimension for generating all-NaN datasets. This argument
-            will be ignored as long as data is not None or empty
+        multidim_vars (optional): dictionary of variables with more than time dimension. Variable name as key, number of
+            dimensions as values. This argument will be ignored as long as the variable is present in dataset
+        time_vector (optional): numpy array of datetime64 to take as time dimension for generating all-NaN datasets.
+            This argument will be ignored as long as data is not None or empty
     Returns:
         xarray.Dataset
     """
 
     # config for empty datasets or variables
     missing_val = np.nan
-    multidim_vars = {'IRT': 2, 'Tb': 2, 'Tb': 3}  # variables that are not timeseries (key: varname; value: ndims)
+    if multidim_vars is None:
+        multidim_vars = {}
 
     # init
     if vars_opt is None:
@@ -31,7 +34,7 @@ def make_dataset(data, dims, vars, vars_opt=None, time_vector=None):
 
     # prepare for empty variables
     ndims_per_var = {var: 1 for var in dims + all_vars}
-    for var, nd in multidim_vars.items():  # can grow larger than keys that  shall be in dataset, only accessed by key
+    for var, nd in multidim_vars.items():  # can grow larger than keys that shall be in output, only accessed by key
         ndims_per_var[var] = nd
 
     # prepare all NaN-variables for case of data==None or empty

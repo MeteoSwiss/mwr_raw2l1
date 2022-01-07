@@ -66,13 +66,13 @@ def prepare_datavars(data, conf):
     for var, specs in conf['variables'].items():
         if var not in data.keys():
             if specs['optional']:
-                # TODO: must create a variable of fill values only
+                # TODO: must create a variable of fill values only. Currently this is handled in Measurement constructor
                 continue
             else:
                 raise KeyError('Variable {} is a mandatory input but was not found in input dictionary'.format(var))
 
         # check dimensions (including order)
-        if list(specs['dim']) != specs['dim']:
+        if list(data[var].coords) != specs['dim']:
             if list(data[var].coords) == specs['dim'][:-1] \
                     and specs['dim'][-1] in data and len(data[specs['dim'][-1]]) == 1:
                 # if last dimension is missing and scalar, it can be added to the data (no need for subsequent check)
@@ -80,8 +80,8 @@ def prepare_datavars(data, conf):
                 tmp = data[var].expand_dims({newdim: 1}, axis=-1)
                 data[var] = tmp.assign_coords({newdim: data[newdim]})
             else:
-                err_msg = 'dimensions in data["{}"] ({}) do not match specs for output file ({})'.format(
-                    var, ', '.join(list(data[var].coords)), ', '.join(specs['dim']))
+                err_msg = "dimensions in data['{}'] (['{}']) do not match specs for output file (['{}'])".format(
+                    var, "', '".join(list(data[var].coords)), "', '".join(specs['dim']))
                 raise OutputDimensionError(err_msg)
 
         # set all attributes and datatype
