@@ -1,7 +1,7 @@
 reader: reader_rpg
 meas_constructor: from_rpg
 input_directory: data/rpg/0-20000-0-06610/  # use absolute path (or relative to location of main.py)
-outpu_directory: output/  # use absolute path (or relative to location of main.py)
+output_directory: output/  # use absolute path (or relative to location of main.py)
 base_filename: 0-20000-0-06610_A
 #TODO: use the values from the above block for running program in main
 

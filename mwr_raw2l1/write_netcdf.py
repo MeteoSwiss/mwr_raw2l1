@@ -25,27 +25,32 @@ def write(data, filename, nc_conf_file, inst_conf_file, *args, **kwargs):
         raise NotImplementedError('no writer for data of type ' + type(data))
 
 
-def write_from_xarray(data_in, filename, nc_conf_file, inst_conf_file, format='NETCDF4', copy_data=False):
+def write_from_xarray(data_in, filename, conf_nc, conf_inst, format='NETCDF4', copy_data=False):
     """write data (Dataset) to NetCDF according to the format definition in conf_file by using the xarray module
 
     Args:
         data_in: xarray Dataset or DataArray containing data to write to file
         filename: name and path of output NetCDF file
-        nc_conf_file: yaml configuration file defining the format and contents of the output NetCDF file
-        inst_conf_file: yaml configuration file with instrument specifications (contains global atts for NetCDF)
+        conf_nc: configuration dict of yaml file defining the format and contents of the output NetCDF file
+        conf_inst: configuration dict of yaml file with instrument specifications (contains global attrs for NetCDF)
         format: NetCDF format type of the output file. Default is NETCDF4
         copy_data (bool): In case of False, the dataset will experience in-place modifications which is suitable when
             the dataset is not used in its original form after calling the write function, for True a copy is modified.
             Defaults to False.
     """
 
-    conf_nc = get_nc_format_config(nc_conf_file)
-    conf_inst = get_inst_config(inst_conf_file)
     if copy_data:
         data = deepcopy(data_in)
     else:
         data = data_in
 
+    # read in config file if config was not provided as dict
+    if not isinstance(conf_nc, dict):
+        conf_nc = get_nc_format_config(conf_nc)
+    if not isinstance(conf_inst, dict):
+        conf_inst = get_inst_config(conf_inst)
+
+    # prepare data and add global attributes
     data = prepare_datavars(data, conf_nc)
     data = prepare_global_attrs(data, conf_nc, attr_key='attributes', set_history=False)  # only need history once
     data = prepare_global_attrs(data, conf_inst, attr_key='nc_attributes', set_history=True)
