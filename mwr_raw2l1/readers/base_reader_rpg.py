@@ -33,20 +33,25 @@ FILETYPE_CONFS = {  # assign metadata to each known filecode
 class BaseReader(object):
     def __init__(self, filename, accept_localtime=False):
         self.filename = filename
+        self.accept_localtime = accept_localtime
         self.data = {}
+        self.data_bin = None
         self.byte_offset = 0  # counter for consumed bytes, increased by each method
         self.filecode = None
         self.filestruct = None
 
-        # TODO: externalise all this below into a run method for better style
+    def run(self):
+        """do whole read-in from files and interpretation and checking of data"""
         logger.info('Reading data from ' + self.filename)
         self.data_bin = get_binary(self.filename)
         self.read()  # fills self.data
-        self.check_data(accept_localtime)
+        self.check_data()
         del self.data_bin  # after read() all contents of data_bin have been interpreted to data
         del self.byte_offset  # after read() has checked that all data have been read, this quantity is useless
 
     def read(self):
+        """read and interpret all data in self.data_bin"""
+
         # sequence must be preserved as self.byte_offset is increased by each method, hence they are all semi-private
         self._read_filecode()
         self.interpret_filecode()
@@ -132,9 +137,9 @@ class BaseReader(object):
             if coord in self.data.keys():
                 self.data[coord[0:3]] = interpret_coord(self.data[coord])
 
-    def check_data(self, accept_localtime):
+    def check_data(self):
         """general checks for the consistency of the data which can be applied to all file type readers"""
-        if not accept_localtime and self.data['timeref'] == 0:
+        if not self.accept_localtime and self.data['timeref'] == 0:
             raise TimerefError('Time encoded in local time but UTC required by "accept_localtime"')
 
     def _read_filecode(self):

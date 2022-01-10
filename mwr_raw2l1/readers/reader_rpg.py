@@ -320,8 +320,9 @@ def read_multiple_files(files):
     for file in files:
         ext = os.path.splitext(file)[1].lower()[1:]  # omit dot from extension
         if ext in reader_for_ext:
-            data_act = reader_for_ext[ext](file)
-            all_data[ext].append(data_act)
+            reader_inst = reader_for_ext[ext](file)
+            reader_inst.run()
+            all_data[ext].append(reader_inst)
             # TODO: decide what to do with processed files. Leave where they are, delete or move to other folder
         else:
             # TODO: decide what to do with unprocessable files. Leave where they are, delete or move to other folder
@@ -342,6 +343,9 @@ def main():
     met = MET(filename_noext + '.MET')
     hkd = HKD(filename_noext + '.HKD')
 
+    for reader_inst in [brt, blb, irt, met, hkd]:
+        reader_inst.run()
+
     # # generate new pickle of the read-in data
     # dir_pickle = 'tests/data/rpg/'
     # vars = [brt, blb, irt, met, hkd]
@@ -356,8 +360,6 @@ def main():
     # irt_old = read_irt(filename_noext + '.IRT')
     # met_old = read_met(filename_noext + '.MET')
     # hkd_old = read_hkd(filename_noext + '.HKD')
-
-    del(brt, blb, irt, met, hkd)  # to avoid warning for unused variables by pylint
 
 
 if __name__ == '__main__':
