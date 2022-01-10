@@ -49,16 +49,56 @@ def get_corresponding_pickle(filename_rawdata, path_pickle, legacy_reader=False)
 
 
 def get_files(dir_in, basename, time_start=None, time_end=None):
-    """get all L1-related files in dir_in corresponding to basename
+    """get files in dir_in corresponding to basename.
+
+    If time_start and/or time_end are given only files with end time before/after these are returned.
 
     Args:
         dir_in: directory where files of the respective instrument are located
-        basename: full identifier including wigos-station-id and inst-id
-        time_start/time_end: To be implemented: Filter to just read files between these times
+        basename: first part of the filename (usually full identifier including wigos-station-id and inst-id)
+        time_start (optional): string in format 'yyyymmddHHMM', 'yyyymmddHHMMSS', 'yyyymmdd' or any of the similar
+        time_end (optional): analogous to time_start
     Returns:
         list of files in dictionary corresponding to basename and time criteria
     """
 
-    files_all_times = glob.glob(os.path.join(dir_in, basename + '*'))
-    files = files_all_times  # TODO choose files according to time_start and time_end instead of using all
+    files = glob.glob(os.path.join(dir_in, basename + '*'))
+
+    if time_start is None and time_end is None:
+        return files
+
+    for file in files[:]:
+        fn_date = datestr_from_filename(file)
+        if time_start is not None:
+            if int(fn_date)/10**len(fn_date) < int(time_start)/10**len(time_start):
+                files.remove(file)
+                continue
+        if time_end is not None:
+            if int(fn_date)/10**len(fn_date) > int(time_end)/10**len(time_end):
+                files.remove(file)
+                continue
+
     return files
+
+
+def datestr_from_filename(filename, datestr_format='yyyymmddHHMM'):
+    """return date string from filename, assuming it consists of the last digits of the filename before the extension
+
+    Args:
+        filename: filename as str. Can contain path and extension.
+        datestr_format: format of the date string in the filename. Only used for counting length of date string
+    Returns:
+        string containing the date in same representation as in the filename
+    """
+    return os.path.splitext(filename)[0][-len(datestr_format):]
+
+
+def generate_output_filename(basename, time, ext='nc'):
+    """generate filename from basename, ext and end time inferred from data time vector (basename_yyyymmddHHMM.ext)
+
+    Args:
+        basename: the first part of the filename without the date
+        time: xarray.Datarray time vector of the data in np.datetime64 format. Assumed to be sorted
+        ext (optional): filename extension. Defaults to 'nc'. Empty not permitted.
+    """
+    return '{}{}.{}'.format(basename, time[-1].dt.strftime('%Y%m%d%H%M').data, ext)

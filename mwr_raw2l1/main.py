@@ -4,7 +4,7 @@ from mwr_raw2l1.errors import MWRConfigError
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement import Measurement
 from mwr_raw2l1.utils.config_utils import get_inst_config, get_nc_format_config
-from mwr_raw2l1.utils.file_utils import get_files
+from mwr_raw2l1.utils.file_utils import get_files, generate_output_filename
 from mwr_raw2l1.write_netcdf import write
 # ------------------------------------------------------
 # import readers (ignore flake8 for unused (accessed through globals() not understood by flake) & wrong isort position)
@@ -59,15 +59,6 @@ def get_meas_constructor(name):
                              'Measurement class'.format(name))
     return meas_constructor
 
-
-def generate_output_filename(basename, time):
-    """generate filename of output file from basename and end time inferred from data time vector
-
-    Args:
-        basename: the first part of the filename without the date
-        time: xarray.Datarray time vector of the data in np.datetime64 format. Assumed to be sorted
-    """
-    return '{}{}.nc'.format(basename, time[-1].dt.strftime('%Y%m%d%H%M').data)
 
 if __name__ == '__main__':
     main('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml')
