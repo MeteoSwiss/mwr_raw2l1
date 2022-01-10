@@ -17,6 +17,7 @@ from mwr_raw2l1.utils.config_utils import get_inst_config, get_nc_format_config
 def write(data, filename, nc_conf_file, inst_conf_file, *args, **kwargs):
     """wrapper picking the right writer according to the type of data"""
 
+    logger.info('Starting writing to ' + filename)
     if isinstance(data, dict):
         write_from_dict(data, filename, nc_conf_file, inst_conf_file, *args, **kwargs)
     elif isinstance(data, xr.Dataset) or isinstance(data, xr.DataArray):
@@ -56,7 +57,7 @@ def write_from_xarray(data_in, filename, conf_nc, conf_inst, format='NETCDF4', c
     data = prepare_global_attrs(data, conf_inst, attr_key='nc_attributes', set_history=True)
 
     data.to_netcdf(filename, format=format)
-    logger.info('data written to ' + filename)
+    logger.info('Data written to ' + filename)
 
 
 def prepare_datavars(data, conf):
@@ -161,7 +162,7 @@ def write_from_dict(data, filename, nc_conf_file, inst_conf_file=None, format='N
     """
 
     logger.warning('This function is not maintained any further and comes with no guarantee at all. Consider using '
-                'write_from_xarray instead.')
+                   'write_from_xarray instead.')
     conf = get_nc_format_config(nc_conf_file)
     with nc.Dataset(filename, 'w', format=format) as ncid:
         for dimact in conf['dimensions']['unlimited']:
@@ -181,4 +182,4 @@ def write_from_dict(data, filename, nc_conf_file, inst_conf_file=None, format='N
                 ncvar[:] = nc.date2num(data[var], specs['attributes']['units'])
             else:
                 ncvar[:] = data[var]
-    logger.info('data written to {}'.format(filename))
+    logger.info('Data written to {}'.format(filename))

@@ -39,6 +39,7 @@ class BaseReader(object):
         self.filestruct = None
 
         # TODO: externalise all this below into a run method for better style
+        logger.info('Reading data from ' + self.filename)
         self.data_bin = get_binary(self.filename)
         self.read()  # fills self.data
         self.check_data(accept_localtime)
@@ -60,8 +61,11 @@ class BaseReader(object):
     def decode_binary(self, encoding_pattern, byte_order=BYTE_ORDER):
         """"
         decode next variables from binary stream and write to dict self.data + augment self.byte_offset
-          - encoding_pattern: a list of tuples or lists containing the individual variable description
-                              e.g. #TODO give an example of encoding pattern here
+        Args:
+            encoding_pattern: a list of tuples or lists containing the individual variable description
+                              e.g. [dict(name='n_meas', type='i', shape=(1,)),
+                                    dict(name='timeref', type='i', shape=(1,)),
+                                    dict(name='n_freq', type='i', shape=(1,))]
         """
         for enc in encoding_pattern:
             full_type = byte_order + np.prod(enc['shape']) * enc['type']
@@ -74,10 +78,13 @@ class BaseReader(object):
                 self.data[enc['name']] = out
 
     def decode_binary_np(self, encoding_pattern, n_entries, byte_order=BYTE_ORDER):
-        """
-        decode bunch of binary stream via 2d numpy array to write to dict self.data + augment self.byte_offset
-          - encoding_pattern: a list of tuples or lists containing the individual variable description FOR ONE TIME STEP
-                              e.g. #TODO give an example of encoding pattern here
+        """decode bunch of binary stream via 2d numpy array to write to dict self.data + augment self.byte_offset
+
+        Args:
+            encoding_pattern: a list of tuples or lists containing the individual variable description for one time step
+                              e.g. [dict(name='time_raw', type='i', shape=(1,)),
+                                    dict(name='rainflag', type='B', shape=(1,)),
+                                    dict(name='Tb', type='f', shape=(n_freq,))]
         """
         dtype_np = np.dtype([(ep['name'], byte_order+ep['type'], ep['shape']) for ep in encoding_pattern])
         names = [ep['name'] for ep in encoding_pattern]
@@ -99,6 +106,7 @@ class BaseReader(object):
                 self.data[name] = arr[name]
 
     def interpret_filecode(self):
+        """assign configuration for read in of file with corresponding file code"""
         try:
             self.filestruct = FILETYPE_CONFS[self.filecode]
         except KeyError:
@@ -106,12 +114,14 @@ class BaseReader(object):
                                   self.filecode, self.filename))
 
     def interpret_header(self):
-        # transform frequency and ir_wavelength to 1D-numpy array for later import to xarray in Measurement classq
+        """interpret data read in with _read_header"""
+        # transform frequency and ir_wavelength to 1D-numpy array for later import to xarray in Measurement class
         for var in ['frequency', 'ir_wavelength', 'scan_ele']:
             if var in self.data.keys():
                 self.data[var] = np.array(self.data[var]).ravel()
 
     def interpret_raw_data(self):
+        """interpret data read in with _read_meas (e.g. get ele/azi from pointing code or datetime from timecode)"""
         try:  # assume data-dict in all subclasses contains time
             self.data['time'] = interpret_time(self.data['time_raw'])
         except KeyError as err:

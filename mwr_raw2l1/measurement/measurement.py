@@ -1,6 +1,7 @@
 import numpy as np
 
 from mwr_raw2l1.errors import MissingDataSource
+from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.rpg_helpers import merge_brt_blb, to_datasets
 
 
@@ -39,6 +40,8 @@ class Measurement(object):
                             'Tstab_kband', 'Tstab_vband', 'flashmemory_remaining', 'BLscan_active']}
         # TODO : check what other hkd variables are needed for output statusflag and monitoring!!!
         scanflag_values = {'brt': 0, 'blb': 1}  # for generating a scan flag indicating whether scanning or zenith obs
+
+        logger.info('Creating instance of Measurement class')
 
         # require mandatory data sources
         if 'brt' not in readin_data and 'blb' not in readin_data:

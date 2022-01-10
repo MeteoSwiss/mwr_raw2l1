@@ -4,7 +4,7 @@ from mwr_raw2l1.errors import MWRConfigError
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement import Measurement
 from mwr_raw2l1.utils.config_utils import get_inst_config, get_nc_format_config
-from mwr_raw2l1.utils.file_utils import get_files, generate_output_filename
+from mwr_raw2l1.utils.file_utils import generate_output_filename, get_files
 from mwr_raw2l1.write_netcdf import write
 # ------------------------------------------------------
 # import readers (ignore flake8 for unused (accessed through globals() not understood by flake) & wrong isort position)
@@ -28,7 +28,7 @@ def main(inst_config_file, nc_format_config_file, **kwargs):
     reader = get_reader(conf_inst['reader'])
     meas_constructor = get_meas_constructor(conf_inst['meas_constructor'])
 
-    files = get_files('data/rpg/0-20000-0-06610', 'MWR_0-20000-0-06610_A', **kwargs)  # TODO: replace path and basename with values from config file
+    files = get_files('data/rpg/0-20000-0-06610', 'MWR_0-20000-0-06610_A', **kwargs)
 
     all_data = reader(files)
     meas = meas_constructor(all_data)
@@ -38,7 +38,7 @@ def main(inst_config_file, nc_format_config_file, **kwargs):
     outfile_with_path = os.path.join(conf_inst['output_directory'], outfile)
     write(meas.data, 'maintest.nc', conf_nc, conf_inst)  # TODO: replace 'maintest.nc' by outfile_with_path
 
-    logger.info('main function ended successfully')
+    logger.info('Main function terminated successfully')
 
 
 def get_reader(name):
