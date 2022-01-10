@@ -52,7 +52,6 @@ def merge_brt_blb(all_data):
         out = all_data['brt']
     if 'blb' in all_data:
         if 'brt' in all_data:
-            # TODO: merge BRT and BLB as sketched in next lines after finishing transform to scan
             blb_ts = scan_to_timeseries(all_data['blb'], hkd=all_data['hkd'], brt=all_data['brt'])
             out = out.merge(blb_ts, join='outer')
         else:

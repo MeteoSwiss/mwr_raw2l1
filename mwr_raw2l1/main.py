@@ -17,26 +17,32 @@ def main(inst_config_file, nc_format_config_file, **kwargs):
     Args:
         inst_config_file: yaml configuration file for the instrument to process
         nc_format_config_file: yaml configuration file defining the output NetCDF format
-        **kwargs: Keyword arguments passed over to get_files function
+        **kwargs: Keyword arguments passed over to get_files function, typically 'time_start' and 'time_end'
     """
 
     logger.info('Running main function for ' + inst_config_file)
 
+    # prepare
+    # -------
     conf_inst = get_inst_config(inst_config_file)
     conf_nc = get_nc_format_config(nc_format_config_file)
 
     reader = get_reader(conf_inst['reader'])
     meas_constructor = get_meas_constructor(conf_inst['meas_constructor'])
 
-    files = get_files('data/rpg/0-20000-0-06610', 'MWR_0-20000-0-06610_A', **kwargs)
+    files = get_files(conf_inst['input_directory'], conf_inst['base_filename'], **kwargs)
 
+    # read and interpret
+    # ------------------
     all_data = reader(files)
     meas = meas_constructor(all_data)
-    meas.run()
+    meas.run(conf_inst)
 
+    # write output
+    # ------------
     outfile = generate_output_filename(conf_inst['base_filename'], meas.data['time'])
     outfile_with_path = os.path.join(conf_inst['output_directory'], outfile)
-    write(meas.data, 'maintest.nc', conf_nc, conf_inst)  # TODO: replace 'maintest.nc' by outfile_with_path
+    write(meas.data, outfile_with_path, conf_nc, conf_inst)
 
     logger.info('Main function terminated successfully')
 
