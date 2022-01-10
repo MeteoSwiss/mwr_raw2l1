@@ -45,6 +45,10 @@ class UnknownFlagValue(MWRInputError):
     """Raised if the value of a flag in the input files does not correspond to the range of known values"""
 
 
+class CoordinateError(MWRInputError):
+    """raised if something with station coordinates and altitude goes wrong"""
+
+
 class TimeInputMissing(MWRInputError):
     """Raised if time is missing in an input file but is required by the reader"""
 

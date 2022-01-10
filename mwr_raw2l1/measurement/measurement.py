@@ -1,6 +1,6 @@
 import numpy as np
 
-from mwr_raw2l1.errors import MissingDataSource
+from mwr_raw2l1.errors import MissingDataSource, CoordinateError
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.rpg_helpers import merge_brt_blb, to_datasets
 
@@ -8,6 +8,10 @@ from mwr_raw2l1.measurement.rpg_helpers import merge_brt_blb, to_datasets
 class Measurement(object):
     def __init__(self):
         self.data = None
+
+    def run(self, conf_inst=None):
+        self.set_coord(conf_inst)
+        self.set_statusflag()
 
     @classmethod
     def from_rpg(cls, readin_data):
@@ -79,7 +83,6 @@ class Measurement(object):
             srcdat_interp = all_data[src].interp(time=out.data['time'], method='nearest')  # nearest: flags stay integer
             out.data = out.data.merge(srcdat_interp, join='left')
 
-        # TODO: check out.data for consistency, possibly with plotting etc.
         return out
 
     @classmethod
@@ -90,11 +93,51 @@ class Measurement(object):
     def from_attex(cls, read_in_data):
         pass
 
-    def encode_statusflag(self):
-        pass
+    def set_coord(self, conf_inst, primary_src='data', delta_lat=0.01, delta_lon=0.02, delta_altitude=10):
+        """(re)set coordinate variables (lat, lon, altitude) in self.data from datafile input and configuration
 
-    def run(self):
-        self.encode_statusflag()
+        If both are available the method checks consistency between coordinates in datafile and configuration.
+
+        Args:
+            conf_inst: configuration dictionary for instrument containing keys station_latitude, station_longitude and
+                station_altitude. If set to None, coordinates are taken from datafile without any checks and an error is
+                raised if any of lat, lon or altitude is missing in data.
+            primary_src (optional {'data', 'config'}): specifies which source takes precedence. Defaults to 'data'
+            delta_lat (optional): maximum allowed difference between latitude in config and in datafile in degrees.
+                Defaults to 0.01.
+            delta_lon (optional): maximum allowed difference between longitude in config and in datafile in degrees.
+                Defaults to 0.02.
+            delta_altitude (optional): maximum allowed difference between altitude in config and in datafile in meters.
+                Defaults to 10.
+        """
+
+        # matching of variable names between self.data and conf and between data variables and accuracy limits
+        var_data_conf = {'lat': 'station_latitude', 'lon': 'station_longitude', 'altitude': 'station_altitude'}
+        acc_matching = {'lat': delta_lat, 'lon': delta_lon, 'altitude': delta_altitude}
+
+        # strategy: do nothing if using variable from data, reset if using variable from config
+        if conf_inst is None:  # no config input
+            for var in var_data_conf.keys():
+                if var not in self.data.keys():
+                    raise CoordinateError("Cannot set coordinates. 'conf_inst' was set to None, but '{}' is missing "
+                                          'in read in data'.format(var))
+        elif not all(var in conf_inst for var in var_data_conf.values()):  # missing keys in config
+            err_msg = "'conf_inst' needs to contain all of the following keys: {}".format(list(var_data_conf.values()))
+            raise CoordinateError(err_msg)
+        else:  # necessary values present in config
+            for var, acc in acc_matching.items():
+                if var in self.data:
+                    if abs(self.data[var][0] - conf_inst[var_data_conf[var]]) > acc:  # checking all elements too slow
+                        raise CoordinateError("'{}' in data and conf differs by more than {}".format(var, acc))
+                if primary_src == 'config' or var not in self.data:
+                    self.data[var] = (('time',), np.full(self.data.time.shape, conf_inst[var_data_conf[var]]))
+                    logger.info("Using '{}' from config as coordinate variable".format(var_data_conf[var]))
+                else:
+                    logger.info("Using '{}' from data files as coordinate variable".format(var))
+
+    def set_statusflag(self):
+        """set statusflag from data"""
+        pass  # TODO: Implement method for setting statusflag from data (and possibly conf_inst)
 
 
 if __name__ == '__main__':
