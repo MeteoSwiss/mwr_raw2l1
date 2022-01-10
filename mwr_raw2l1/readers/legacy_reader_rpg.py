@@ -600,8 +600,8 @@ def read_hkd(filename, accept_localtime=False):
 
 
 if __name__ == '__main__':
-    base_filename = 'C00-V859_190803'
-    filename_noext = '../data/rpg/' + base_filename
+    base_filename = 'MWR_0-20000-0-06610_A201908040100'
+    filename_noext = '../data/rpg/0-20000-0-06610/' + base_filename
     brt = read_brt(filename_noext + '.BRT')
     blb = read_blb(filename_noext + '.BLB')
     irt = read_irt(filename_noext + '.IRT')

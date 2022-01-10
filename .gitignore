@@ -1,5 +1,8 @@
 __pycache__/
 *.py[cod]
 poetry.lock
+*log.txt
 .idea/
 .~lock.*
+
+mwr_raw2l1/data/output/*

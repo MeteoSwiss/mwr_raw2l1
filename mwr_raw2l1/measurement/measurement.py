@@ -98,7 +98,7 @@ if __name__ == '__main__':
     from mwr_raw2l1.readers.reader_rpg import read_multiple_files
     from mwr_raw2l1.utils.file_utils import abs_file_path, get_files
 
-    files = get_files(abs_file_path('mwr_raw2l1/data/rpg/'), 'C00-V859')
+    files = get_files(abs_file_path('mwr_raw2l1/data/rpg/0-20000-0-06610/'), 'MWR_0-20000-0-06610_A')
     all_data = read_multiple_files(files)
     meas = Measurement.from_rpg(all_data)
     meas.run()

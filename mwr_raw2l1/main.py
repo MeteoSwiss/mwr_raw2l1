@@ -28,7 +28,7 @@ def main(inst_config_file, nc_format_config_file, **kwargs):
     reader = get_reader(conf_inst['reader'])
     meas_constructor = get_meas_constructor(conf_inst['meas_constructor'])
 
-    files = get_files('data/rpg/', 'C00-V859', **kwargs)  # TODO: replace path and basename with values from config file
+    files = get_files('data/rpg/0-20000-0-06610', 'MWR_0-20000-0-06610_A', **kwargs)  # TODO: replace path and basename with values from config file
 
     all_data = reader(files)
     meas = meas_constructor(all_data)

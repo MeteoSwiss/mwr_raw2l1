@@ -332,9 +332,9 @@ def read_multiple_files(files):
 
 def main():
 
-    base_filename = 'C00-V859_190803'
+    base_filename = 'MWR_0-20000-0-06610_A201908040100'
 
-    filename_noext = os.path.splitext('data/rpg/' + base_filename)[0]  # join path and make sure filename has no ext
+    filename_noext = os.path.splitext('data/rpg/0-20000-0-06610' + base_filename)[0]  # join path and make sure filename has no ext
 
     brt = BRT(filename_noext + '.BRT')
     blb = BLB(filename_noext + '.BLB')
@@ -364,5 +364,5 @@ if __name__ == '__main__':
     from mwr_raw2l1.utils.file_utils import abs_file_path, get_files
 
     # main()
-    files = get_files(abs_file_path('mwr_raw2l1/data/rpg/'), 'C00-V859')
+    files = get_files(abs_file_path('mwr_raw2l1/data/rpg/0-20000-0-06610'), 'MWR_0-20000-0-06610_A')
     all_data = read_multiple_files(files)
