@@ -129,7 +129,7 @@ class Measurement(object):
                 if var in self.data:
                     if abs(self.data[var][0] - conf_inst[var_data_conf[var]]) > acc:  # checking all elements too slow
                         raise CoordinateError("'{}' in data and conf differs by more than {}".format(var, acc))
-                if primary_src == 'config' or var not in self.data:
+                if primary_src == 'config' or var not in self.data:  # (re)set variable according to conf_inst
                     self.data[var] = (('time',), np.full(self.data.time.shape, conf_inst[var_data_conf[var]]))
                     logger.info("Using '{}' from config as coordinate variable".format(var_data_conf[var]))
                 else:
