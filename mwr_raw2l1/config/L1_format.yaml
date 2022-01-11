@@ -7,7 +7,7 @@ dimensions:
 
 
 variables:
-  time:  # variable name in data dictionary
+  time:  # variable name in Measurement.data Dataset
     name: time  # variable name in output NetCDF
     dim:
       - time
@@ -45,6 +45,42 @@ variables:
       long_name: Wavelength of infrared channels
       standard_name: sensor_band_central_radiation_wavelength
       units: um
+
+  lat:
+    name: station_latitude
+    dim:
+      - time
+    type: f4
+    _FillValue: -999.
+    optional: False
+    attributes:
+      long_name: Latitude of measurement station
+      standard_name: latitude
+      units: degree_north
+
+  lon:
+    name: station_longitude
+    dim:
+      - time
+    type: f4
+    _FillValue: -999.
+    optional: False
+    attributes:
+      long_name: Longitude of measurement station
+      standard_name: longitude
+      units: degree_east
+
+  altitude:
+    name: station_altitude
+    dim:
+      - time
+    type: f4
+    _FillValue: -999.
+    optional: False
+    attributes:
+      long_name: Altitude above mean sea level of measurement station
+      standard_name: altitude
+      units: m
 
   azi:
     name: azi

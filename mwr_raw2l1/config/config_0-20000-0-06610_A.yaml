@@ -3,7 +3,8 @@ meas_constructor: from_rpg
 
 input_directory: data/rpg/0-20000-0-06610/  # use absolute path (or relative to location of main.py)
 output_directory: data/output/  # use absolute path (or relative to location of main.py)
-base_filename: MWR_0-20000-0-06610_A
+base_filename_in: MWR_0-20000-0-06610_A
+base_filename_out: MWR_1C01_0-20000-0-06610_A
 
 station_latitude: 46.81
 station_longitude: 6.94

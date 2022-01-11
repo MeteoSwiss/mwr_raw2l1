@@ -30,7 +30,7 @@ def main(inst_config_file, nc_format_config_file, **kwargs):
     reader = get_reader(conf_inst['reader'])
     meas_constructor = get_meas_constructor(conf_inst['meas_constructor'])
 
-    files = get_files(conf_inst['input_directory'], conf_inst['base_filename'], **kwargs)
+    files = get_files(conf_inst['input_directory'], conf_inst['base_filename_in'], **kwargs)
 
     # read and interpret
     # ------------------
@@ -40,7 +40,7 @@ def main(inst_config_file, nc_format_config_file, **kwargs):
 
     # write output
     # ------------
-    outfile = generate_output_filename(conf_inst['base_filename'], meas.data['time'])
+    outfile = generate_output_filename(conf_inst['base_filename_out'], meas.data['time'])
     outfile_with_path = os.path.join(conf_inst['output_directory'], outfile)
     write(meas.data, outfile_with_path, conf_nc, conf_inst)
 
