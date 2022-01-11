@@ -12,6 +12,8 @@ colorlog = "^4.2.1"  # TODO: remove this dependency
 dynaconf = "^3.1.7"  # TODO: remove this dependency
 xarray = "^0.20.1"
 scipy = "^1.7.3"  # needed for xarray.Dataset.interp
+Sphinx = "^4.3.2"
+sphinxcontrib-napoleon = "^0.7"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.8.3"
