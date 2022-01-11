@@ -6,6 +6,8 @@
 - drop attributes in global_atts.yaml under per_instrument_aux_accuracy for E-PROFILE
     - if they shall be kept in data format, consider adding the same for IR sensor
 - date format in seconds for MWR (quasi-standard) but in days for other data
+- station_altitude:
+    - reference: remove this attribute, or what is expected here?
 - t_amb:
     - Shall we have 1 single T_amb or 1 for each receiver? write values of T_amb_1 into this for now.
     - why encoding t_amb with L1 at all? In the end we don't want to go back to raw signal (would also need gain param)
