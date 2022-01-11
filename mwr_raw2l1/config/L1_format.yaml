@@ -221,9 +221,11 @@ variables:
 # If the same fields are present in the instrument-specific config, the general ones from below will be overwritten
 attributes:
   conventions: CF-1.8
-  source: Ground Based Remote Sensing
   references: E-PROFILE data format description document
-  network_name: E-PROFILE
-  dependencies: None
   license: Closed-Use Non-Commercial General Licence 1.0 (CUNCGL)
+  network_name: E-PROFILE
+  campaign_name: ''
+  comment: ''
+  source: Ground Based Remote Sensing
+  dependencies: None
   # history is directly set in NetCDF writer
