@@ -143,14 +143,14 @@ class BaseReader(object):
             raise TimerefError('Time encoded in local time but UTC required by "accept_localtime"')
 
     def _read_filecode(self):
-        """first of the _read... methods to be executed (according to order in file)"""
+        """read filecode from binary data. first of the _read... methods to be executed (according to order in file)"""
         self.filecode = struct.unpack_from('<i', self.data_bin, self.byte_offset)[0]
         self.byte_offset += 4
 
     def _read_header(self):
-        """second of the _read... methods to be executed (according to order in file)"""
+        """read header from binary data. second of the _read... methods to be executed (according to order in file)"""
         pass
 
     def _read_meas(self):
-        """third of the _read... methods to be executed (according to order in file)"""
+        """read measurement from binary. third of the _read... methods to be executed (according to order in file)"""
         pass

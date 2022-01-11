@@ -13,7 +13,7 @@ def scan_endtime_to_time(endtime, n_angles, time_per_angle=17):
     RPG scan files only have one timestamp per scan. This function returns the approximate timestamp for the observation
     at each angle
 
-    Args
+    Args:
         endtime : numpy array of datetime64 or single datetime.datetime.
             Corresponds ot the single timestamp saved with each angle scan. Assumed as the end time of the scan
         n_angles : number of angles per scan.

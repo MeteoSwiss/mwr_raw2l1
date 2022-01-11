@@ -41,7 +41,6 @@ class BRT(BaseReader):
         self.decode_binary(encodings_bin_var)
 
     def _read_meas(self):
-        """read actual measurements. Filecode and Header needs to be read before as info is needed for decoding"""
         n_freq = self.data['n_freq']
         encodings_bin = (
             dict(name='time_raw', type='i', shape=(1,)),

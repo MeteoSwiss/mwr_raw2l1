@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mwr_raw2l1 package &mdash; mwr_raw2l1  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="mwr_raw2l1.measurement package" href="mwr_raw2l1.measurement.html" />
+    <link rel="prev" title="mwr_raw2l1" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> mwr_raw2l1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">mwr_raw2l1</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">mwr_raw2l1 package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mwr_raw2l1.measurement.html">mwr_raw2l1.measurement package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mwr_raw2l1.readers.html">mwr_raw2l1.readers package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mwr_raw2l1.utils.html">mwr_raw2l1.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-mwr_raw2l1.errors">mwr_raw2l1.errors module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-mwr_raw2l1.log">mwr_raw2l1.log module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-mwr_raw2l1.main">mwr_raw2l1.main module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-mwr_raw2l1.write_netcdf">mwr_raw2l1.write_netcdf module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-mwr_raw2l1">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">mwr_raw2l1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">mwr_raw2l1</a> &raquo;</li>
+      <li>mwr_raw2l1 package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/mwr_raw2l1.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mwr-raw2l1-package">
+<h1>mwr_raw2l1 package<a class="headerlink" href="#mwr-raw2l1-package" title="Permalink to this headline"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mwr_raw2l1.measurement.html">mwr_raw2l1.measurement package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.measurement.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.measurement.html#module-mwr_raw2l1.measurement.measurement">mwr_raw2l1.measurement.measurement module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.measurement.html#module-mwr_raw2l1.measurement.measurement_helpers">mwr_raw2l1.measurement.measurement_helpers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.measurement.html#module-mwr_raw2l1.measurement.rpg_helpers">mwr_raw2l1.measurement.rpg_helpers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.measurement.html#module-mwr_raw2l1.measurement.scan_transform">mwr_raw2l1.measurement.scan_transform module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.measurement.html#module-mwr_raw2l1.measurement">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mwr_raw2l1.readers.html">mwr_raw2l1.readers package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.readers.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.readers.html#module-mwr_raw2l1.readers.base_reader_rpg">mwr_raw2l1.readers.base_reader_rpg module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.readers.html#module-mwr_raw2l1.readers.legacy_reader_rpg">mwr_raw2l1.readers.legacy_reader_rpg module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.readers.html#module-mwr_raw2l1.readers.reader_radiometrics">mwr_raw2l1.readers.reader_radiometrics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.readers.html#module-mwr_raw2l1.readers.reader_rpg">mwr_raw2l1.readers.reader_rpg module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.readers.html#module-mwr_raw2l1.readers.reader_rpg_helpers">mwr_raw2l1.readers.reader_rpg_helpers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.readers.html#module-mwr_raw2l1.readers">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mwr_raw2l1.utils.html">mwr_raw2l1.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.utils.html#module-mwr_raw2l1.utils.config_utils">mwr_raw2l1.utils.config_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.utils.html#module-mwr_raw2l1.utils.file_utils">mwr_raw2l1.utils.file_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.utils.html#module-mwr_raw2l1.utils.transformations">mwr_raw2l1.utils.transformations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mwr_raw2l1.utils.html#module-mwr_raw2l1.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-mwr_raw2l1.errors">
+<span id="mwr-raw2l1-errors-module"></span><h2>mwr_raw2l1.errors module<a class="headerlink" href="#module-mwr_raw2l1.errors" title="Permalink to this headline"></a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.CoordinateError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">CoordinateError</span></span><a class="headerlink" href="#mwr_raw2l1.errors.CoordinateError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRInputError" title="mwr_raw2l1.errors.MWRInputError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRInputError</span></code></a></p>
+<p>raised if something with station coordinates and altitude goes wrong</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.DimensionError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">DimensionError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dims_required</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dims_var</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mwr_raw2l1.errors.DimensionError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRError" title="mwr_raw2l1.errors.MWRError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRError</span></code></a></p>
+<p>Raised if specified dimensions do not match variable dimension</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.FileTooLong">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">FileTooLong</span></span><a class="headerlink" href="#mwr_raw2l1.errors.FileTooLong" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRFileError" title="mwr_raw2l1.errors.MWRFileError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRFileError</span></code></a></p>
+<p>Raised if file seems too long, e.g. if binary stream is not entirely consumed after reading is finished</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.FileTooShort">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">FileTooShort</span></span><a class="headerlink" href="#mwr_raw2l1.errors.FileTooShort" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRFileError" title="mwr_raw2l1.errors.MWRFileError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRFileError</span></code></a></p>
+<p>Raised if file seems too short, e.g. if parameter n_meas &gt; rest of buffer</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MWRConfigError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">MWRConfigError</span></span><a class="headerlink" href="#mwr_raw2l1.errors.MWRConfigError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRError" title="mwr_raw2l1.errors.MWRError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRError</span></code></a></p>
+<p>Raised if something with the configuration file is wrong</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MWRError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">MWRError</span></span><a class="headerlink" href="#mwr_raw2l1.errors.MWRError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Base exception for MWR</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MWRFileError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">MWRFileError</span></span><a class="headerlink" href="#mwr_raw2l1.errors.MWRFileError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRError" title="mwr_raw2l1.errors.MWRError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRError</span></code></a></p>
+<p>Base exception for MWR Files</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MWRInputError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">MWRInputError</span></span><a class="headerlink" href="#mwr_raw2l1.errors.MWRInputError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRError" title="mwr_raw2l1.errors.MWRError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRError</span></code></a></p>
+<p>Base exception for calling of MWR reader/helper function or generating measurement from it</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MWROutputError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">MWROutputError</span></span><a class="headerlink" href="#mwr_raw2l1.errors.MWROutputError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRError" title="mwr_raw2l1.errors.MWRError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRError</span></code></a></p>
+<p>Raised when something with the output file goes wrong</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MissingConfig">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">MissingConfig</span></span><a class="headerlink" href="#mwr_raw2l1.errors.MissingConfig" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRConfigError" title="mwr_raw2l1.errors.MWRConfigError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRConfigError</span></code></a></p>
+<p>Raised if a mandatory entry of the config file is missing</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MissingDataSource">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">MissingDataSource</span></span><a class="headerlink" href="#mwr_raw2l1.errors.MissingDataSource" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRInputError" title="mwr_raw2l1.errors.MWRInputError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRInputError</span></code></a></p>
+<p>Raised if a mandatory data source for creation of Measurement is missing in input</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MissingInputArgument">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">MissingInputArgument</span></span><a class="headerlink" href="#mwr_raw2l1.errors.MissingInputArgument" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRInputError" title="mwr_raw2l1.errors.MWRInputError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRInputError</span></code></a></p>
+<p>Raised if a required input argument to a function or class initiation is missing</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.OutputDimensionError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">OutputDimensionError</span></span><a class="headerlink" href="#mwr_raw2l1.errors.OutputDimensionError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWROutputError" title="mwr_raw2l1.errors.MWROutputError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWROutputError</span></code></a></p>
+<p>Raised if requested output dimensions do not match data</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.TimeInputMissing">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">TimeInputMissing</span></span><a class="headerlink" href="#mwr_raw2l1.errors.TimeInputMissing" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRInputError" title="mwr_raw2l1.errors.MWRInputError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRInputError</span></code></a></p>
+<p>Raised if time is missing in an input file but is required by the reader</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.TimerefError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">TimerefError</span></span><a class="headerlink" href="#mwr_raw2l1.errors.TimerefError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRError" title="mwr_raw2l1.errors.MWRError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRError</span></code></a></p>
+<p>Raised if time reference is local but UTC is required</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.UnknownFileType">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">UnknownFileType</span></span><a class="headerlink" href="#mwr_raw2l1.errors.UnknownFileType" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRFileError" title="mwr_raw2l1.errors.MWRFileError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRFileError</span></code></a></p>
+<p>Raised if the filetype of the datafile is not in the known range of file ID types</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.UnknownFlagValue">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">UnknownFlagValue</span></span><a class="headerlink" href="#mwr_raw2l1.errors.UnknownFlagValue" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRInputError" title="mwr_raw2l1.errors.MWRInputError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRInputError</span></code></a></p>
+<p>Raised if the value of a flag in the input files does not correspond to the range of known values</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.WrongFileType">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">WrongFileType</span></span><a class="headerlink" href="#mwr_raw2l1.errors.WrongFileType" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRFileError" title="mwr_raw2l1.errors.MWRFileError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRFileError</span></code></a></p>
+<p>Raised if the filetype does not match with the chosen reader</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.WrongInputFormat">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">WrongInputFormat</span></span><a class="headerlink" href="#mwr_raw2l1.errors.WrongInputFormat" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRInputError" title="mwr_raw2l1.errors.MWRInputError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRInputError</span></code></a></p>
+<p>Raised if format of input to a function or class does not correspond to expectations</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.WrongNumberOfChannels">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.errors.</span></span><span class="sig-name descname"><span class="pre">WrongNumberOfChannels</span></span><a class="headerlink" href="#mwr_raw2l1.errors.WrongNumberOfChannels" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRError" title="mwr_raw2l1.errors.MWRError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRError</span></code></a></p>
+<p>Raised if a wrong number of frequency channels is assumed for reading the file
+-&gt; this can happen for old-version BLB files where n_freq is read after being used</p>
+</dd></dl>
+
+</section>
+<section id="module-mwr_raw2l1.log">
+<span id="mwr-raw2l1-log-module"></span><h2>mwr_raw2l1.log module<a class="headerlink" href="#module-mwr_raw2l1.log" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-mwr_raw2l1.main">
+<span id="mwr-raw2l1-main-module"></span><h2>mwr_raw2l1.main module<a class="headerlink" href="#module-mwr_raw2l1.main" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.main.get_meas_constructor">
+<span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.main.</span></span><span class="sig-name descname"><span class="pre">get_meas_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mwr_raw2l1.main.get_meas_constructor" title="Permalink to this definition"></a></dt>
+<dd><p>get constructor method for measurement class from name string</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.main.get_reader">
+<span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.main.</span></span><span class="sig-name descname"><span class="pre">get_reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mwr_raw2l1.main.get_reader" title="Permalink to this definition"></a></dt>
+<dd><p>get data reader from name string</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.main.main">
+<span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.main.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inst_config_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nc_format_config_file</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mwr_raw2l1.main.main" title="Permalink to this definition"></a></dt>
+<dd><p>main function reading in raw files, generating and processing measurement instance and writing output file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inst_config_file</strong> – yaml configuration file for the instrument to process</p></li>
+<li><p><strong>nc_format_config_file</strong> – yaml configuration file defining the output NetCDF format</p></li>
+<li><p><strong>**kwargs</strong> – Keyword arguments passed over to get_files function, typically ‘time_start’ and ‘time_end’</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-mwr_raw2l1.write_netcdf">
+<span id="mwr-raw2l1-write-netcdf-module"></span><h2>mwr_raw2l1.write_netcdf module<a class="headerlink" href="#module-mwr_raw2l1.write_netcdf" title="Permalink to this headline"></a></h2>
+<p>Create NetCDF from xarray Dataset (or dictionary) according to specifications in the config file</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.write_netcdf.generate_history_str">
+<span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.write_netcdf.</span></span><span class="sig-name descname"><span class="pre">generate_history_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mwr_raw2l1.write_netcdf.generate_history_str" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.write_netcdf.prepare_datavars">
+<span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.write_netcdf.</span></span><span class="sig-name descname"><span class="pre">prepare_datavars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mwr_raw2l1.write_netcdf.prepare_datavars" title="Permalink to this definition"></a></dt>
+<dd><p>prepare xarray Dataset’s data variables for writing to file standard specified in conf</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.write_netcdf.prepare_global_attrs">
+<span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.write_netcdf.</span></span><span class="sig-name descname"><span class="pre">prepare_global_attrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mwr_raw2l1.write_netcdf.prepare_global_attrs" title="Permalink to this definition"></a></dt>
+<dd><p>add global attributes from configuration dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – xarray.Dataset</p></li>
+<li><p><strong>conf</strong> – configuration dictionary with global attributes under the key given by attr_key</p></li>
+<li><p><strong>attr_key</strong> – string specifying the key under which attributes are stored in conf dict. Usually ‘attributes’ or
+‘nc_attributes’</p></li>
+<li><p><strong>set_history</strong> – add history attribute specifying when and how file was generated. Defaults to True.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.write_netcdf.write">
+<span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.write_netcdf.</span></span><span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nc_conf_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inst_conf_file</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mwr_raw2l1.write_netcdf.write" title="Permalink to this definition"></a></dt>
+<dd><p>wrapper picking the right writer according to the type of data</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.write_netcdf.write_from_dict">
+<span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.write_netcdf.</span></span><span class="sig-name descname"><span class="pre">write_from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nc_conf_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inst_conf_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NETCDF4'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mwr_raw2l1.write_netcdf.write_from_dict" title="Permalink to this definition"></a></dt>
+<dd><p>write data dictionary to NetCDF according to the format definition in conf_file by using the netCDF4 module</p>
+<dl class="simple">
+<dt>CARE: This is a legacy function here for completeness but not maintained any further.</dt><dd><p>Especially, writing of global attributes is not yet included.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.write_netcdf.write_from_xarray">
+<span class="sig-prename descclassname"><span class="pre">mwr_raw2l1.write_netcdf.</span></span><span class="sig-name descname"><span class="pre">write_from_xarray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_nc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_inst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NETCDF4'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mwr_raw2l1.write_netcdf.write_from_xarray" title="Permalink to this definition"></a></dt>
+<dd><p>write data (Dataset) to NetCDF according to the format definition in conf_file by using the xarray module</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_in</strong> – xarray Dataset or DataArray containing data to write to file</p></li>
+<li><p><strong>filename</strong> – name and path of output NetCDF file</p></li>
+<li><p><strong>conf_nc</strong> – configuration dict of yaml file defining the format and contents of the output NetCDF file</p></li>
+<li><p><strong>conf_inst</strong> – configuration dict of yaml file with instrument specifications (contains global attrs for NetCDF)</p></li>
+<li><p><strong>format</strong> – NetCDF format type of the output file. Default is NETCDF4</p></li>
+<li><p><strong>copy_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – In case of False, the dataset will experience in-place modifications which is suitable when
+the dataset is not used in its original form after calling the write function, for True a copy is modified.
+Defaults to False.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-mwr_raw2l1">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mwr_raw2l1" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="mwr_raw2l1" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mwr_raw2l1.measurement.html" class="btn btn-neutral float-right" title="mwr_raw2l1.measurement package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rolf Rüfenacht.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
