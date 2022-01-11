@@ -225,5 +225,5 @@ attributes:
   references: E-PROFILE data format description document
   network_name: E-PROFILE
   dependencies: None
-  license: BSD 3-Clause License  # TODO: check for appropriate license
+  license: Closed-Use Non-Commercial General Licence 1.0 (CUNCGL)
   # history is directly set in NetCDF writer
