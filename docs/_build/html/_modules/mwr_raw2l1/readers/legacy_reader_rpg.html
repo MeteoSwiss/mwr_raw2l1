@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mwr_raw2l1.readers.legacy_reader_rpg &mdash; mwr_raw2l1  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> mwr_raw2l1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">mwr_raw2l1</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">mwr_raw2l1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>mwr_raw2l1.readers.legacy_reader_rpg</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mwr_raw2l1.readers.legacy_reader_rpg</h1><div class="highlight"><pre>
+<span></span><span class="c1"># TODO: once happy with the classes BRT, BLB, IRT, MET, HKD (incl doc) in reader_rpg.py the present file can be removed</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">mwr_raw2l1.readers.reader_rpg_helpers</span> <span class="kn">import</span> <span class="p">(</span><span class="n">interpret_angle</span><span class="p">,</span>
+                                                   <span class="n">interpret_coord</span><span class="p">,</span>
+                                                   <span class="n">interpret_time</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">mwr_raw2l1.measurement.scan_transform</span> <span class="kn">import</span> <span class="n">scan_endtime_to_time</span>
+
+<span class="n">missing_float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">999.</span>
+<span class="n">missing_int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9</span>
+
+
+<div class="viewcode-block" id="read_brt"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.legacy_reader_rpg.read_brt">[docs]</a><span class="k">def</span> <span class="nf">read_brt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read BRT file holding the MWR brightness temperatures of starring obs</span>
+<span class="sd">    (fixed azimuth and elevation)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        path to .brt file holding the starring MWR brightness temp obs.</span>
+<span class="sd">    accept_localtime : bool, optional</span>
+<span class="sd">        Accept that timestamp is stored in localtime. The default is False.</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data : dict</span>
+<span class="sd">        containts observations and metadata</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    flag meanings:</span>
+<span class="sd">        rainflag: 0, no rain; 1, rain</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">byte_offset</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># counter for consumed bytes</span>
+
+    <span class="c1"># header info</span>
+    <span class="c1">#############</span>
+
+    <span class="c1"># read and check file code</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">666666</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">666667</span><span class="p">:</span>
+        <span class="n">anglever</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">formatchar_angle</span> <span class="o">=</span> <span class="s1">&#39;f&#39;</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">666000</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">667000</span><span class="p">:</span>
+        <span class="n">anglever</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">formatchar_angle</span> <span class="o">=</span> <span class="s1">&#39;i&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown file format. Known codes for BRT files are &#39;</span>
+                         <span class="o">+</span> <span class="s1">&#39;666666, 666667, 666000 or 667000 but received </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">])</span>
+
+        <span class="c1"># read rest of header info</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;timeref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;frequency&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tb_min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tb_max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+
+    <span class="c1"># tests on header</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">accept_localtime</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;timeref&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Time encoded in local time but UTC required by &quot;accept_localtime&quot;&#39;</span><span class="p">)</span>
+
+    <span class="c1"># measurements</span>
+    <span class="c1">##############</span>
+
+    <span class="c1"># init measurements</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">))</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rainflag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ele&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;azi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+
+    <span class="c1"># read measurements</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">]):</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpret_time</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rainflag&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tb&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ele&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;azi&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpret_angle</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span>
+            <span class="s1">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="n">formatchar_angle</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">anglever</span><span class="p">)</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="read_blb"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.legacy_reader_rpg.read_blb">[docs]</a><span class="k">def</span> <span class="nf">read_blb</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read BLB file holding the MWR brightness temperatures of elevation scans</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        path to .blb file holding the scanning observations.</span>
+<span class="sd">    accept_localtime : bool, optional</span>
+<span class="sd">        Accept that timestamp is stored in localtime. The default is False.</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data : dict</span>
+<span class="sd">        contains observations and metadata</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    rainflag: 0, no rain; 1, rain</span>
+<span class="sd">    scanmode: 0, 1st quadrant; 1, 2nd quadrant; 2, two quadrant avg; 3, two independent scans</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">n_freq_default</span> <span class="o">=</span> <span class="mi">14</span>  <span class="c1"># used to read in files of structver=1 where spectram comes before n_freq</span>
+    <span class="c1"># TODO: check how RPG deals with files from TEMPRO or HUMPRO how would have different n_freq. Other filecodes? Could also get frequency info from BRT files but ugly dependency.</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">byte_offset</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># counter for consumed bytes</span>
+
+    <span class="c1"># header info</span>
+    <span class="c1">#############</span>
+
+    <span class="c1"># read and check file code</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">567845847</span><span class="p">:</span>
+        <span class="n">structver</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">567845848</span><span class="p">:</span>
+        <span class="n">structver</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;Unknown file format. Known codes for BLB files are 567845847 and 567845848 but received </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data</span><span class="p">[</span>
+                <span class="s1">&#39;filecode&#39;</span><span class="p">])</span>
+
+        <span class="c1"># read rest of header info</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_scans&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="k">if</span> <span class="n">structver</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_freq_default</span>  <span class="c1"># no byte offset here as not reading from file</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tb_min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tb_max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;timeref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="k">if</span> <span class="n">structver</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># n_freq already assumed for reading in previous spectra, check whether this was correct</span>
+        <span class="n">n_freq_file</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="n">n_freq_file</span> <span class="o">!=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Assumed wrong number of frequency channels for reading in BLB header&#39;</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;frequency&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;scan_ele&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_scans&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span>
+
+    <span class="c1"># measurements</span>
+    <span class="c1">##############</span>
+
+    <span class="c1"># init measurements</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;scan_starttime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">))</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">))</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rainflag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;scanmode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ele&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="c1"># TODO: find a way to infer data[&#39;azi&#39;]</span>
+    <span class="n">single_scan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+
+    <span class="c1"># read measurements. flatten scan in series of time at different azimuth and ele</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_scans&#39;</span><span class="p">]):</span>
+        <span class="n">i0</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span>
+        <span class="n">i1</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span>
+
+        <span class="c1"># write per-scan information to time series</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;scan_starttime&#39;</span><span class="p">][</span><span class="n">i0</span><span class="p">:</span><span class="n">i1</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpret_time</span><span class="p">(</span>
+            <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][</span><span class="n">i0</span><span class="p">:</span><span class="n">i1</span><span class="p">]</span> <span class="o">=</span> <span class="n">scan_endtime_to_time</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;scan_starttime&#39;</span><span class="p">][</span><span class="n">i0</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">])</span>  <span class="c1"># no byte offset here</span>
+        <span class="n">flagbits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unpackbits</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span>
+            <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">bitorder</span><span class="o">=</span><span class="s1">&#39;little&#39;</span><span class="p">)</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rainflag&#39;</span><span class="p">][</span><span class="n">i0</span><span class="p">:</span><span class="n">i1</span><span class="p">]</span> <span class="o">=</span> <span class="n">flagbits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">structver</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;scanmode&#39;</span><span class="p">][</span><span class="n">i0</span><span class="p">:</span><span class="n">i1</span><span class="p">]</span> <span class="o">=</span> <span class="n">flagbits</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">flagbits</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;scanmode&#39;</span><span class="p">][</span><span class="n">i0</span><span class="p">:</span><span class="n">i1</span><span class="p">]</span> <span class="o">=</span> <span class="n">flagbits</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">flagbits</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ele&#39;</span><span class="p">][</span><span class="n">i0</span><span class="p">:</span><span class="n">i1</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;scan_ele&#39;</span><span class="p">]</span>
+
+        <span class="c1"># write observations to time series</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]):</span>
+            <span class="n">single_scan</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)</span>
+            <span class="n">byte_offset</span> <span class="o">+=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tb&#39;</span><span class="p">][</span><span class="n">i0</span><span class="p">:</span><span class="n">i1</span><span class="p">]</span> <span class="o">=</span> <span class="n">single_scan</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># first n_ele elemts are Tb</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">][</span><span class="n">i0</span><span class="p">:</span><span class="n">i1</span><span class="p">]</span> <span class="o">=</span> <span class="n">single_scan</span><span class="p">[</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># last element is ambient temperature (same for each frequency)</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="read_irt"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.legacy_reader_rpg.read_irt">[docs]</a><span class="k">def</span> <span class="nf">read_irt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read IRT file holding the infrared brightness temperatures</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        path to .irt file holding the infrared observations.</span>
+<span class="sd">    accept_localtime : bool, optional</span>
+<span class="sd">        Accept that timestamp is stored in localtime. The default is False.</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data : dict</span>
+<span class="sd">        containts observations and metadata</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    flag meanings:</span>
+<span class="sd">        rainflag: 0, no rain; 1, rain</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">byte_offset</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># counter for consumed bytes</span>
+
+    <span class="c1"># header info</span>
+    <span class="c1">#############</span>
+
+    <span class="c1"># read and check file code</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">671112495</span><span class="p">:</span>
+        <span class="n">structver</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">671112496</span><span class="p">:</span>
+        <span class="n">structver</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">anglever</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">formatchar_angle</span> <span class="o">=</span> <span class="s1">&#39;f&#39;</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">671112000</span><span class="p">:</span>
+        <span class="n">structver</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">anglever</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">formatchar_angle</span> <span class="o">=</span> <span class="s1">&#39;i&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown file format. Known codes for IRT files are &#39;</span>
+                         <span class="o">+</span> <span class="s1">&#39;671112495, 671112496 or 671112000 but received </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">])</span>
+
+        <span class="c1"># read rest of header info</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;IRT_min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;IRT_max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;timeref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="k">if</span> <span class="n">structver</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ir_wavelengths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ir_wavelength&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ir_wavelengths&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ir_wavelengths&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ir_wavelengths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ir_wavelength&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">missing_float</span>
+
+    <span class="c1"># tests on header</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">accept_localtime</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;timeref&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Time encoded in local time but UTC required by &quot;accept_localtime&quot;&#39;</span><span class="p">)</span>
+
+    <span class="c1"># measurements</span>
+    <span class="c1">##############</span>
+
+    <span class="c1"># init measurements</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">))</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rainflag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;IRT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ir_wavelengths&#39;</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ele&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;azi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+
+    <span class="c1"># read measurements</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">]):</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpret_time</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rainflag&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;IRT&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ir_wavelengths&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ir_wavelengths&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="n">structver</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ele&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;azi&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpret_angle</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span>
+                <span class="s1">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="n">formatchar_angle</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">anglever</span><span class="p">)</span>
+            <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="read_met"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.legacy_reader_rpg.read_met">[docs]</a><span class="k">def</span> <span class="nf">read_met</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read MET file holding the observations of the weather sensors</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        path to .met file holding the meteorological observations.</span>
+<span class="sd">    accept_localtime : bool, optional</span>
+<span class="sd">        Accept that timestamp is stored in localtime. The default is False.</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data : dict</span>
+<span class="sd">        containts observations and metadata</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    flag meanings:</span>
+<span class="sd">        rainflag: 0, no rain; 1, rain</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">byte_offset</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># counter for consumed bytes</span>
+
+    <span class="c1"># header info</span>
+    <span class="c1">#############</span>
+
+    <span class="c1"># read and check file code</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">599658943</span><span class="p">:</span>
+        <span class="n">structver</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">599658944</span><span class="p">:</span>
+        <span class="n">structver</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown file format. Known codes for MET files are &#39;</span>
+                         <span class="o">+</span> <span class="s1">&#39;599658943 or 599658944 but received </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">])</span>
+
+        <span class="c1"># read rest of header info</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># number of measurements each indivitual sensor took</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="k">if</span> <span class="n">structver</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># get list of additional sensors</span>
+        <span class="n">auxsensbits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unpackbits</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span>
+            <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">bitorder</span><span class="o">=</span><span class="s1">&#39;little&#39;</span><span class="p">)</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_windspeed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">auxsensbits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_winddir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">auxsensbits</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_rainrate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">auxsensbits</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_windspeed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_winddir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_rainrate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># no byte offset here as not reading from file</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;p_min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;p_max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T_min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T_max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;RH_min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;RH_max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_windspeed&#39;</span><span class="p">]:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;windspeed_min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;windspeed_max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;windspeed_min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">missing_float</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;windspeed_max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">missing_float</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_winddir&#39;</span><span class="p">]:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;winddir_min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;winddir_max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;winddir_min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">missing_float</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;winddir_max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">missing_float</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_rainrate&#39;</span><span class="p">]:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rainrate_min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rainrate_max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rainrate_min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">missing_float</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rainrate_max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;timeref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+
+    <span class="c1"># tests on header</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">accept_localtime</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;timeref&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Time encoded in local time but UTC required by &quot;accept_localtime&quot;&#39;</span><span class="p">)</span>
+
+        <span class="c1"># measurements</span>
+    <span class="c1">##############</span>
+
+    <span class="c1"># init measurements</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">))</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rainflag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;RH&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;windspeed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;winddir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rainrate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+
+    <span class="c1"># read measurements</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">]):</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpret_time</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rainflag&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;RH&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_windspeed&#39;</span><span class="p">]:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;windspeed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_winddir&#39;</span><span class="p">]:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;winddir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_rainrate&#39;</span><span class="p">]:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rainrate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="read_hkd"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.legacy_reader_rpg.read_hkd">[docs]</a><span class="k">def</span> <span class="nf">read_hkd</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read HKD file holding the housekeeping data</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        path to .hkd file holding the housekeeping data.</span>
+<span class="sd">    accept_localtime : bool, optional</span>
+<span class="sd">        Accept that timestamp is stored in localtime. The default is False.</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data : dict</span>
+<span class="sd">        contains observations and metadata</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    flag meanings:</span>
+<span class="sd">        rainflag: 0, no rain; 1, rain</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">n_freq_kband</span> <span class="o">=</span> <span class="mi">7</span>  <span class="c1"># number of frequency channels in K-band receiver</span>
+    <span class="n">n_freq_vband</span> <span class="o">=</span> <span class="mi">7</span>  <span class="c1"># number of frequency channels in V-band receiver</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">byte_offset</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># counter for consumed bytes</span>
+
+    <span class="c1"># header info</span>
+    <span class="c1">#############</span>
+
+    <span class="c1"># read and check file code</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">837854832</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown file format. Known codes for HKD file is &#39;</span>
+                         <span class="o">+</span> <span class="s1">&#39;837854832 but received </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;filecode&#39;</span><span class="p">])</span>
+
+        <span class="c1"># read rest of header info</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;timeref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">hkdselbits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unpackbits</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">))</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span>
+        <span class="n">bitorder</span><span class="o">=</span><span class="s1">&#39;little&#39;</span><span class="p">)</span>
+    <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_coord&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hkdselbits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_T&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hkdselbits</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_stability&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hkdselbits</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_flashmemoryinfo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hkdselbits</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_qualityflag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hkdselbits</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_statusflag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hkdselbits</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>  <span class="c1"># following three bytes of hkdselbits not used</span>
+
+    <span class="c1"># tests on header</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">accept_localtime</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;timeref&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Time encoded in local time but UTC required by &quot;accept_localtime&quot;&#39;</span><span class="p">)</span>
+
+    <span class="c1"># measurement info</span>
+    <span class="c1">##################</span>
+
+    <span class="c1"># init variables</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">))</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;alarm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T_amb_1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T_amb_2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T_receiver_kband&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T_receiver_vband&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tstab_kband&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tstab_vband&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;flashmemory_remaining&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;L2_qualityflag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;channel_quality_ok_kband&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">n_freq_kband</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;channel_quality_ok_vband&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">n_freq_vband</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rainflag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;blowerspeed_status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;BLscan_active&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;tipcal_active&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;gaincal_active&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;noisecal_active&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;noisediode_ok_kband&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;noisediode_ok_vband&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tstab_ok_kband&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tstab_ok_vband&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;recent_powerfailure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tstab_ok_amb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;noisediode_on&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_int</span>
+
+    <span class="c1"># read measurement info</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">]):</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpret_time</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;alarm&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_coord&#39;</span><span class="p">]:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpret_coord</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpret_coord</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_T&#39;</span><span class="p">]:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T_amb_1&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T_amb_2&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T_receiver_kband&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T_receiver_vband&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_stability&#39;</span><span class="p">]:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tstab_kband&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tstab_vband&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;f&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_flashmemoryinfo&#39;</span><span class="p">]:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;flashmemory_remaining&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_qualityflag&#39;</span><span class="p">]:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;L2_qualityflag&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># don&#39;t interpret L2 qualityflag further. Refer to manual for interpretation</span>
+            <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_statusflag&#39;</span><span class="p">]:</span>
+            <span class="n">statusflagbits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unpackbits</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">byte_offset</span><span class="p">))</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span>
+                <span class="n">bitorder</span><span class="o">=</span><span class="s1">&#39;little&#39;</span><span class="p">)</span>
+            <span class="n">byte_offset</span> <span class="o">+=</span> <span class="mi">4</span>
+
+            <span class="c1"># interpret statusflagbits</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;channel_quality_ok_kband&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">n_freq_kband</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;channel_quality_ok_vband&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">8</span><span class="p">:(</span><span class="mi">8</span> <span class="o">+</span> <span class="n">n_freq_vband</span><span class="p">)]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rainflag&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;blowerspeed_status&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">17</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;BLscan_active&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">18</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;tipcal_active&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">19</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;gaincal_active&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">20</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;noisecal_active&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">21</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;noisediode_ok_kband&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">22</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;noisediode_ok_vband&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">23</span><span class="p">]</span>
+            <span class="n">Tstabflag_kband</span> <span class="o">=</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">24</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">25</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">Tstabflag_kband</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tstab_ok_kband&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">Tstabflag_kband</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span>  <span class="c1"># 1:ok, 0:insufficient, fillvalue:unknown</span>
+            <span class="n">Tstabflag_vband</span> <span class="o">=</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">26</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">27</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">Tstabflag_vband</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tstab_ok_vband&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">Tstabflag_vband</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span>  <span class="c1"># 1:ok, 0:insufficient, fillvalue:unknown</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;recent_powerfailure&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">28</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tstab_ok_amb&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="ow">not</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">29</span><span class="p">])</span>  <span class="c1"># 1:ok, 0:not ok because sensors differ by &gt;0.3 K</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;noisediode_on&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">statusflagbits</span><span class="p">[</span><span class="mi">30</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">base_filename</span> <span class="o">=</span> <span class="s1">&#39;MWR_0-20000-0-06610_A201908040100&#39;</span>
+    <span class="n">filename_noext</span> <span class="o">=</span> <span class="s1">&#39;../data/rpg/0-20000-0-06610/&#39;</span> <span class="o">+</span> <span class="n">base_filename</span>
+    <span class="n">brt</span> <span class="o">=</span> <span class="n">read_brt</span><span class="p">(</span><span class="n">filename_noext</span> <span class="o">+</span> <span class="s1">&#39;.BRT&#39;</span><span class="p">)</span>
+    <span class="n">blb</span> <span class="o">=</span> <span class="n">read_blb</span><span class="p">(</span><span class="n">filename_noext</span> <span class="o">+</span> <span class="s1">&#39;.BLB&#39;</span><span class="p">)</span>
+    <span class="n">irt</span> <span class="o">=</span> <span class="n">read_irt</span><span class="p">(</span><span class="n">filename_noext</span> <span class="o">+</span> <span class="s1">&#39;.IRT&#39;</span><span class="p">)</span>
+    <span class="n">met</span> <span class="o">=</span> <span class="n">read_met</span><span class="p">(</span><span class="n">filename_noext</span> <span class="o">+</span> <span class="s1">&#39;.MET&#39;</span><span class="p">)</span>
+    <span class="n">hkd</span> <span class="o">=</span> <span class="n">read_hkd</span><span class="p">(</span><span class="n">filename_noext</span> <span class="o">+</span> <span class="s1">&#39;.HKD&#39;</span><span class="p">)</span>
+
+    <span class="c1"># # generate new pickle of the read-in data</span>
+    <span class="c1"># dir_pickle = &#39;tests/data/rpg/&#39;</span>
+    <span class="c1"># vars = [brt, blb, irt, met, hkd]</span>
+    <span class="c1"># varnames = [&#39;brt&#39;, &#39;blb&#39;, &#39;irt&#39;, &#39;met&#39;, &#39;hkd&#39;]</span>
+    <span class="c1"># for var, varname in zip(vars, varnames):</span>
+    <span class="c1">#     var.pop(&#39;filecode&#39;, None)</span>
+    <span class="c1">#     outfile = dir_pickle + &#39;/&#39; + base_filename + &#39;_&#39; + varname + &#39;_legacy.pkl&#39;</span>
+    <span class="c1">#     pickle_dump(var, outfile)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rolf Rüfenacht.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -64,13 +64,11 @@ class BaseReader(object):
                 self.byte_offset, self.filename, len(self.data_bin)))
 
     def decode_binary(self, encoding_pattern, byte_order=BYTE_ORDER):
-        """"
-        decode next variables from binary stream and write to dict self.data + augment self.byte_offset
+        """decode next variables from binary stream and write to dict self.data + augment self.byte_offset
+
         Args:
             encoding_pattern: a list of tuples or lists containing the individual variable description
-                              e.g. [dict(name='n_meas', type='i', shape=(1,)),
-                                    dict(name='timeref', type='i', shape=(1,)),
-                                    dict(name='n_freq', type='i', shape=(1,))]
+                e.g. [dict(name='n_meas', type='i', shape=(1,)), dict(name='Tb', type='f', shape=(n_freq,)), ...]
         """
         for enc in encoding_pattern:
             full_type = byte_order + np.prod(enc['shape']) * enc['type']
@@ -83,13 +81,11 @@ class BaseReader(object):
                 self.data[enc['name']] = out
 
     def decode_binary_np(self, encoding_pattern, n_entries, byte_order=BYTE_ORDER):
-        """decode bunch of binary stream via 2d numpy array to write to dict self.data + augment self.byte_offset
+        """decode from binary stream via :class:`numpy.ndarray` to write to dict self.data + augment self.byte_offset
 
         Args:
             encoding_pattern: a list of tuples or lists containing the individual variable description for one time step
-                              e.g. [dict(name='time_raw', type='i', shape=(1,)),
-                                    dict(name='rainflag', type='B', shape=(1,)),
-                                    dict(name='Tb', type='f', shape=(n_freq,))]
+                e.g. [dict(name='time_raw', type='i', shape=(1,)), dict(name='Tb', type='f', shape=(n_freq,)), ...]
         """
         dtype_np = np.dtype([(ep['name'], byte_order+ep['type'], ep['shape']) for ep in encoding_pattern])
         names = [ep['name'] for ep in encoding_pattern]

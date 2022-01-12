@@ -98,7 +98,7 @@ def generate_output_filename(basename, time, ext='nc'):
 
     Args:
         basename: the first part of the filename without the date
-        time: xarray.Datarray time vector of the data in np.datetime64 format. Assumed to be sorted
+        time: :class:`xarray.DataArray` time vector of the data in :class:`numpy.datetime64` format. Assume to be sorted
         ext (optional): filename extension. Defaults to 'nc'. Empty not permitted.
     """
     return '{}{}.{}'.format(basename, time[-1].dt.strftime('%Y%m%d%H%M').data, ext)

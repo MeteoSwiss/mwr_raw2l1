@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mwr_raw2l1.readers.reader_rpg &mdash; mwr_raw2l1  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> mwr_raw2l1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">mwr_raw2l1</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">mwr_raw2l1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>mwr_raw2l1.readers.reader_rpg</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mwr_raw2l1.readers.reader_rpg</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">readers for the different binary files from RPG radiometers (HATPRO, TEMPRO or HUMPRO)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">mwr_raw2l1.errors</span> <span class="kn">import</span> <span class="n">WrongFileType</span><span class="p">,</span> <span class="n">WrongNumberOfChannels</span>
+<span class="kn">from</span> <span class="nn">mwr_raw2l1.log</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">mwr_raw2l1.readers.base_reader_rpg</span> <span class="kn">import</span> <span class="n">BaseReader</span>
+<span class="kn">from</span> <span class="nn">mwr_raw2l1.readers.reader_rpg_helpers</span> <span class="kn">import</span> <span class="p">(</span><span class="n">interpret_hkd_contents_code</span><span class="p">,</span> <span class="n">interpret_met_auxsens_code</span><span class="p">,</span>
+                                                   <span class="n">interpret_scanflag</span><span class="p">,</span> <span class="n">interpret_statusflag</span><span class="p">)</span>
+
+<span class="n">N_FREQ_DEFAULT</span> <span class="o">=</span> <span class="mi">14</span>    <span class="c1"># needed before as freq used before read-in in old BRT file format</span>
+<span class="c1"># TODO: check how RPG deals with files from TEMPRO or HUMPRO how would have different n_freq. Other filecodes?</span>
+
+
+<div class="viewcode-block" id="BRT"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.BRT">[docs]</a><span class="k">class</span> <span class="nc">BRT</span><span class="p">(</span><span class="n">BaseReader</span><span class="p">):</span>
+<div class="viewcode-block" id="BRT.interpret_filecode"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.BRT.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BRT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpret_filecode</span><span class="p">()</span>
+
+        <span class="c1"># check if filecode corresponds to a BRT file</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;brt&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">WrongFileType</span><span class="p">(</span><span class="s1">&#39;filecode of input file corresponds to a </span><span class="si">{}</span><span class="s1">-file but this reader is for BRT&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]))</span></div>
+
+    <span class="k">def</span> <span class="nf">_read_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># quantities with fixed length</span>
+        <span class="n">encodings_bin_fix</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;n_meas&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;timeref&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;n_freq&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary</span><span class="p">(</span><span class="n">encodings_bin_fix</span><span class="p">)</span>
+
+        <span class="c1"># quantities with length dependent on number of spectral channels (n_freq) only possible after n_freq is read</span>
+        <span class="n">n_freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span>
+        <span class="n">encodings_bin_var</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;frequency&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_freq</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Tb_min&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_freq</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Tb_max&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_freq</span><span class="p">,))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary</span><span class="p">(</span><span class="n">encodings_bin_var</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_meas</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">n_freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span>
+        <span class="n">encodings_bin</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;time_raw&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;rainflag&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Tb&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_freq</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;pointing_raw&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;formatchar_angle&#39;</span><span class="p">],</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary_np</span><span class="p">(</span><span class="n">encodings_bin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="BLB"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.BLB">[docs]</a><span class="k">class</span> <span class="nc">BLB</span><span class="p">(</span><span class="n">BaseReader</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">header_reader</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BLB</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BLB.interpret_filecode"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.BLB.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BLB</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpret_filecode</span><span class="p">()</span>
+
+        <span class="c1"># check if filecode corresponds to a BLB file</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;blb&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">WrongFileType</span><span class="p">(</span><span class="s1">&#39;filecode of input file corresponds to a </span><span class="si">{}</span><span class="s1">-file but this reader is for BLB&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">header_reader</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_read_header_</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;structver&#39;</span><span class="p">]))</span></div>
+
+    <span class="k">def</span> <span class="nf">_read_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">header_reader</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_read_header_1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Function for reading header for files with structver 1 (n_freq first assumed and read only afterwards)&quot;&quot;&quot;</span>
+        <span class="c1"># quantities with fixed length</span>
+        <span class="n">encodings_bin_fix</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;n_scans&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary</span><span class="p">(</span><span class="n">encodings_bin_fix</span><span class="p">)</span>
+
+        <span class="c1"># quantities with length dependent on number of spectral channels (n_freq) only possible after n_freq is read</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">N_FREQ_DEFAULT</span>  <span class="c1"># need assumption as number of channels is encoded after used for read</span>
+        <span class="n">n_freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span>
+        <span class="n">encodings_bin_var_1</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Tb_min&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_freq</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Tb_max&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_freq</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;timeref&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;n_freq_file&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;frequency&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_freq</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;n_ele&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary</span><span class="p">(</span><span class="n">encodings_bin_var_1</span><span class="p">)</span>
+
+        <span class="c1"># quantities with length dependent on number of elevations in scan (n_ele) only possible after n_ele is read</span>
+        <span class="n">n_ele</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span>
+        <span class="n">encodings_bin_var_2</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;scan_ele&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_ele</span><span class="p">,))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary</span><span class="p">(</span><span class="n">encodings_bin_var_2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_header_2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Function for reading header for files with structver 2 (no assumption on n_freq needed&quot;&quot;&quot;</span>
+        <span class="c1"># quantities with fixed length</span>
+        <span class="n">encodings_bin_fix</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;n_scans&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;n_freq&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary</span><span class="p">(</span><span class="n">encodings_bin_fix</span><span class="p">)</span>
+
+        <span class="c1"># quantities with length dependent on number of spectral channels (n_freq) only possible after n_freq is read</span>
+        <span class="n">n_freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span>
+        <span class="n">encodings_bin_var_1</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Tb_min&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_freq</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Tb_max&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_freq</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;timeref&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;frequency&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_freq</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;n_ele&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary</span><span class="p">(</span><span class="n">encodings_bin_var_1</span><span class="p">)</span>
+
+        <span class="c1"># quantities with length dependent on number of elevations in scan (n_ele) only possible after n_ele is read</span>
+        <span class="n">n_ele</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span>
+        <span class="n">encodings_bin_var_2</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;scan_ele&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_ele</span><span class="p">,))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary</span><span class="p">(</span><span class="n">encodings_bin_var_2</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BLB.interpret_header"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.BLB.interpret_header">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BLB</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpret_header</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_scans&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span>
+
+        <span class="c1"># check if correct number of channels was assumed for reading in structver 1 file</span>
+        <span class="k">if</span> <span class="s1">&#39;n_freq_file&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq_file&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="n">WrongNumberOfChannels</span><span class="p">(</span>
+                    <span class="s1">&#39;assumed number of channels (</span><span class="si">{}</span><span class="s1">) for reading this BLB file seems wrong&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]))</span></div>
+
+    <span class="k">def</span> <span class="nf">_read_meas</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">n_ele</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span>
+        <span class="n">n_freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span>
+        <span class="n">encodings_bin</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;time_raw&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>  <span class="c1"># scan starttime here, will be transformed to series</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;scanflag&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;scanobs&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_freq</span><span class="p">,</span> <span class="n">n_ele</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>  <span class="c1"># Tb on n_ele + T (stored at n_ele+1)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary_np</span><span class="p">(</span><span class="n">encodings_bin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_scans&#39;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="BLB.interpret_raw_data"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.BLB.interpret_raw_data">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BLB</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpret_raw_data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpret_scanobs</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">interpret_scanflag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;scanflag&#39;</span><span class="p">]))</span></div>
+
+<div class="viewcode-block" id="BLB.interpret_scanobs"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.BLB.interpret_scanobs">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_scanobs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;transform scanobs 3D array to time series of spectra and temperature&quot;&quot;&quot;</span>
+
+        <span class="c1"># extract ambient temperature (ambient temperature equal for each frequency, one per scan)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;scanobs&#39;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># extract spectra of brightness temperatures for each ele in dimension (time, freq, ele)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;scanobs&#39;</span><span class="p">][:,</span> <span class="p">:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="IRT"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.IRT">[docs]</a><span class="k">class</span> <span class="nc">IRT</span><span class="p">(</span><span class="n">BaseReader</span><span class="p">):</span>
+<div class="viewcode-block" id="IRT.interpret_filecode"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.IRT.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">IRT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpret_filecode</span><span class="p">()</span>
+
+        <span class="c1"># check if filecode corresponds to a IRT file</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;irt&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">WrongFileType</span><span class="p">(</span><span class="s1">&#39;filecode of input file corresponds to a </span><span class="si">{}</span><span class="s1">-file but this reader is for IRT&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]))</span></div>
+
+    <span class="k">def</span> <span class="nf">_read_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># quantities with fixed length</span>
+        <span class="n">encodings_bin_fix</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;n_meas&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;IRT_min&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;IRT_max&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;timeref&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))]</span>  <span class="c1"># define as list to be able to append.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;structver&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">encodings_bin_fix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;n_ir_wavelengths&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary</span><span class="p">(</span><span class="n">encodings_bin_fix</span><span class="p">)</span>
+
+        <span class="c1"># quantities with length dependent on number of spectral channels (n_wavelenghts) only possible after read</span>
+        <span class="n">n_wl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ir_wavelengths&#39;</span><span class="p">]</span>
+        <span class="n">encodings_bin_var</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;ir_wavelength&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_wl</span><span class="p">,))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary</span><span class="p">(</span><span class="n">encodings_bin_var</span><span class="p">)</span>
+
+        <span class="c1"># complete missing input for structver == 1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;structver&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ir_wavelengths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;ir_wavelength&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="k">def</span> <span class="nf">_read_meas</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">n_wl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ir_wavelengths&#39;</span><span class="p">]</span>
+        <span class="n">encodings_bin</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;time_raw&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;rainflag&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;IRT&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_wl</span><span class="p">,))]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;structver&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">encodings_bin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;pointing_raw&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;formatchar_angle&#39;</span><span class="p">],</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary_np</span><span class="p">(</span><span class="n">encodings_bin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="MET"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.MET">[docs]</a><span class="k">class</span> <span class="nc">MET</span><span class="p">(</span><span class="n">BaseReader</span><span class="p">):</span>
+<div class="viewcode-block" id="MET.interpret_filecode"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.MET.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MET</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpret_filecode</span><span class="p">()</span>
+
+        <span class="c1"># check if filecode corresponds to a MET file</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;met&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">WrongFileType</span><span class="p">(</span><span class="s1">&#39;filecode of input file corresponds to a </span><span class="si">{}</span><span class="s1">-file but this reader is for MET&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]))</span></div>
+
+    <span class="k">def</span> <span class="nf">_read_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># quantities with fixed length</span>
+        <span class="n">encodings_bin_fix</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;n_meas&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;structver&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">encodings_bin_fix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;auxsens_code&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;p_min&#39;</span><span class="p">,</span> <span class="s1">&#39;p_max&#39;</span><span class="p">,</span> <span class="s1">&#39;T_min&#39;</span><span class="p">,</span> <span class="s1">&#39;T_max&#39;</span><span class="p">,</span> <span class="s1">&#39;RH_min&#39;</span><span class="p">,</span> <span class="s1">&#39;RH_max&#39;</span><span class="p">]:</span>
+            <span class="n">encodings_bin_fix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">var</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>  <span class="c1"># the variables all have same type and shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary</span><span class="p">(</span><span class="n">encodings_bin_fix</span><span class="p">)</span>
+
+        <span class="c1"># interpret availability of auxiliary sensor data</span>
+        <span class="n">auxsens_input</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="s1">&#39;auxsens_code&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;auxsens_code&#39;</span><span class="p">]</span>
+        <span class="n">auxsens_contents</span> <span class="o">=</span> <span class="n">interpret_met_auxsens_code</span><span class="p">(</span><span class="n">auxsens_input</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">auxsens_contents</span><span class="p">)</span>
+
+        <span class="c1"># quantities with existence depending on auxsens contents</span>
+        <span class="n">encodings_bin_var</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_windspeed&#39;</span><span class="p">]:</span>
+            <span class="n">encodings_bin_var</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;windspeed_min&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+            <span class="n">encodings_bin_var</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;windspeed_max&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_winddir&#39;</span><span class="p">]:</span>
+            <span class="n">encodings_bin_var</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;winddir_min&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+            <span class="n">encodings_bin_var</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;winddir_max&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_rainrate&#39;</span><span class="p">]:</span>
+            <span class="n">encodings_bin_var</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;rainrate_min&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+            <span class="n">encodings_bin_var</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;rainrate_max&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+        <span class="n">encodings_bin_var</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;timeref&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary</span><span class="p">(</span><span class="n">encodings_bin_var</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_meas</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">encodings_bin</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;time_raw&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;rainflag&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;RH&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_windspeed&#39;</span><span class="p">]:</span>
+            <span class="n">encodings_bin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;windspeed&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_winddir&#39;</span><span class="p">]:</span>
+            <span class="n">encodings_bin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;winddir&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_rainrate&#39;</span><span class="p">]:</span>
+            <span class="n">encodings_bin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;rainrate&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary_np</span><span class="p">(</span><span class="n">encodings_bin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="HKD"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.HKD">[docs]</a><span class="k">class</span> <span class="nc">HKD</span><span class="p">(</span><span class="n">BaseReader</span><span class="p">):</span>
+<div class="viewcode-block" id="HKD.interpret_filecode"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.HKD.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HKD</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpret_filecode</span><span class="p">()</span>
+
+        <span class="c1"># check if filecode corresponds to a HKD file</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;hkd&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">WrongFileType</span><span class="p">(</span><span class="s1">&#39;filecode of input file corresponds to a </span><span class="si">{}</span><span class="s1">-file but this reader is for HKD&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]))</span></div>
+
+    <span class="k">def</span> <span class="nf">_read_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">encodings_bin</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;n_meas&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;timeref&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;hkd_contents_code&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary</span><span class="p">(</span><span class="n">encodings_bin</span><span class="p">)</span>
+
+        <span class="n">file_contents</span> <span class="o">=</span> <span class="n">interpret_hkd_contents_code</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;hkd_contents_code&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">file_contents</span><span class="p">)</span>  <span class="c1"># add variables &#39;has_...&#39; used below to the data dictionary</span>
+
+    <span class="k">def</span> <span class="nf">_read_meas</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">encodings_bin</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;time_raw&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;alarm&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_coord&#39;</span><span class="p">]:</span>
+            <span class="n">encodings_bin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;lon_raw&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+            <span class="n">encodings_bin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;lat_raw&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_T&#39;</span><span class="p">]:</span>
+            <span class="n">encodings_bin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;T_amb_1&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+            <span class="n">encodings_bin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;T_amb_2&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+            <span class="n">encodings_bin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;T_receiver_kband&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+            <span class="n">encodings_bin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;T_receiver_vband&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_stability&#39;</span><span class="p">]:</span>
+            <span class="n">encodings_bin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Tstab_kband&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+            <span class="n">encodings_bin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Tstab_vband&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_flashmemoryinfo&#39;</span><span class="p">]:</span>
+            <span class="n">encodings_bin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;flashmemory_remaining&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_qualityflag&#39;</span><span class="p">]:</span>
+            <span class="n">encodings_bin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;L2_qualityflag&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_statusflag&#39;</span><span class="p">]:</span>
+            <span class="n">encodings_bin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;statusflag&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary_np</span><span class="p">(</span><span class="n">encodings_bin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="HKD.interpret_raw_data"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.HKD.interpret_raw_data">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HKD</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpret_raw_data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">interpret_statusflag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;statusflag&#39;</span><span class="p">]))</span></div></div>
+
+
+<span class="c1"># TODO: Consider transforming to SI units. IRT/IRT_min/IRT_max -&gt; K; ir_wavelength -&gt; m; frequency -&gt; Hz.</span>
+<span class="c1">#  could be done in interpret_raw_data of BaseReader class</span>
+
+
+<div class="viewcode-block" id="read_multiple_files"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.read_multiple_files">[docs]</a><span class="k">def</span> <span class="nf">read_multiple_files</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;read multiple L1-related files and return dictionary of executed read-in class instances</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        files: list of files to read in</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dictionary with keys brt, blb, irt, met, hkd containing list with all read-in class instances for the</span>
+<span class="sd">        corresponding file extension matching basename and the timing requirement. If no file of the corresponding type</span>
+<span class="sd">        is found an empty list is returned for this key.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="c1"># assign reader class (value) to lowercase file extension (key). All keys will have an entry in the output dict</span>
+    <span class="n">reader_for_ext</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;brt&#39;</span><span class="p">:</span> <span class="n">BRT</span><span class="p">,</span> <span class="s1">&#39;blb&#39;</span><span class="p">:</span> <span class="n">BLB</span><span class="p">,</span> <span class="s1">&#39;irt&#39;</span><span class="p">:</span> <span class="n">IRT</span><span class="p">,</span> <span class="s1">&#39;met&#39;</span><span class="p">:</span> <span class="n">MET</span><span class="p">,</span> <span class="s1">&#39;hkd&#39;</span><span class="p">:</span> <span class="n">HKD</span><span class="p">}</span>
+
+    <span class="n">all_data</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">reader_for_ext</span><span class="p">}</span>  <span class="c1"># use file extension as name for list of instances of reader type</span>
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>  <span class="c1"># omit dot from extension</span>
+        <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">reader_for_ext</span><span class="p">:</span>
+            <span class="n">reader_inst</span> <span class="o">=</span> <span class="n">reader_for_ext</span><span class="p">[</span><span class="n">ext</span><span class="p">](</span><span class="n">file</span><span class="p">)</span>
+            <span class="n">reader_inst</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+            <span class="n">all_data</span><span class="p">[</span><span class="n">ext</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reader_inst</span><span class="p">)</span>
+            <span class="c1"># TODO: decide what to do with processed files. Leave where they are, delete or move to other folder</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># TODO: decide what to do with unprocessable files. Leave where they are, delete or move to other folder</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Cannot read </span><span class="si">{}</span><span class="s1"> as no reader is specified for files with extension &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">ext</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">all_data</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+
+    <span class="n">base_filename</span> <span class="o">=</span> <span class="s1">&#39;MWR_0-20000-0-06610_A201908040100&#39;</span>
+
+    <span class="n">filename_noext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="s1">&#39;data/rpg/0-20000-0-06610&#39;</span> <span class="o">+</span> <span class="n">base_filename</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># join path and make sure filename has no ext</span>
+
+    <span class="n">brt</span> <span class="o">=</span> <span class="n">BRT</span><span class="p">(</span><span class="n">filename_noext</span> <span class="o">+</span> <span class="s1">&#39;.BRT&#39;</span><span class="p">)</span>
+    <span class="n">blb</span> <span class="o">=</span> <span class="n">BLB</span><span class="p">(</span><span class="n">filename_noext</span> <span class="o">+</span> <span class="s1">&#39;.BLB&#39;</span><span class="p">)</span>
+    <span class="n">irt</span> <span class="o">=</span> <span class="n">IRT</span><span class="p">(</span><span class="n">filename_noext</span> <span class="o">+</span> <span class="s1">&#39;.IRT&#39;</span><span class="p">)</span>
+    <span class="n">met</span> <span class="o">=</span> <span class="n">MET</span><span class="p">(</span><span class="n">filename_noext</span> <span class="o">+</span> <span class="s1">&#39;.MET&#39;</span><span class="p">)</span>
+    <span class="n">hkd</span> <span class="o">=</span> <span class="n">HKD</span><span class="p">(</span><span class="n">filename_noext</span> <span class="o">+</span> <span class="s1">&#39;.HKD&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">reader_inst</span> <span class="ow">in</span> <span class="p">[</span><span class="n">brt</span><span class="p">,</span> <span class="n">blb</span><span class="p">,</span> <span class="n">irt</span><span class="p">,</span> <span class="n">met</span><span class="p">,</span> <span class="n">hkd</span><span class="p">]:</span>
+        <span class="n">reader_inst</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
+
+    <span class="c1"># # generate new pickle of the read-in data</span>
+    <span class="c1"># dir_pickle = &#39;tests/data/rpg/&#39;</span>
+    <span class="c1"># vars = [brt, blb, irt, met, hkd]</span>
+    <span class="c1"># varnames = [&#39;brt&#39;, &#39;blb&#39;, &#39;irt&#39;, &#39;met&#39;, &#39;hkd&#39;]</span>
+    <span class="c1"># for var, varname in zip(vars, varnames):</span>
+    <span class="c1">#     outfile = dir_pickle + &#39;/&#39; + base_filename + &#39;_&#39; + varname + &#39;.pkl&#39;</span>
+    <span class="c1">#     pickle_dump(var.data, outfile)  # only store data dict in pickle</span>
+
+    <span class="c1"># # legacy readers</span>
+    <span class="c1"># brt_old = read_brt(filename_noext + &#39;.BRT&#39;)</span>
+    <span class="c1"># blb_old = read_blb(filename_noext + &#39;.BLB&#39;)</span>
+    <span class="c1"># irt_old = read_irt(filename_noext + &#39;.IRT&#39;)</span>
+    <span class="c1"># met_old = read_met(filename_noext + &#39;.MET&#39;)</span>
+    <span class="c1"># hkd_old = read_hkd(filename_noext + &#39;.HKD&#39;)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">mwr_raw2l1.utils.file_utils</span> <span class="kn">import</span> <span class="n">abs_file_path</span><span class="p">,</span> <span class="n">get_files</span>
+
+    <span class="c1"># main()</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="n">get_files</span><span class="p">(</span><span class="n">abs_file_path</span><span class="p">(</span><span class="s1">&#39;mwr_raw2l1/data/rpg/0-20000-0-06610&#39;</span><span class="p">),</span> <span class="s1">&#39;MWR_0-20000-0-06610_A&#39;</span><span class="p">)</span>
+    <span class="n">all_data</span> <span class="o">=</span> <span class="n">read_multiple_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rolf Rüfenacht.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

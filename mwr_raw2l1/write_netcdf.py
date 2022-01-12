@@ -1,5 +1,5 @@
 """
-Create NetCDF from xarray Dataset (or dictionary) according to specifications in the config file
+Create NetCDF from :class:`xarray.Dataset` (or dictionary) according to specifications in the config file
 """
 import datetime as dt
 from copy import deepcopy
@@ -27,10 +27,10 @@ def write(data, filename, nc_conf_file, inst_conf_file, *args, **kwargs):
 
 
 def write_from_xarray(data_in, filename, conf_nc, conf_inst, format='NETCDF4', copy_data=False):
-    """write data (Dataset) to NetCDF according to the format definition in conf_file by using the xarray module
+    """write data (Dataset) to NetCDF according to the format definition in conf_file by using the :class:`xarray` module
 
     Args:
-        data_in: xarray Dataset or DataArray containing data to write to file
+        data_in: :class:`xarray.Dataset` or :class:`DataArray` containing data to write to file
         filename: name and path of output NetCDF file
         conf_nc: configuration dict of yaml file defining the format and contents of the output NetCDF file
         conf_inst: configuration dict of yaml file with instrument specifications (contains global attrs for NetCDF)
@@ -61,7 +61,7 @@ def write_from_xarray(data_in, filename, conf_nc, conf_inst, format='NETCDF4', c
 
 
 def prepare_datavars(data, conf):
-    """prepare xarray Dataset's data variables for writing to file standard specified in conf"""
+    """prepare data variables :class:`xarray.Dataset` for writing to file standard specified in 'conf'"""
 
     # value for _FillValue attribute of variables encoding field to have unset _FillValue in NetCDF
     enc_no_fillvalue = None  # tutorials from 2017 said False must be used, but with xarray 0.20.1 only None works
@@ -132,7 +132,7 @@ def prepare_global_attrs(data, conf, attr_key, set_history=True):
     """add global attributes from configuration dictionary
 
     Args:
-        data: xarray.Dataset
+        data: :class:`xarray.Dataset`
         conf: configuration dictionary with global attributes under the key given by attr_key
         attr_key: string specifying the key under which attributes are stored in conf dict. Usually 'attributes' or
             'nc_attributes'

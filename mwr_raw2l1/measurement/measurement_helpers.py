@@ -6,7 +6,7 @@ from mwr_raw2l1.log import logger
 
 
 def make_dataset(data, dims, vars, vars_opt=None, multidim_vars=None, time_vector=None):
-    """generate a xarray Dataset from 'data' using the dimensions and variables specified
+    """generate a :class:`xarray.Dataset` from 'data' dictionary using the dimensions and variables specified
 
     Args:
         data: dictionary containing the data. If set to None or empty a placeholder dataset with all-NaN time series
@@ -16,10 +16,10 @@ def make_dataset(data, dims, vars, vars_opt=None, multidim_vars=None, time_vecto
         vars_opt (optional): list of keys that are optional data variables (added as 1-d series of NaN if not in 'data')
         multidim_vars (optional): dictionary of variables with more than time dimension. Variable name as key, number of
             dimensions as values. This argument will be ignored as long as the variable is present in dataset
-        time_vector (optional): numpy array of datetime64 to take as time dimension for generating all-NaN datasets.
-            This argument will be ignored as long as data is not None or empty
+        time_vector (optional): :class:`numpy.ndarray` of :class:`numpy.datetime64` to take as time dimension for
+            generating all-NaN datasets. This argument will be ignored as long as data is not None or empty
     Returns:
-        xarray.Dataset
+        :class:`xarray.Dataset`
     """
 
     # config for empty datasets or variables
@@ -73,7 +73,7 @@ def drop_duplicates(ds, dim):
     """drop duplicates from all data in ds for duplicates in dimension vector
 
     Args:
-        ds: xarray Dataset or DataArray
+        ds: :class:`xarray.Dataset` or :class:`xarray.DataArray` containing the data
         dim: string indicating the dimension name to check for duplicates
     Returns:
         ds with unique dimension vector

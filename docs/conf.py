@@ -30,6 +30,7 @@ author = 'Rolf Rüfenacht'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
+    'sphinx.ext.viewcode',
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
@@ -61,6 +62,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
+html_show_sourcelink = True
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -68,4 +70,4 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-add_module_names = True
+add_module_names = False

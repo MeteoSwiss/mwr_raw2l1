@@ -20,7 +20,7 @@ def read_brt(filename, accept_localtime=False):
     Parameters
     ----------
     filename : str
-        path to *.brt file holding the starring MWR brightness temp obs.
+        path to .brt file holding the starring MWR brightness temp obs.
     accept_localtime : bool, optional
         Accept that timestamp is stored in localtime. The default is False.
 
@@ -29,8 +29,11 @@ def read_brt(filename, accept_localtime=False):
     -------
     data : dict
         containts observations and metadata
-        flag meanings:
-            rainflag: 0, no rain; 1, rain
+
+    Notes
+    -----
+    flag meanings:
+        rainflag: 0, no rain; 1, rain
     """
 
     with open(filename, 'rb') as f:
@@ -73,7 +76,7 @@ def read_brt(filename, accept_localtime=False):
     if not accept_localtime and data['timeref'] == 0:
         raise ValueError('Time encoded in local time but UTC required by "accept_localtime"')
 
-        # measurements
+    # measurements
     ##############
 
     # init measurements
@@ -105,7 +108,7 @@ def read_blb(filename, accept_localtime=False):
     Parameters
     ----------
     filename : str
-        path to *.blb file holding the scanning observations.
+        path to .blb file holding the scanning observations.
     accept_localtime : bool, optional
         Accept that timestamp is stored in localtime. The default is False.
 
@@ -113,11 +116,12 @@ def read_blb(filename, accept_localtime=False):
     Returns
     -------
     data : dict
-        containts observations and metadata
-        flag meanings:
-            rainflag: 0, no rain; 1, rain
-            scanmode: 0, 1st quadrant; 1, 2nd quadrant;
-                      2, two quadrant avg; 3, two independent scans
+        contains observations and metadata
+
+    Notes
+    -----
+    rainflag: 0, no rain; 1, rain
+    scanmode: 0, 1st quadrant; 1, 2nd quadrant; 2, two quadrant avg; 3, two independent scans
     """
 
     n_freq_default = 14  # used to read in files of structver=1 where spectram comes before n_freq
@@ -224,7 +228,7 @@ def read_irt(filename, accept_localtime=False):
     Parameters
     ----------
     filename : str
-        path to *.irt file holding the infrared observations.
+        path to .irt file holding the infrared observations.
     accept_localtime : bool, optional
         Accept that timestamp is stored in localtime. The default is False.
 
@@ -233,8 +237,11 @@ def read_irt(filename, accept_localtime=False):
     -------
     data : dict
         containts observations and metadata
-        flag meanings:
-            rainflag: 0, no rain; 1, rain
+
+    Notes
+    -----
+    flag meanings:
+        rainflag: 0, no rain; 1, rain
     """
 
     with open(filename, 'rb') as f:
@@ -318,7 +325,7 @@ def read_met(filename, accept_localtime=False):
     Parameters
     ----------
     filename : str
-        path to *.met file holding the meteorological observations.
+        path to .met file holding the meteorological observations.
     accept_localtime : bool, optional
         Accept that timestamp is stored in localtime. The default is False.
 
@@ -327,8 +334,11 @@ def read_met(filename, accept_localtime=False):
     -------
     data : dict
         containts observations and metadata
-        flag meanings:
-            rainflag: 0, no rain; 1, rain
+
+    Notes
+    -----
+    flag meanings:
+        rainflag: 0, no rain; 1, rain
     """
 
     with open(filename, 'rb') as f:
@@ -453,7 +463,7 @@ def read_hkd(filename, accept_localtime=False):
     Parameters
     ----------
     filename : str
-        path to *.hkd file holding the housekeeping data.
+        path to .hkd file holding the housekeeping data.
     accept_localtime : bool, optional
         Accept that timestamp is stored in localtime. The default is False.
 
@@ -461,9 +471,12 @@ def read_hkd(filename, accept_localtime=False):
     Returns
     -------
     data : dict
-        containts observations and metadata
-        flag meanings:
-            rainflag: 0, no rain; 1, rain
+        contains observations and metadata
+
+    Notes
+    -----
+    flag meanings:
+        rainflag: 0, no rain; 1, rain
     """
 
     n_freq_kband = 7  # number of frequency channels in K-band receiver

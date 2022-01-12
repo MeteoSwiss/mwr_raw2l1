@@ -14,10 +14,10 @@ def scan_endtime_to_time(endtime, n_angles, time_per_angle=17):
     at each angle
 
     Args:
-        endtime : numpy array of datetime64 or single datetime.datetime.
+        endtime (:class:`numpy.ndarray` of :class:`numpy.datetime64` or single :class:`datetime.datetime` object):
             Corresponds ot the single timestamp saved with each angle scan. Assumed as the end time of the scan
         n_angles : number of angles per scan.
-        time_per_angle : total time for scanning one angle inluding integration time and the time for moving the mirror.
+        time_per_angle : total time for scanning one angle including integration time and the time for moving the mirror.
             Indicated in seconds. The default is 17.
 
     Returns:
@@ -41,16 +41,17 @@ def scan_endtime_to_time(endtime, n_angles, time_per_angle=17):
 
 
 def scantime_from_aux(blb, hkd=None, brt=None):
-    """determine time vector of each elevation in scan using scan_endtime_to_time inferring scan duration from aux data
+    """determine time of each elevation in scan using :func:`scan_endtime_to_time` inferring scan duration from aux data
 
-    If none of the optional arguments is provided default scan duration form scan_endtime_to time is used
+    If none of the optional arguments is provided default scan duration form :func:`scan_endtime_to_time` is used
 
     Args:
-        blb: xarray.Dataset of the scan observations
-        hkd (optional): dataset of housekeeping data.
-        brt (optional): dataset of zenith observation data
+        blb: :class:`xarray.Dataset` of the scan observations
+        hkd (optional): :class:`xarray.Dataset` of housekeeping data
+        brt (optional): :class:`xarray.Dataset` of zenith observation data
     Returns:
-         np.array of datetime.datetime objects. list of timestamps (end of integration) for each observed angle
+        vector of timestamps (end of integration) for each observed angle as :class:`numpy.ndarray` of
+        :class`datetime.datetime` objects
     """
 
     time_scan = blb['time'].values
@@ -92,8 +93,8 @@ def scan_to_timeseries(blb, *args, **kwargs):
     The time vector of each elevation in scan comes from scan_endtime_to_time inferring scan duration from aux data
 
     Args:
-        blb: xarray.Dataset of the scan observations (BLB)
-        *args/**kwargs: auxiliary datasets (HKD, BRT) passed on to scan_endtime_to_time
+        blb: :class:`xarray.Dataset` of the scan observations (BLB)
+        *args/**kwargs: :class:`xarray.Dataset` s of auxiliary observations (HKD, BRT) passed on to scan_endtime_to_time
     Returns:
         blb with elevation-dimension transformed to time series
     """

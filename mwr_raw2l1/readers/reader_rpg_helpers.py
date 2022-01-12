@@ -171,14 +171,21 @@ def interpret_statusflag(flag_integer):
 def interpret_scanflag(flag_integer):
     """interpret flag of BLB scan
 
-        first bit: rainflag
+    Args:
+        flag_integer: scanflag from BLB as integer. When transformed to bit, first bit interpreted as rainflag while
+            2nd/3rd encodes scan time (see notes)
+    Returns:
+        Dictionary with keys 'rainflag' and 'scan_quadrant'
 
-        2nd/3rd bit (input) | scan_quadrant (output) | description
-        --------------------|------------------------|-------------------
-        0/0                 | 1                      | first quadrant
-        0/1                 | 2                      | second quadrant
-        1/0                 | 0                      | average over both quadrants
-        """
+    Notes:
+        ===================   ======================   ============================
+        2nd/3rd bit (input)   scan_quadrant (output)   description
+        ===================   ======================   ============================
+        0/0                   1                        first quadrant
+        0/1                   2                        second quadrant
+        1/0                   0                        average over both quadrants
+        ===================   ======================   ============================
+    """
 
     scanflagbits = flag_int2bits(flag_integer)
     int_quadr = scanflagbits[:, 1] + 2 * scanflagbits[:, 2]
@@ -192,11 +199,14 @@ def interpret_scanflag(flag_integer):
 def interpret_tstab_flag(flag):
     """interpret temperature stability flag and return a flag saying stability ok (1), not ok (0) or unknown (NaN)
 
-    tstab flag (input) | tstab ok (output) | description
-    -------------------|-------------------|-------------------
-    0                  | NaN               | unknown stability (too short measurement series available)
-    1                  | 1                 | stability ok
-    2                  | 0                 | not ok (T sensors differ by >0.3 K)
+    Notes:
+        ==================   =================   ==========================================================
+        tstab flag (input)   tstab ok (output)   description
+        ==================   =================   ==========================================================
+        0                    NaN                 unknown stability (too short measurement series available)
+        1                    1                   stability ok
+        2                    0                   not ok (T sensors differ by >0.3 K)
+        ==================   =================   ==========================================================
     """
     flag2tstab_ok = {0: np.nan, 1: 1, 2: 0}  # correspondence of RPG stability flag (keys) with stability ok (value)
     try:
@@ -221,7 +231,7 @@ def interpret_quadrant_int(int_quadr):
 
 
 def interpret_bit_order(bit_order):
-    """interpret bit_order for use in numpy's unpackbits so that it also '>' and '<' can be used"""
+    """interpret bit_order for use in :func:`numpy.unpackbits` so that it also '>' and '<' can be used"""
     if bit_order == 'little' or bit_order == 'big':
         return bit_order
     elif bit_order == '<':

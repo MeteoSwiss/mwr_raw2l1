@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mwr_raw2l1.measurement.scan_transform &mdash; mwr_raw2l1  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> mwr_raw2l1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">mwr_raw2l1</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">mwr_raw2l1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>mwr_raw2l1.measurement.scan_transform</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mwr_raw2l1.measurement.scan_transform</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;collection of functions for transforming a scanning observation with elevation dim to a flat time series&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">mwr_raw2l1.log</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">mwr_raw2l1.utils.transformations</span> <span class="kn">import</span> <span class="n">timedelta2s</span>
+
+
+<div class="viewcode-block" id="scan_endtime_to_time"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.scan_transform.scan_endtime_to_time">[docs]</a><span class="k">def</span> <span class="nf">scan_endtime_to_time</span><span class="p">(</span><span class="n">endtime</span><span class="p">,</span> <span class="n">n_angles</span><span class="p">,</span> <span class="n">time_per_angle</span><span class="o">=</span><span class="mi">17</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    RPG scan files only have one timestamp per scan. This function returns the approximate timestamp for the observation</span>
+<span class="sd">    at each angle</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        endtime (:class:`numpy.ndarray` of :class:`numpy.datetime64` or single :class:`datetime.datetime` object):</span>
+<span class="sd">            Corresponds ot the single timestamp saved with each angle scan. Assumed as the end time of the scan</span>
+<span class="sd">        n_angles : number of angles per scan.</span>
+<span class="sd">        time_per_angle : total time for scanning one angle including integration time and the time for moving the mirror.</span>
+<span class="sd">            Indicated in seconds. The default is 17.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        time : np.array of datetime.datetime objects. list of timestamps (end of integration) for each observed angle</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">endtime</span><span class="p">,</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+        <span class="n">endtime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">endtime</span><span class="p">])</span>
+        <span class="k">def</span> <span class="nf">timedelta_method</span><span class="p">(</span><span class="n">seconds</span><span class="p">):</span> <span class="k">return</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">seconds</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">timedelta_method</span><span class="p">(</span><span class="n">seconds</span><span class="p">):</span> <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">seconds</span><span class="o">*</span><span class="mi">1000</span><span class="p">),</span> <span class="s1">&#39;ms&#39;</span><span class="p">)</span>  <span class="c1"># use ms as timedelta needs int</span>
+
+    <span class="n">delta</span> <span class="o">=</span> <span class="p">[</span><span class="n">timedelta_method</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">time_per_angle</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_angles</span><span class="p">))]</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
+
+    <span class="n">endtime</span> <span class="o">=</span> <span class="n">endtime</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">endtime</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># for letting numpy broadcast along dimension 1</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">endtime</span> <span class="o">-</span> <span class="n">delta</span>  <span class="c1"># calculate time for each scan position (matrix)</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,))</span>  <span class="c1"># make one-dimenional vector out of time matrix</span>
+
+    <span class="k">return</span> <span class="n">time</span></div>
+
+
+<div class="viewcode-block" id="scantime_from_aux"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.scan_transform.scantime_from_aux">[docs]</a><span class="k">def</span> <span class="nf">scantime_from_aux</span><span class="p">(</span><span class="n">blb</span><span class="p">,</span> <span class="n">hkd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">brt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;determine time of each elevation in scan using :func:`scan_endtime_to_time` inferring scan duration from aux data</span>
+
+<span class="sd">    If none of the optional arguments is provided default scan duration form :func:`scan_endtime_to_time` is used</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        blb: :class:`xarray.Dataset` of the scan observations</span>
+<span class="sd">        hkd (optional): :class:`xarray.Dataset` of housekeeping data</span>
+<span class="sd">        brt (optional): :class:`xarray.Dataset` of zenith observation data</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        vector of timestamps (end of integration) for each observed angle as :class:`numpy.ndarray` of</span>
+<span class="sd">        :class`datetime.datetime` objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">time_scan</span> <span class="o">=</span> <span class="n">blb</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">n_ele</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">blb</span><span class="p">[</span><span class="s1">&#39;scan_ele&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="n">endtime2time_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">endtime</span><span class="o">=</span><span class="n">time_scan</span><span class="p">,</span> <span class="n">n_angles</span><span class="o">=</span><span class="n">n_ele</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">hkd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">&#39;BLscan_active&#39;</span> <span class="ow">in</span> <span class="n">hkd</span><span class="p">:</span>
+        <span class="n">time_scan_active</span> <span class="o">=</span> <span class="n">hkd</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">hkd</span><span class="o">.</span><span class="n">BLscan_active</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">time_zen_active</span> <span class="o">=</span> <span class="n">hkd</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">hkd</span><span class="o">.</span><span class="n">BLscan_active</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">blb</span><span class="o">.</span><span class="n">time</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># more than one scan in blb. sure that last one is complete</span>
+            <span class="n">time_last_scan_active</span> <span class="o">=</span> <span class="n">time_scan_active</span><span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">time_scan_active</span> <span class="o">&gt;</span> <span class="n">blb</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">time_scan_active</span> <span class="o">&lt;=</span> <span class="n">blb</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)]</span>
+            <span class="n">scan_duration</span> <span class="o">=</span> <span class="n">timedelta2s</span><span class="p">(</span><span class="n">time_last_scan_active</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">time_last_scan_active</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">endtime2time_params</span><span class="p">[</span><span class="s1">&#39;time_per_angle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scan_duration</span> <span class="o">/</span> <span class="n">n_ele</span>
+        <span class="k">elif</span> <span class="n">time_scan_active</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">time_zen_active</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>  <span class="c1"># sure to have full scan at beginning of hkd</span>
+            <span class="n">scan_duration</span> <span class="o">=</span> <span class="n">timedelta2s</span><span class="p">(</span><span class="n">blb</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="n">time_scan_active</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">endtime2time_params</span><span class="p">[</span><span class="s1">&#39;time_per_angle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scan_duration</span> <span class="o">/</span> <span class="n">n_ele</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s1">&#39;Cannot infer scan duration as first scan might extend to previous period. Using default values&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">brt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># less accurate than hkd because things happen before scan starts (e.g. ambload obs).</span>
+        <span class="c1"># Assume after last hkd measure it takes 2x time_per_angle before first scanobs ends.</span>
+        <span class="k">if</span> <span class="n">brt</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">blb</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">diff_end_blb_brt</span> <span class="o">=</span> <span class="n">timedelta2s</span><span class="p">(</span>
+                <span class="n">blb</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="n">brt</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">blb</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pad&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="n">endtime2time_params</span><span class="p">[</span><span class="s1">&#39;time_per_angle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">diff_end_blb_brt</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_ele</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s1">&#39;Cannot infer scan duration as first scan might extend to previous period. Using default values&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">scan_endtime_to_time</span><span class="p">(</span><span class="o">**</span><span class="n">endtime2time_params</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="scan_to_timeseries"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.scan_transform.scan_to_timeseries">[docs]</a><span class="k">def</span> <span class="nf">scan_to_timeseries</span><span class="p">(</span><span class="n">blb</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transform scanning datasete to time series of Tb spectra and temperatures flattening the elevation dimension.</span>
+
+<span class="sd">    The time vector of each elevation in scan comes from scan_endtime_to_time inferring scan duration from aux data</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        blb: :class:`xarray.Dataset` of the scan observations (BLB)</span>
+<span class="sd">        *args/**kwargs: :class:`xarray.Dataset` s of auxiliary observations (HKD, BRT) passed on to scan_endtime_to_time</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        blb with elevation-dimension transformed to time series</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">time_dim</span> <span class="o">=</span> <span class="s1">&#39;time&#39;</span>
+    <span class="n">ele_dim</span> <span class="o">=</span> <span class="s1">&#39;scan_ele&#39;</span>
+    <span class="n">n_ele</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">blb</span><span class="p">[</span><span class="n">ele_dim</span><span class="p">])</span>
+    <span class="n">n_scans</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">blb</span><span class="p">[</span><span class="n">time_dim</span><span class="p">])</span>
+
+    <span class="c1"># transform time vector and assign as temporary dimension</span>
+    <span class="n">time_all_angles</span> <span class="o">=</span> <span class="n">scantime_from_aux</span><span class="p">(</span><span class="n">blb</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">blb</span> <span class="o">=</span> <span class="n">blb</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">({</span><span class="s1">&#39;time_tmp&#39;</span><span class="p">:</span> <span class="n">time_all_angles</span><span class="p">})</span>
+
+    <span class="c1"># reshape data variables to correct dimension</span>
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">blb</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
+        <span class="n">var_tmp</span> <span class="o">=</span> <span class="n">blb</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">blb</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">blb</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">ele_dim</span> <span class="ow">and</span> <span class="n">blb</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">time_dim</span><span class="p">:</span>  <span class="c1"># 3 dimensional</span>
+            <span class="n">var_tmp</span> <span class="o">=</span> <span class="n">var_tmp</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># swap dim to (xxx, time, ele) where xxx is usually frequency</span>
+            <span class="n">var_tmp</span> <span class="o">=</span> <span class="n">var_tmp</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_scans</span><span class="o">*</span><span class="n">n_ele</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+            <span class="n">dims_act</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;time_tmp&#39;</span><span class="p">,</span> <span class="n">blb</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">blb</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">blb</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">time_dim</span><span class="p">:</span>
+            <span class="n">var_tmp</span> <span class="o">=</span> <span class="n">var_tmp</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">n_ele</span><span class="p">)</span>
+            <span class="n">dims_act</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;time_tmp&#39;</span><span class="p">,)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;transformation only implemented for 1d timeseries and 3d variables with &#39;</span>
+                                      <span class="s1">&#39;time as first and elevation as third dimension&#39;</span><span class="p">)</span>
+        <span class="n">blb</span> <span class="o">=</span> <span class="n">blb</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>  <span class="c1"># remove original variable from dataset</span>
+        <span class="n">blb</span> <span class="o">=</span> <span class="n">blb</span><span class="o">.</span><span class="n">assign</span><span class="p">({</span><span class="n">var</span><span class="p">:</span> <span class="p">(</span><span class="n">dims_act</span><span class="p">,</span> <span class="n">var_tmp</span><span class="p">)})</span>  <span class="c1"># assign reshaped variable to dataset</span>
+
+    <span class="c1"># reshape elevation remove as dimension and assign as variable</span>
+    <span class="n">ele_tmp</span> <span class="o">=</span> <span class="n">blb</span><span class="p">[</span><span class="n">ele_dim</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">ele_tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">ele_tmp</span><span class="p">,</span> <span class="n">n_scans</span><span class="p">)</span>
+    <span class="n">blb</span> <span class="o">=</span> <span class="n">blb</span><span class="o">.</span><span class="n">drop_dims</span><span class="p">(</span><span class="n">ele_dim</span><span class="p">)</span>
+    <span class="n">blb</span> <span class="o">=</span> <span class="n">blb</span><span class="o">.</span><span class="n">assign</span><span class="p">({</span><span class="s1">&#39;ele&#39;</span><span class="p">:</span> <span class="p">((</span><span class="s1">&#39;time_tmp&#39;</span><span class="p">,),</span> <span class="n">ele_tmp</span><span class="p">)})</span>
+
+    <span class="c1"># replace old time dimension by the freshly created one</span>
+    <span class="n">blb</span> <span class="o">=</span> <span class="n">blb</span><span class="o">.</span><span class="n">drop_dims</span><span class="p">(</span><span class="n">time_dim</span><span class="p">)</span>
+    <span class="n">blb</span> <span class="o">=</span> <span class="n">blb</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="s1">&#39;time_tmp&#39;</span><span class="p">:</span> <span class="n">time_dim</span><span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">blb</span></div>
+
+
+<div class="viewcode-block" id="scan_to_timeseries_from_dict"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.scan_transform.scan_to_timeseries_from_dict">[docs]</a><span class="k">def</span> <span class="nf">scan_to_timeseries_from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;transform scans to time series of spectra and temperatures starting from dict.</span>
+
+<span class="sd">    Not routinely used anymore. More hard coding than for scan_to_timeseries</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: dictioinary containing the scan observations (BLB)</span>
+<span class="sd">        *arrgs/**kwargs: optional parameters for scan_endtime_to_time</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_freq</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span>
+    <span class="n">n_ele</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span>
+    <span class="n">n_scans</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_scans&#39;</span><span class="p">]</span>
+
+    <span class="n">tb_tmp</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tb&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># swap dim to (freq, time, ele)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tb_tmp</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_freq</span><span class="p">,</span> <span class="n">n_scans</span> <span class="o">*</span> <span class="n">n_ele</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">n_ele</span><span class="p">)</span>  <span class="c1"># repeat to have one T value for each new time</span>
+
+    <span class="c1"># transform single vector of elevations to time series of elevations</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ele&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;scan_ele&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_scans&#39;</span><span class="p">])</span>
+
+    <span class="c1"># time is encoded as end time of scan (same time for all elevations).</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scan_endtime_to_time</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rolf Rüfenacht.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

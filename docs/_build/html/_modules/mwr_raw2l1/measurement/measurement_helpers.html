@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mwr_raw2l1.measurement.measurement_helpers &mdash; mwr_raw2l1  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> mwr_raw2l1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">mwr_raw2l1</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">mwr_raw2l1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>mwr_raw2l1.measurement.measurement_helpers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mwr_raw2l1.measurement.measurement_helpers</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+<span class="kn">from</span> <span class="nn">mwr_raw2l1.errors</span> <span class="kn">import</span> <span class="n">DimensionError</span><span class="p">,</span> <span class="n">MissingInputArgument</span>
+<span class="kn">from</span> <span class="nn">mwr_raw2l1.log</span> <span class="kn">import</span> <span class="n">logger</span>
+
+
+<div class="viewcode-block" id="make_dataset"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.measurement_helpers.make_dataset">[docs]</a><span class="k">def</span> <span class="nf">make_dataset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dims</span><span class="p">,</span> <span class="nb">vars</span><span class="p">,</span> <span class="n">vars_opt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">multidim_vars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;generate a :class:`xarray.Dataset` from &#39;data&#39; dictionary using the dimensions and variables specified</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: dictionary containing the data. If set to None or empty a placeholder dataset with all-NaN time series</span>
+<span class="sd">            (except variable IRT, which is 2d) is returned. If set to None or empty time_vector must be specified.</span>
+<span class="sd">        dims: list of keys that are a dimension (must correspond to the order of dimensions in data)</span>
+<span class="sd">        vars: list of keys that are data variables (dimensions don&#39;t need to be specified again)</span>
+<span class="sd">        vars_opt (optional): list of keys that are optional data variables (added as 1-d series of NaN if not in &#39;data&#39;)</span>
+<span class="sd">        multidim_vars (optional): dictionary of variables with more than time dimension. Variable name as key, number of</span>
+<span class="sd">            dimensions as values. This argument will be ignored as long as the variable is present in dataset</span>
+<span class="sd">        time_vector (optional): :class:`numpy.ndarray` of :class:`numpy.datetime64` to take as time dimension for</span>
+<span class="sd">            generating all-NaN datasets. This argument will be ignored as long as data is not None or empty</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :class:`xarray.Dataset`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># config for empty datasets or variables</span>
+    <span class="n">missing_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="k">if</span> <span class="n">multidim_vars</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">multidim_vars</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># init</span>
+    <span class="k">if</span> <span class="n">vars_opt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">vars_opt</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_vars</span> <span class="o">=</span> <span class="nb">vars</span> <span class="o">+</span> <span class="n">vars_opt</span>
+
+    <span class="c1"># prepare for empty variables</span>
+    <span class="n">ndims_per_var</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="p">:</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">dims</span> <span class="o">+</span> <span class="n">all_vars</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">nd</span> <span class="ow">in</span> <span class="n">multidim_vars</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>  <span class="c1"># can grow larger than keys that shall be in output, only accessed by key</span>
+        <span class="n">ndims_per_var</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">nd</span>
+
+    <span class="c1"># prepare all NaN-variables for case of data==None or empty</span>
+    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">time_vector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MissingInputArgument</span><span class="p">(</span><span class="s1">&#39;if data is empty or None the input argument time_vector must be specified&#39;</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">time_vector</span><span class="p">}</span>  <span class="c1"># start overwriting empty data variable</span>
+        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>  <span class="c1"># assume first dimension to be &#39;time&#39;</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">missing_val</span><span class="p">])</span>  <span class="c1"># other dimensions all one-element</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">all_vars</span><span class="p">:</span>
+            <span class="n">shape_act</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">dims</span><span class="p">[</span><span class="n">k</span><span class="p">]])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndims_per_var</span><span class="p">[</span><span class="n">var</span><span class="p">])]</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">shape_act</span><span class="p">,</span> <span class="n">missing_val</span><span class="p">)</span>
+
+    <span class="c1"># add optional variables as NaN-series to data if not in input data</span>
+    <span class="k">for</span> <span class="n">varo</span> <span class="ow">in</span> <span class="n">vars_opt</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">varo</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">shape_act</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">dims</span><span class="p">[</span><span class="n">k</span><span class="p">]])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndims_per_var</span><span class="p">[</span><span class="n">varo</span><span class="p">])]</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">varo</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">shape_act</span><span class="p">,</span> <span class="n">missing_val</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Optional variable </span><span class="si">{}</span><span class="s1"> not found in input data. Will create a all-NaN placeholder&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">varo</span><span class="p">))</span>
+
+    <span class="c1"># collect specifications and data for generating xarray Dataset from dict</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">:</span>
+        <span class="n">spec</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>
+    <span class="c1"># add vars to spec</span>
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">all_vars</span><span class="p">:</span>
+        <span class="n">nd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">nd</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">dims</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DimensionError</span><span class="p">(</span><span class="n">dims</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">nd</span><span class="p">)</span>
+        <span class="n">spec</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">nd</span><span class="p">],</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="drop_duplicates"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.measurement_helpers.drop_duplicates">[docs]</a><span class="k">def</span> <span class="nf">drop_duplicates</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;drop duplicates from all data in ds for duplicates in dimension vector</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ds: :class:`xarray.Dataset` or :class:`xarray.DataArray` containing the data</span>
+<span class="sd">        dim: string indicating the dimension name to check for duplicates</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        ds with unique dimension vector</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># keep first index but assume duplicate values identical anyway</span>
+    <span class="k">return</span> <span class="n">ds</span><span class="o">.</span><span class="n">isel</span><span class="p">({</span><span class="n">dim</span><span class="p">:</span> <span class="n">ind</span><span class="p">})</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rolf Rüfenacht.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

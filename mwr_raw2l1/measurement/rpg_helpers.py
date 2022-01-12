@@ -6,16 +6,16 @@ from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries
 
 
 def to_datasets(data, dims, vars, vars_opt):
-    """generate unique xarray Datasets for each type of observations in 'data' using dimensions and variables specified
+    """generate unique :class:`xarray.Dataset` for each type of obs in 'data' using dimensions and variables specified
 
     Args:
         data: dictionary of lists containing the obs (obs: a dictionary of variable names and values) for different
-            source files of same type
+            source files of same type. The dictionary keys correspond to the type of observations (e.g. brt, blb, ...)
         dims: list of keys that are a dimension (must correspond to the order of dimensions in data)
         vars: list of keys that are data variables (dimensions don't need to be specified again)
         vars_opt: list of keys that are optional data variables (added as 1-dim series of NaN if missing in 'data')
     Returns:
-        dictionary of xarray.Dataset's. It contains one item for each key in data
+        dictionary with one :class:`xarray.Dataset` for each key. It contains one item for each key in data
     """
     multidim_vars_per_obstype = {'irt': {'IRT': 2}, 'brt': {'Tb': 2}, 'blb': {'Tb': 3}}
 
@@ -46,7 +46,7 @@ def merge_brt_blb(all_data):
     """merge brt (zenith MWR) and blb (scanning MWR) observations from an RPG instrument
 
     Args:
-        all_data: dictionary of xarray.Dataset's (output of to_datasets)
+        all_data: dictionary with a :class:`xarray.Dataset` attached to each key (output of :func:`to_datasets`)
     """
     if 'brt' in all_data:
         out = all_data['brt']
