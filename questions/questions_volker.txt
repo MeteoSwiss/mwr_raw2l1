@@ -1,5 +1,5 @@
 General:
-- check program flow and what is too much procedural of functional or unstructured
+- check program flow and if it is not too much procedural, functional or unstructured
 
 Specific to programming:
 - having a Measurement class without methods but functions in measurement_helpers
@@ -11,6 +11,9 @@ Specific to programming:
 
 Specific to organisation:
 - why requirements.txt and setup.py along with pyproject.toml (in ELDAmwl)
+- readthedocs fails to import any module that imports an external package. Possibly problem that we use pyproject.toml
+- how to get the docs-passing icon
 - what to do with th following after updating pyproject.toml?
    - poetry.lock is out of date: Run poetry lock, poetry lock --no-update or poetry update
 - read_all function besides reader classes for RPG. does this make sense here?
+
