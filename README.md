@@ -1,3 +1,6 @@
+[![Documentation Status](https://readthedocs.org/projects/mwr-raw2l1/badge/?version=latest)](https://mwr-raw2l1.readthedocs.io/en/latest/?badge=latest)
+      
+
 # mwr_raw2l1
 
 This repository contains tools for reading brightness temperatures as well as housekeeping and auxiliary data from the

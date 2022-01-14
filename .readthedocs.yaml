@@ -11,11 +11,11 @@ build:
 
 sphinx:
    configuration: docs/conf.py
+   fail_on_warning: true
 
 formats:
   - pdf
 
-# for the following the package must probably be pip-installable. Found no way to use pyproject.toml with rtd by now
 python:
   install:
     - method: pip
