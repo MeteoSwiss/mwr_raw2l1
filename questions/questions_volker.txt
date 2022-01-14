@@ -17,3 +17,6 @@ Specific to organisation:
    - poetry.lock is out of date: Run poetry lock, poetry lock --no-update or poetry update
 - read_all function besides reader classes for RPG. does this make sense here?
 
+specific to deployment:
+- how to make package pip installable (PyPi). Can ask Augustin for this
+
