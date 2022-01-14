@@ -16,9 +16,9 @@ formats:
   - pdf
 
 # for the following the package must probably be pip-installable. Found no way to use pyproject.toml with rtd by now
-#python:
-#  install:
-#    - method: pip
-#      path: .
-#      extra_requirements:
-#        - docs
+python:
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
