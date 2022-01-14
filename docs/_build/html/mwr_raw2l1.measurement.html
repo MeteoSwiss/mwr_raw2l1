@@ -271,8 +271,8 @@ Indicated in seconds. The default is 17.</p></li>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>blb</strong> – <a class="reference external" href="https://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v0.20.2.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> of the scan observations (BLB)</p></li>
-<li><p><strong>*args/**kwargs</strong> – <p><a class="reference external" href="https://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v0.20.2.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> s of auxiliary observations (HKD, BRT) passed on to scan_endtime_to_time</p>
-</p></li>
+<li><p><strong>*args</strong> – Auxiliary observations (HKD, BRT) as <a class="reference external" href="https://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v0.20.2.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> passed on to <a class="reference internal" href="#mwr_raw2l1.measurement.scan_transform.scan_endtime_to_time" title="mwr_raw2l1.measurement.scan_transform.scan_endtime_to_time"><code class="xref py py-func docutils literal notranslate"><span class="pre">scan_endtime_to_time()</span></code></a></p></li>
+<li><p><strong>**kwargs</strong> – Auxiliary observations (HKD, BRT) as <a class="reference external" href="https://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v0.20.2.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> passed on to <a class="reference internal" href="#mwr_raw2l1.measurement.scan_transform.scan_endtime_to_time" title="mwr_raw2l1.measurement.scan_transform.scan_endtime_to_time"><code class="xref py py-func docutils literal notranslate"><span class="pre">scan_endtime_to_time()</span></code></a></p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -290,8 +290,8 @@ Indicated in seconds. The default is 17.</p></li>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> – dictioinary containing the scan observations (BLB)</p></li>
-<li><p><strong>*arrgs/**kwargs</strong> – <p>optional parameters for scan_endtime_to_time</p>
-</p></li>
+<li><p><strong>*args</strong> – Auxiliary observations</p></li>
+<li><p><strong>**kwargs</strong> – Auxiliary observations</p></li>
 </ul>
 </dd>
 </dl>

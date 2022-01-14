@@ -10,7 +10,7 @@ data to a NetCDF format defined by configuration.
 It is the code operationally run for the processing of MWR data in `E-PROFILE <https://e-profile.eu>`_
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
    modules

@@ -94,7 +94,8 @@ def scan_to_timeseries(blb, *args, **kwargs):
 
     Args:
         blb: :class:`xarray.Dataset` of the scan observations (BLB)
-        *args/**kwargs: :class:`xarray.Dataset` s of auxiliary observations (HKD, BRT) passed on to scan_endtime_to_time
+        *args: Auxiliary observations (HKD, BRT) as :class:`xarray.Dataset` passed on to :func:`scan_endtime_to_time`
+        **kwargs: Auxiliary observations (HKD, BRT) as :class:`xarray.Dataset` passed on to :func:`scan_endtime_to_time`
     Returns:
         blb with elevation-dimension transformed to time series
     """
@@ -144,7 +145,8 @@ def scan_to_timeseries_from_dict(data, *args, **kwargs):
 
     Args:
         data: dictioinary containing the scan observations (BLB)
-        *arrgs/**kwargs: optional parameters for scan_endtime_to_time
+        *args: Auxiliary observations
+        **kwargs: Auxiliary observations
     """
     n_freq = data['n_freq']
     n_ele = data['n_ele']

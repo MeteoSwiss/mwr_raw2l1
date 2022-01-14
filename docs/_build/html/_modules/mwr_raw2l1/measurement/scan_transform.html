@@ -160,7 +160,8 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        blb: :class:`xarray.Dataset` of the scan observations (BLB)</span>
-<span class="sd">        *args/**kwargs: :class:`xarray.Dataset` s of auxiliary observations (HKD, BRT) passed on to scan_endtime_to_time</span>
+<span class="sd">        *args: Auxiliary observations (HKD, BRT) as :class:`xarray.Dataset` passed on to :func:`scan_endtime_to_time`</span>
+<span class="sd">        **kwargs: Auxiliary observations (HKD, BRT) as :class:`xarray.Dataset` passed on to :func:`scan_endtime_to_time`</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        blb with elevation-dimension transformed to time series</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -210,7 +211,8 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        data: dictioinary containing the scan observations (BLB)</span>
-<span class="sd">        *arrgs/**kwargs: optional parameters for scan_endtime_to_time</span>
+<span class="sd">        *args: Auxiliary observations</span>
+<span class="sd">        **kwargs: Auxiliary observations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n_freq</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]</span>
     <span class="n">n_ele</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span>
@@ -254,7 +256,13 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>  
+
+  <style>
+         .wy-nav-content { max-width: none; }
+  </style>
+
+
 
 </body>
 </html>
