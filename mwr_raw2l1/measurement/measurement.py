@@ -48,9 +48,10 @@ class Measurement(object):
         logger.info('Creating instance of Measurement class')
 
         # require mandatory data sources
-        if 'brt' not in readin_data and 'blb' not in readin_data:
+        if ('brt' not in readin_data and 'blb' not in readin_data) or (
+                not readin_data['brt'] and not readin_data['blb']):
             raise MissingDataSource('At least one file of brt (zenith MWR) or blb (scanning MWR) must be present')
-        if 'hkd' not in readin_data:
+        if 'hkd' not in readin_data or not readin_data['hkd']:
             raise MissingDataSource('The housekeeping file (hkd) must be present')
 
         # construct datasets
