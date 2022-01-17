@@ -19,6 +19,10 @@ class MWRConfigError(MWRError):
     """Raised if something with the configuration file is wrong"""
 
 
+class MWRTestError(MWRError):
+    """Raised if something goes wrong during set up or clean up of testing"""
+
+
 ################################
 class UnknownFileType(MWRFileError):
     """Raised if the filetype of the datafile is not in the known range of file ID types"""

@@ -1,2 +1,1 @@
-The config files here are automatically generated from the sample config files in mwr_raw2l1/config. They should get
-deleted at the end of the tests.
+Output data (NetCDF files) from integration tests. They should get deleted after each test case.
