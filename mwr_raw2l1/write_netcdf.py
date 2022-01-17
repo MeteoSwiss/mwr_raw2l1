@@ -77,11 +77,11 @@ def prepare_datavars(data, conf):
             else:
                 raise KeyError('Variable {} is a mandatory input but was not found in input dictionary'.format(var))
 
-        # check dimensions (including order)
-        if list(data[var].coords) != specs['dim']:
-            if list(data[var].coords) == specs['dim'][:-1] \
+        # check dimensions (retain order of config specs, but order of coords returned by xarray Dataset is arbitrary)
+        if sorted(list(data[var].coords)) != sorted(specs['dim']):
+            # if last dim of specs is missing in data and scalar, add it to data (no need for subsequent check)
+            if sorted(list(data[var].coords)) == sorted(specs['dim'][:-1]) \
                     and specs['dim'][-1] in data and len(data[specs['dim'][-1]]) == 1:
-                # if last dimension is missing and scalar, it can be added to the data (no need for subsequent check)
                 newdim = specs['dim'][-1]
                 tmp = data[var].expand_dims({newdim: 1}, axis=-1)
                 data[var] = tmp.assign_coords({newdim: data[newdim]})
