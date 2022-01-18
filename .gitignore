@@ -6,3 +6,4 @@ poetry.lock
 .~lock.*
 
 mwr_raw2l1/data/output/*
+tests/data/output/*.nc
