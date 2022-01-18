@@ -13,6 +13,7 @@ import unittest
 from unittest.mock import patch
 
 import yaml
+import xarray as xr
 
 from mwr_raw2l1.errors import MissingDataSource, MWRTestError
 from mwr_raw2l1.main import main
@@ -28,6 +29,9 @@ path_data_files_out = str(abs_file_path('tests/data/output/'))  # all nc files w
 # NetCDF format definition
 nc_format_config_file = abs_file_path('mwr_raw2l1/config/L1_format.yaml')
 
+# reference output file to compare against
+reference_output = str(abs_file_path('tests/data/rpg/reference_output/MWR_1C01_0-20000-0-06610_A201908050059.nc'))
+
 
 class TestRPG(unittest.TestCase):
     @classmethod
@@ -40,6 +44,7 @@ class TestRPG(unittest.TestCase):
                        'path_data_files_out and remove files manually if needed'.format(path_data_files_out))
             raise MWRTestError(err_msg)
         cls.conf_inst = make_test_config(orig_inst_conf_file, test_inst_conf_file)
+        cls.ds_ref = xr.load_dataset(reference_output)
 
     @classmethod
     def tearDownClass(cls):
@@ -56,49 +61,39 @@ class TestRPG(unittest.TestCase):
     # -----
     def test_all_infiles_available(self):
         """Test main function runs ok when all input file types are available"""
-        vars_to_test = ['tb']  # variable names according to NetCDF file standard
-        atrrs_to_test = ['network']
-
-        self.single_test_call_series(vars_to_test, atrrs_to_test)
+        self.single_test_call_series()
 
     @patch('mwr_raw2l1.main.get_files')
     def test_no_irt(self, get_files_mock):
         """Test main function runs ok when IRT files are missing"""
-        vars_to_test = ['tb']
-        atrrs_to_test = ['network']
-
+        vars_to_ignore = ['irt', 'ir_wavelength']
         get_files_mock.return_value = self.infiles_mock(['.IRT'])
-        self.single_test_call_series(vars_to_test, atrrs_to_test)
+        self.single_test_call_series(vars_to_ignore)
         get_files_mock.assert_called()
 
     @patch('mwr_raw2l1.main.get_files')
     def test_no_met(self, get_files_mock):
         """Test main function runs ok when MET files are missing"""
-        vars_to_test = ['tb']
-        atrrs_to_test = ['network']
-
+        vars_to_ignore = ['air_pressure', 'air_temperature', 'relative_humidity',
+                          'wind_speed', 'wind_direction', 'rain_rate']
         get_files_mock.return_value = self.infiles_mock(['.MET'])
-        self.single_test_call_series(vars_to_test, atrrs_to_test)
+        self.single_test_call_series(vars_to_ignore)
         get_files_mock.assert_called()
 
     @patch('mwr_raw2l1.main.get_files')
     def test_no_brt(self, get_files_mock):
         """Test main function runs ok when BRT files are missing"""
-        vars_to_test = ['tb']
-        atrrs_to_test = ['network']
-
+        vars_to_ignore = ['azi']  # TODO: fix this after found correct way to encode azi in the case of BLB is present
         get_files_mock.return_value = self.infiles_mock(['.BRT'])
-        self.single_test_call_series(vars_to_test, atrrs_to_test, check_timeseries_length=False)
+        self.single_test_call_series(vars_to_ignore, check_timeseries_length=False)
         get_files_mock.assert_called()
 
     @patch('mwr_raw2l1.main.get_files')
     def test_no_blb(self, get_files_mock):
         """Test main function runs ok when BLB files are missing"""
-        vars_to_test = ['tb']
-        atrrs_to_test = ['network']
-
+        vars_to_ignore = ['air_temperature']  # TODO: fix this after found correct way to encode azi in absence of BLB
         get_files_mock.return_value = self.infiles_mock(['.BLB'])
-        self.single_test_call_series(vars_to_test, atrrs_to_test, check_timeseries_length=False)
+        self.single_test_call_series(vars_to_ignore, check_timeseries_length=False)
         get_files_mock.assert_called()
 
     @patch('mwr_raw2l1.main.get_files')
@@ -117,19 +112,40 @@ class TestRPG(unittest.TestCase):
 
     # Helper methods
     # --------------
-    def single_test_call_series(self, vars_to_test, atrrs_to_test, check_timeseries_length=True):
-        """all steps a normal test should run through, i.e. executing main and checking contents of output NetCDF"""
+    def single_test_call_series(self, vars_to_ignore=None, check_timeseries_length=True):
+        """All steps a normal test should run through, i.e. executing main and checking contents of output NetCDF"""
+        if vars_to_ignore is None:
+            vars_to_ignore = []
+
+        # subTest
         with self.subTest(operation='run_main'):
+            """Run entire processing chain in main method (read-in > Measurement > write NetCDF)"""
             main(test_inst_conf_file, nc_format_config_file)
+        with self.subTest(operation='load_ouptut_netcdf'):
+            """Load output NetCDF file with xarray. Failed test might indicate a corrupt file"""
+            files = glob.glob(os.path.join(path_data_files_out, '*.nc'))
+            if len(files) != 1:
+                MWRTestError("Expected to find 1 file in test output directory ('{}') after running main but found {}"
+                             .format(path_data_files_out, len(files)))
+            self.ds = xr.load_dataset(files[0])
         with self.subTest(operation='check_output_vars'):
-            """compare variable values with sample NetCDF file"""
-            pass
-        with self.subTest(operation='check_output_att'):
-            """compare global attributes with sample NetCDF file"""
-            pass
+            """compare variables with sample NetCDF file"""
+            ds_ref_sel = self.ds_ref.sel(time=self.ds.time)  # only time period of ds_ref that has also data in ds
+            ds_ref_sel = ds_ref_sel.drop_vars(vars_to_ignore, errors='ignore')  # no problem if var to ignore is missing
+            ds_sel = self.ds.drop_vars(vars_to_ignore, errors='ignore')
+            xr.testing.assert_allclose(ds_sel, ds_ref_sel)
         if check_timeseries_length:
             with self.subTest(operation='check_whole_timeseries_in_nc'):
-                pass
+                """compare length of time vector with reference. Not detected due to selection in check_output_vars"""
+                self.assertEqual(len(self.ds.time), len(self.ds_ref.time))
+        with self.subTest(operation='check_output_att'):
+            """check global attributes of output correspond to instrument config and that key attrs are present"""
+            for attname, attval in self.conf_inst['nc_attributes'].items():
+                self.assertIn(attname, self.ds.attrs)
+                self.assertEqual(attval, self.ds.attrs[attname])
+            for attname in ['network_name', 'license', 'history']:
+                self.assertIn(attname, self.ds.attrs)
+            self.assertIn('raw2l1', self.ds.attrs['history'].lower())
 
     def infiles_mock(self, ext_to_exclude):
         """Mock for return value of get_files
