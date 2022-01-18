@@ -12,8 +12,8 @@ import os
 import unittest
 from unittest.mock import patch
 
-import yaml
 import xarray as xr
+import yaml
 
 from mwr_raw2l1.errors import MissingDataSource, MWRTestError
 from mwr_raw2l1.main import main

@@ -6,8 +6,8 @@ from mwr_raw2l1.measurement.measurement import Measurement
 from mwr_raw2l1.utils.config_utils import get_inst_config, get_nc_format_config
 from mwr_raw2l1.utils.file_utils import generate_output_filename, get_files
 from mwr_raw2l1.write_netcdf import write
-# ------------------------------------------------------
-# import readers (ignore flake8 for unused (accessed through globals() not understood by flake) & wrong isort position)
+# -------------------------------------------------------------------------- # noqa: F401, I001, I004
+# import readers                                                             # noqa: F401, I001, I004
 from mwr_raw2l1.readers.reader_rpg import read_multiple_files as reader_rpg  # noqa: F401, I001, I004
 
 

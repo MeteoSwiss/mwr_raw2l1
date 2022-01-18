@@ -297,10 +297,6 @@ class HKD(BaseReader):
         self.data.update(interpret_statusflag(self.data['statusflag']))
 
 
-# TODO: Consider transforming to SI units. IRT/IRT_min/IRT_max -> K; ir_wavelength -> m; frequency -> Hz.
-#  could be done in interpret_raw_data of BaseReader class
-
-
 def read_multiple_files(files):
     """read multiple L1-related files and return dictionary of executed read-in class instances
 
@@ -334,7 +330,7 @@ def main():
 
     base_filename = 'MWR_0-20000-0-06610_A201908040100'
 
-    filename_noext = os.path.splitext('data/rpg/0-20000-0-06610' + base_filename)[0]  # join path and make sure filename has no ext
+    filename_noext = os.path.splitext('data/rpg/0-20000-0-06610' + base_filename)[0]
 
     brt = BRT(filename_noext + '.BRT')
     blb = BLB(filename_noext + '.BLB')

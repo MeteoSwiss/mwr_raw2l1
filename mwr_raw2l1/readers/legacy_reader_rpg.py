@@ -125,7 +125,6 @@ def read_blb(filename, accept_localtime=False):
     """
 
     n_freq_default = 14  # used to read in files of structver=1 where spectram comes before n_freq
-    # TODO: check how RPG deals with files from TEMPRO or HUMPRO how would have different n_freq. Other filecodes? Could also get frequency info from BRT files but ugly dependency.
 
     with open(filename, 'rb') as f:
         d = f.read()
@@ -187,7 +186,6 @@ def read_blb(filename, accept_localtime=False):
     data['Tb'] = np.ones((data['n_meas'], data['n_freq']), dtype=np.float32) * missing_float
     data['T'] = np.ones((data['n_meas']), dtype=np.float32) * missing_float
     data['ele'] = np.ones(data['n_meas'], dtype=np.float32) * missing_float
-    # TODO: find a way to infer data['azi']
     single_scan = np.ones((data['n_freq'], data['n_ele'] + 1), dtype=np.float32) * missing_float
 
     # read measurements. flatten scan in series of time at different azimuth and ele

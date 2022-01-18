@@ -1,6 +1,6 @@
 import numpy as np
 
-from mwr_raw2l1.errors import MissingDataSource, CoordinateError
+from mwr_raw2l1.errors import CoordinateError, MissingDataSource
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.rpg_helpers import merge_brt_blb, to_datasets
 
@@ -32,7 +32,7 @@ class Measurement(object):
                 'met': ['time'],
                 'hkd': ['time']}
         vars = {'brt': ['Tb', 'rainflag', 'ele', 'azi'],
-                'blb': ['Tb', 'T', 'rainflag', 'scan_quadrant'],
+                'blb': ['Tb', 'T', 'rainflag', 'scan_quadrant'],  # TODO: find a way to infer 'azi' from blb
                 'irt': ['IRT', 'rainflag', 'ele', 'azi'],
                 'met': ['p', 'T', 'RH'],
                 'hkd': ['alarm']}
