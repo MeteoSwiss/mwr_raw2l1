@@ -1,5 +1,12 @@
+import datetime as dt
 from logging import INFO, FileHandler, Formatter, StreamHandler, getLogger
 from sys import stdout
+
+from mwr_raw2l1.utils.file_utils import abs_file_path
+
+# define log file name and path
+act_time_str = dt.datetime.now().strftime('%Y%m%d%H%M%S')
+log_file = str(abs_file_path('mwr_raw2l1/logs/log_{}.txt'.format(act_time_str)))
 
 # Colors for the log console output (Options see color_log-package)
 LOG_COLORS = {
@@ -48,8 +55,8 @@ logger.addHandler(console_handler)
 #     dir_not_found_hint(self.cfg.LOG_PATH)
 #     raise LogPathNotExists
 
-log_file_path = 'log.txt'
-file_handler = FileHandler(log_file_path)
+
+file_handler = FileHandler(log_file)
 file_handler_formatter = formatter
 file_handler.setFormatter(file_handler_formatter)
 file_handler.setLevel(INFO)
