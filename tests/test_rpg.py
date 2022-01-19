@@ -130,6 +130,22 @@ class TestRPG(unittest.TestCase):
             self.ds = xr.load_dataset(files[0])
         with self.subTest(operation='check_output_vars'):
             """compare variables with sample NetCDF file"""
+            # block for testing if error is produced by time rounding
+            print(self.ds_ref.time[:20].values)
+            print(self.ds.time[:20].values)
+            ds_ref_round = self.ds_ref.copy()
+            ds_ref_round['time'] = ds_ref_round.time.dt.round('ms')
+            ds_round = self.ds.copy()
+            ds_round['time'] = ds_round.time.dt.round('ms')
+            print(ds_ref_round.time[:20].values)
+            print(ds_round.time[:20].values)
+            try:
+                ds_ref_round.sel(time=ds_round.time)
+                print('Time selection works with times rounded to ms')
+            except Exception as err:
+                print('Time selection produces error ', err)
+            # end of time rounding test block
+
             ds_ref_sel = self.ds_ref.sel(time=self.ds.time)  # only time period of ds_ref that has also data in ds
             ds_ref_sel = ds_ref_sel.drop_vars(vars_to_ignore, errors='ignore')  # no problem if var to ignore is missing
             ds_sel = self.ds.drop_vars(vars_to_ignore, errors='ignore')
