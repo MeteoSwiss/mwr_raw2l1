@@ -131,14 +131,18 @@ class TestRPG(unittest.TestCase):
         with self.subTest(operation='check_output_vars'):
             """compare variables with sample NetCDF file"""
             # block for testing if error is produced by time rounding
-            print(self.ds_ref.time[:20].values)
-            print(self.ds.time[:20].values)
+            print('ds_ref times:')
+            print(self.ds_ref.time[:10].values)
+            print('ds (locally produced) times:')
+            print(self.ds.time[:10].values)
             ds_ref_round = self.ds_ref.copy()
             ds_ref_round['time'] = ds_ref_round.time.dt.round('ms')
             ds_round = self.ds.copy()
             ds_round['time'] = ds_round.time.dt.round('ms')
-            print(ds_ref_round.time[:20].values)
-            print(ds_round.time[:20].values)
+            print('ds_ref rounded to ms:')
+            print(ds_ref_round.time[:10].values)
+            print('ds rounded to ms:')
+            print(ds_round.time[:10].values)
             try:
                 ds_ref_round.sel(time=ds_round.time)
                 print('Time selection works with times rounded to ms')

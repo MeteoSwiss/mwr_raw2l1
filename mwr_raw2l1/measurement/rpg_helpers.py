@@ -39,6 +39,14 @@ def to_datasets(data, dims, vars, vars_opt):
             data_act.append(make_dataset(dat.data, dims[src], vars[src], vars_opt[src], multidim_vars=multidim_vars))
         out[src] = xr.concat(data_act, dim='time')  # merge all datasets of the same type
         out[src] = drop_duplicates(out[src], dim='time')  # remove duplicate measurements
+
+    # block for debugging time (zone?) issue
+    print('read-in times for BLB:')
+    print(data['blb'][0].data['time'][:10])
+    print('Measurement times for BLB:')
+    print(out['blb'].time[:10].values)
+    # end of debugging block
+
     return out
 
 
