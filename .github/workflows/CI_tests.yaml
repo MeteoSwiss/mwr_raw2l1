@@ -35,4 +35,4 @@ jobs:
       - name: Install package
         run: poetry install
       - name: Run tests
-        run: python -m unittest discover tests/
+        run: poetry run python -m unittest discover tests/
