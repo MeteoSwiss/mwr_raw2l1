@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.6', '3.8', '3.9']  # MetOffice hub runs on python 3.6 so important to be able to run on it
+        python-version: ['3.8', '3.9', '3.10']  # TODO: MetOffice hub runs on python 3.6. pyproject.toml needs py 3.7 for scipy. Find a way to make a pyproject.toml for py3.6 first
     steps:
       - uses: actions/checkout@v2
       - name: Set up python ${{ matrix.python-version }}

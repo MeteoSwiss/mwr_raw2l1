@@ -16,5 +16,7 @@ Specific to organisation:
    - poetry.lock is out of date: Run poetry lock, poetry lock --no-update or poetry update
 
 specific to deployment:
-- how to make package pip installable (PyPi). Can ask Augustin for this
+- MetOffice runs python 3.6. I know it is > EOL, but can take them years to update so should make sure we can run on it
+    - how can we find out which package requirements must be specified in pyproject.toml for this?
+- how to make package pip installable (PyPi). Can maybe also ask Augustin for this
 
