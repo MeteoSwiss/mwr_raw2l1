@@ -75,10 +75,13 @@
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  
 </div>
 <h2 id="A">A</h2>
@@ -109,6 +112,10 @@
       <li><a href="api/readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.check_data">check_data() (BaseReader method)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.CoordinateError">CoordinateError</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="D">D</h2>
@@ -122,6 +129,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.decode_binary_np">decode_binary_np() (BaseReader method)</a>
 </li>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.DimensionError">DimensionError</a>
+</li>
       <li><a href="api/measurement.html#mwr_raw2l1.measurement.measurement_helpers.drop_duplicates">drop_duplicates() (in module mwr_raw2l1.measurement.measurement_helpers)</a>
 </li>
   </ul></td>
@@ -130,12 +139,16 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/readers.html#mwr_raw2l1.readers.reader_rpg_helpers.flag_int2bits">flag_int2bits() (in module mwr_raw2l1.readers.reader_rpg_helpers)</a>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.FileTooLong">FileTooLong</a>
 </li>
-      <li><a href="api/measurement.html#mwr_raw2l1.measurement.measurement.Measurement.from_attex">from_attex() (Measurement class method)</a>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.FileTooShort">FileTooShort</a>
+</li>
+      <li><a href="api/readers.html#mwr_raw2l1.readers.reader_rpg_helpers.flag_int2bits">flag_int2bits() (in module mwr_raw2l1.readers.reader_rpg_helpers)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/measurement.html#mwr_raw2l1.measurement.measurement.Measurement.from_attex">from_attex() (Measurement class method)</a>
+</li>
       <li><a href="api/measurement.html#mwr_raw2l1.measurement.measurement.Measurement.from_radiometrics">from_radiometrics() (Measurement class method)</a>
 </li>
       <li><a href="api/measurement.html#mwr_raw2l1.measurement.measurement.Measurement.from_rpg">from_rpg() (Measurement class method)</a>
@@ -146,6 +159,8 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/write_netcdf.html#mwr_raw2l1.write_netcdf.generate_history_str">generate_history_str() (in module mwr_raw2l1.write_netcdf)</a>
+</li>
       <li><a href="api/utils.html#mwr_raw2l1.utils.file_utils.generate_output_filename">generate_output_filename() (in module mwr_raw2l1.utils.file_utils)</a>
 </li>
       <li><a href="api/utils.html#mwr_raw2l1.utils.file_utils.get_binary">get_binary() (in module mwr_raw2l1.utils.file_utils)</a>
@@ -246,10 +261,20 @@
 </li>
       <li><a href="api/readers.html#mwr_raw2l1.readers.reader_rpg.MET">MET (class in mwr_raw2l1.readers.reader_rpg)</a>
 </li>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.MissingConfig">MissingConfig</a>
+</li>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.MissingDataSource">MissingDataSource</a>
+</li>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.MissingInputArgument">MissingInputArgument</a>
+</li>
       <li>
     module
 
       <ul>
+        <li><a href="api/errors.html#module-mwr_raw2l1.errors">mwr_raw2l1.errors</a>
+</li>
+        <li><a href="api/logs.html#module-mwr_raw2l1.log">mwr_raw2l1.log</a>
+</li>
         <li><a href="api/measurement.html#module-mwr_raw2l1.measurement.measurement">mwr_raw2l1.measurement.measurement</a>
 </li>
         <li><a href="api/measurement.html#module-mwr_raw2l1.measurement.measurement_helpers">mwr_raw2l1.measurement.measurement_helpers</a>
@@ -274,6 +299,22 @@
 </li>
         <li><a href="api/utils.html#module-mwr_raw2l1.utils.transformations">mwr_raw2l1.utils.transformations</a>
 </li>
+        <li><a href="api/write_netcdf.html#module-mwr_raw2l1.write_netcdf">mwr_raw2l1.write_netcdf</a>
+</li>
+      </ul></li>
+      <li>
+    mwr_raw2l1.errors
+
+      <ul>
+        <li><a href="api/errors.html#module-mwr_raw2l1.errors">module</a>
+</li>
+      </ul></li>
+      <li>
+    mwr_raw2l1.log
+
+      <ul>
+        <li><a href="api/logs.html#module-mwr_raw2l1.log">module</a>
+</li>
       </ul></li>
       <li>
     mwr_raw2l1.measurement.measurement
@@ -282,6 +323,8 @@
         <li><a href="api/measurement.html#module-mwr_raw2l1.measurement.measurement">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     mwr_raw2l1.measurement.measurement_helpers
 
@@ -289,8 +332,6 @@
         <li><a href="api/measurement.html#module-mwr_raw2l1.measurement.measurement_helpers">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     mwr_raw2l1.measurement.rpg_helpers
 
@@ -361,6 +402,33 @@
         <li><a href="api/utils.html#module-mwr_raw2l1.utils.transformations">module</a>
 </li>
       </ul></li>
+      <li>
+    mwr_raw2l1.write_netcdf
+
+      <ul>
+        <li><a href="api/write_netcdf.html#module-mwr_raw2l1.write_netcdf">module</a>
+</li>
+      </ul></li>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.MWRConfigError">MWRConfigError</a>
+</li>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.MWRError">MWRError</a>
+</li>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.MWRFileError">MWRFileError</a>
+</li>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.MWRInputError">MWRInputError</a>
+</li>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.MWROutputError">MWROutputError</a>
+</li>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.MWRTestError">MWRTestError</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.OutputDimensionError">OutputDimensionError</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -369,9 +437,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/utils.html#mwr_raw2l1.utils.file_utils.pickle_dump">pickle_dump() (in module mwr_raw2l1.utils.file_utils)</a>
 </li>
+      <li><a href="api/utils.html#mwr_raw2l1.utils.file_utils.pickle_load">pickle_load() (in module mwr_raw2l1.utils.file_utils)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/utils.html#mwr_raw2l1.utils.file_utils.pickle_load">pickle_load() (in module mwr_raw2l1.utils.file_utils)</a>
+      <li><a href="api/write_netcdf.html#mwr_raw2l1.write_netcdf.prepare_datavars">prepare_datavars() (in module mwr_raw2l1.write_netcdf)</a>
+</li>
+      <li><a href="api/write_netcdf.html#mwr_raw2l1.write_netcdf.prepare_global_attrs">prepare_global_attrs() (in module mwr_raw2l1.write_netcdf)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -431,9 +503,45 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/utils.html#mwr_raw2l1.utils.transformations.timedelta2s">timedelta2s() (in module mwr_raw2l1.utils.transformations)</a>
 </li>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.TimeInputMissing">TimeInputMissing</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.TimerefError">TimerefError</a>
+</li>
       <li><a href="api/measurement.html#mwr_raw2l1.measurement.rpg_helpers.to_datasets">to_datasets() (in module mwr_raw2l1.measurement.rpg_helpers)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.UnknownFileType">UnknownFileType</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.UnknownFlagValue">UnknownFlagValue</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/write_netcdf.html#mwr_raw2l1.write_netcdf.write">write() (in module mwr_raw2l1.write_netcdf)</a>
+</li>
+      <li><a href="api/write_netcdf.html#mwr_raw2l1.write_netcdf.write_from_dict">write_from_dict() (in module mwr_raw2l1.write_netcdf)</a>
+</li>
+      <li><a href="api/write_netcdf.html#mwr_raw2l1.write_netcdf.write_from_xarray">write_from_xarray() (in module mwr_raw2l1.write_netcdf)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.WrongFileType">WrongFileType</a>
+</li>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.WrongInputFormat">WrongInputFormat</a>
+</li>
+      <li><a href="api/errors.html#mwr_raw2l1.errors.WrongNumberOfChannels">WrongNumberOfChannels</a>
 </li>
   </ul></td>
 </tr></table>

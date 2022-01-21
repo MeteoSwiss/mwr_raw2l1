@@ -7,4 +7,6 @@ API
    api/measurement
    api/readers
    api/utils
-
+   api/errors
+   api/logs
+   api/write_netcdf

@@ -1,5 +1,5 @@
-mwr\_raw2l1.utils package
-=========================
+Utils
+=====
 
 mwr\_raw2l1.utils.config\_utils module
 --------------------------------------

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Errors &mdash; mwr_raw2l1  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Logs" href="logs.html" />
+    <link rel="prev" title="Utils" href="utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> mwr_raw2l1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="measurement.html">Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.html">Readers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">Utils</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logs.html">Logs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="write_netcdf.html">Write NetCDF</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">mwr_raw2l1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">API</a> &raquo;</li>
+      <li>Errors</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/errors.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mwr_raw2l1.errors">
+<span id="errors"></span><h1>Errors<a class="headerlink" href="#module-mwr_raw2l1.errors" title="Permalink to this headline"></a></h1>
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.CoordinateError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CoordinateError</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#CoordinateError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.CoordinateError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRInputError" title="mwr_raw2l1.errors.MWRInputError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRInputError</span></code></a></p>
+<p>raised if something with station coordinates and altitude goes wrong</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.DimensionError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DimensionError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dims_required</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dims_var</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#DimensionError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.DimensionError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRError" title="mwr_raw2l1.errors.MWRError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRError</span></code></a></p>
+<p>Raised if specified dimensions do not match variable dimension</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.FileTooLong">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FileTooLong</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#FileTooLong"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.FileTooLong" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRFileError" title="mwr_raw2l1.errors.MWRFileError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRFileError</span></code></a></p>
+<p>Raised if file seems too long, e.g. if binary stream is not entirely consumed after reading is finished</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.FileTooShort">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FileTooShort</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#FileTooShort"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.FileTooShort" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRFileError" title="mwr_raw2l1.errors.MWRFileError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRFileError</span></code></a></p>
+<p>Raised if file seems too short, e.g. if parameter n_meas &gt; rest of buffer</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MWRConfigError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MWRConfigError</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#MWRConfigError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.MWRConfigError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRError" title="mwr_raw2l1.errors.MWRError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRError</span></code></a></p>
+<p>Raised if something with the configuration file is wrong</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MWRError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MWRError</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#MWRError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.MWRError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Base exception for MWR</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MWRFileError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MWRFileError</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#MWRFileError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.MWRFileError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRError" title="mwr_raw2l1.errors.MWRError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRError</span></code></a></p>
+<p>Base exception for MWR Files</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MWRInputError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MWRInputError</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#MWRInputError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.MWRInputError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRError" title="mwr_raw2l1.errors.MWRError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRError</span></code></a></p>
+<p>Base exception for calling of MWR reader/helper function or generating measurement from it</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MWROutputError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MWROutputError</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#MWROutputError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.MWROutputError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRError" title="mwr_raw2l1.errors.MWRError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRError</span></code></a></p>
+<p>Raised when something with the output file goes wrong</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MWRTestError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MWRTestError</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#MWRTestError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.MWRTestError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRError" title="mwr_raw2l1.errors.MWRError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRError</span></code></a></p>
+<p>Raised if something goes wrong during set up or clean up of testing</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MissingConfig">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MissingConfig</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#MissingConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.MissingConfig" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRConfigError" title="mwr_raw2l1.errors.MWRConfigError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRConfigError</span></code></a></p>
+<p>Raised if a mandatory entry of the config file is missing</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MissingDataSource">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MissingDataSource</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#MissingDataSource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.MissingDataSource" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRInputError" title="mwr_raw2l1.errors.MWRInputError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRInputError</span></code></a></p>
+<p>Raised if a mandatory data source for creation of Measurement is missing in input</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.MissingInputArgument">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MissingInputArgument</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#MissingInputArgument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.MissingInputArgument" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRInputError" title="mwr_raw2l1.errors.MWRInputError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRInputError</span></code></a></p>
+<p>Raised if a required input argument to a function or class initiation is missing</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.OutputDimensionError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OutputDimensionError</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#OutputDimensionError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.OutputDimensionError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWROutputError" title="mwr_raw2l1.errors.MWROutputError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWROutputError</span></code></a></p>
+<p>Raised if requested output dimensions do not match data</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.TimeInputMissing">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimeInputMissing</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#TimeInputMissing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.TimeInputMissing" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRInputError" title="mwr_raw2l1.errors.MWRInputError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRInputError</span></code></a></p>
+<p>Raised if time is missing in an input file but is required by the reader</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.TimerefError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimerefError</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#TimerefError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.TimerefError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRError" title="mwr_raw2l1.errors.MWRError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRError</span></code></a></p>
+<p>Raised if time reference is local but UTC is required</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.UnknownFileType">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnknownFileType</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#UnknownFileType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.UnknownFileType" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRFileError" title="mwr_raw2l1.errors.MWRFileError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRFileError</span></code></a></p>
+<p>Raised if the filetype of the datafile is not in the known range of file ID types</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.UnknownFlagValue">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnknownFlagValue</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#UnknownFlagValue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.UnknownFlagValue" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRInputError" title="mwr_raw2l1.errors.MWRInputError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRInputError</span></code></a></p>
+<p>Raised if the value of a flag in the input files does not correspond to the range of known values</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.WrongFileType">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WrongFileType</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#WrongFileType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.WrongFileType" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRFileError" title="mwr_raw2l1.errors.MWRFileError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRFileError</span></code></a></p>
+<p>Raised if the filetype does not match with the chosen reader</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.WrongInputFormat">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WrongInputFormat</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#WrongInputFormat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.WrongInputFormat" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRInputError" title="mwr_raw2l1.errors.MWRInputError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRInputError</span></code></a></p>
+<p>Raised if format of input to a function or class does not correspond to expectations</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mwr_raw2l1.errors.WrongNumberOfChannels">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WrongNumberOfChannels</span></span><a class="reference internal" href="../_modules/mwr_raw2l1/errors.html#WrongNumberOfChannels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.errors.WrongNumberOfChannels" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mwr_raw2l1.errors.MWRError" title="mwr_raw2l1.errors.MWRError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mwr_raw2l1.errors.MWRError</span></code></a></p>
+<p>Raised if a wrong number of frequency channels is assumed for reading the file
+-&gt; this can happen for old-version BLB files where n_freq is read after being used</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="utils.html" class="btn btn-neutral float-left" title="Utils" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="logs.html" class="btn btn-neutral float-right" title="Logs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rolf Rüfenacht.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+         .wy-nav-content { max-width: none; }
+  </style>
+
+
+
+</body>
+</html>

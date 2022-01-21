@@ -1,5 +1,5 @@
-mwr\_raw2l1.readers package
-===========================
+Readers
+=======
 
 mwr\_raw2l1.readers.base\_reader\_rpg module
 --------------------------------------------

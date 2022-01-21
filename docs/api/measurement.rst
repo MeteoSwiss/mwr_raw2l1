@@ -1,5 +1,5 @@
-mwr\_raw2l1.measurement package
-===============================
+Measurement
+===========
 
 mwr\_raw2l1.measurement.measurement module
 ------------------------------------------
