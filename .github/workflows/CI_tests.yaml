@@ -5,6 +5,9 @@ name: CI
 
 on:
   push:
+    branches:
+      - master
+      - fix_time_issue
   pull_request:
 
 jobs:

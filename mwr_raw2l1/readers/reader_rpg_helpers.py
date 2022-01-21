@@ -10,14 +10,15 @@ from mwr_raw2l1.errors import UnknownFlagValue, WrongInputFormat
 
 def interpret_time(time_in):
     """translate the time format of RPG files to datetime object"""
-    posix_offset = dt.datetime.timestamp(dt.datetime(2001, 1, 1))  # offset between RPG and POSIX time in seconds
+    # offset between RPG and POSIX time in seconds. Care: datetime base must be in UTC, hence tzinfo muxt be given.
+    posix_offset = dt.datetime.timestamp(dt.datetime(2001, 1, 1, tzinfo=dt.timezone(dt.timedelta(0))))
 
     scalar_input = False
     if np.isscalar(time_in):
         time_in = np.array([time_in])
         scalar_input = True
 
-    times = [dt.datetime.fromtimestamp(x + posix_offset) for x in time_in]
+    times = [dt.datetime.utcfromtimestamp(x + posix_offset) for x in time_in]
     out = np.array(times)
 
     if scalar_input:

@@ -5,7 +5,7 @@ from sys import stdout
 from mwr_raw2l1.utils.file_utils import abs_file_path
 
 # define log file name and path
-act_time_str = dt.datetime.now().strftime('%Y%m%d%H%M%S')
+act_time_str = dt.datetime.now(tz=dt.timezone(dt.timedelta(0))).strftime('%Y%m%d%H%M%S')
 log_file = str(abs_file_path('mwr_raw2l1/logs/log_{}.txt'.format(act_time_str)))
 
 # Colors for the log console output (Options see color_log-package)

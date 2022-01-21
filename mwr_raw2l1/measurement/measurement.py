@@ -84,6 +84,9 @@ class Measurement(object):
             srcdat_interp = all_data[src].interp(time=out.data['time'], method='nearest')  # nearest: flags stay integer
             out.data = out.data.merge(srcdat_interp, join='left')
 
+            # round to ms to exclude rounding differences for scan transformation from different computers
+            out.data['time'] = out.data.time.dt.round('ms')
+
         return out
 
     @classmethod

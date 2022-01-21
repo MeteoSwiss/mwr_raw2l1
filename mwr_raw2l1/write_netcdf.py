@@ -148,7 +148,7 @@ def prepare_global_attrs(data, conf, attr_key, set_history=True):
 
 
 def generate_history_str():
-    current_time = dt.datetime.now()
+    current_time = dt.datetime.now(tz=dt.timezone(dt.timedelta(0)))
     proj_dir = mwr_raw2l1.__file__.split('/')[-2]
     proj_dist = get_distribution(proj_dir)
     return '{}: {} ({})'.format(current_time.strftime('%Y%m%d'), proj_dist.project_name, proj_dist.version)

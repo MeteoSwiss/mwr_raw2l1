@@ -8,14 +8,12 @@ Specific to programming:
 - Measurement with derived classes instead of classmethod
 - measurement_helpers.make_dataset: code copy with shape_act = ... and following line (ca 44-45 and 52-53)
 - would it make sense to go make writer classes instead of functions?
+- read_all function besides reader classes for RPG. does this make sense here?
 
 Specific to organisation:
 - why requirements.txt and setup.py along with pyproject.toml (in ELDAmwl)
-- readthedocs fails to import any module that imports an external package. Possibly problem that we use pyproject.toml
-- how to get the docs-passing icon
 - what to do with th following after updating pyproject.toml?
    - poetry.lock is out of date: Run poetry lock, poetry lock --no-update or poetry update
-- read_all function besides reader classes for RPG. does this make sense here?
 
 specific to deployment:
 - how to make package pip installable (PyPi). Can ask Augustin for this
