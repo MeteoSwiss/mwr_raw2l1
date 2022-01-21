@@ -34,9 +34,9 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">mwr_raw2l1</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
 </ul>
 
         </div>
@@ -72,7 +72,7 @@
 <span class="kn">import</span> <span class="nn">mwr_raw2l1</span>
 
 
-<div class="viewcode-block" id="abs_file_path"><a class="viewcode-back" href="../../../mwr_raw2l1.utils.html#mwr_raw2l1.utils.file_utils.abs_file_path">[docs]</a><span class="k">def</span> <span class="nf">abs_file_path</span><span class="p">(</span><span class="o">*</span><span class="n">file_path</span><span class="p">):</span>
+<div class="viewcode-block" id="abs_file_path"><a class="viewcode-back" href="../../../api/utils.html#mwr_raw2l1.utils.file_utils.abs_file_path">[docs]</a><span class="k">def</span> <span class="nf">abs_file_path</span><span class="p">(</span><span class="o">*</span><span class="n">file_path</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Make a relative file_path absolute in respect to the mwr_raw2l1 project directory.</span>
 <span class="sd">    Absolute paths wil not be changed</span>
@@ -83,23 +83,23 @@
     <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">mwr_raw2l1</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">path</span></div>
 
 
-<div class="viewcode-block" id="get_binary"><a class="viewcode-back" href="../../../mwr_raw2l1.utils.html#mwr_raw2l1.utils.file_utils.get_binary">[docs]</a><span class="k">def</span> <span class="nf">get_binary</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="get_binary"><a class="viewcode-back" href="../../../api/utils.html#mwr_raw2l1.utils.file_utils.get_binary">[docs]</a><span class="k">def</span> <span class="nf">get_binary</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;return the entire content of the binary file as binary stream&quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="pickle_load"><a class="viewcode-back" href="../../../mwr_raw2l1.utils.html#mwr_raw2l1.utils.file_utils.pickle_load">[docs]</a><span class="k">def</span> <span class="nf">pickle_load</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="pickle_load"><a class="viewcode-back" href="../../../api/utils.html#mwr_raw2l1.utils.file_utils.pickle_load">[docs]</a><span class="k">def</span> <span class="nf">pickle_load</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="pickle_dump"><a class="viewcode-back" href="../../../mwr_raw2l1.utils.html#mwr_raw2l1.utils.file_utils.pickle_dump">[docs]</a><span class="k">def</span> <span class="nf">pickle_dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="pickle_dump"><a class="viewcode-back" href="../../../api/utils.html#mwr_raw2l1.utils.file_utils.pickle_dump">[docs]</a><span class="k">def</span> <span class="nf">pickle_dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_corresponding_pickle"><a class="viewcode-back" href="../../../mwr_raw2l1.utils.html#mwr_raw2l1.utils.file_utils.get_corresponding_pickle">[docs]</a><span class="k">def</span> <span class="nf">get_corresponding_pickle</span><span class="p">(</span><span class="n">filename_rawdata</span><span class="p">,</span> <span class="n">path_pickle</span><span class="p">,</span> <span class="n">legacy_reader</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="get_corresponding_pickle"><a class="viewcode-back" href="../../../api/utils.html#mwr_raw2l1.utils.file_utils.get_corresponding_pickle">[docs]</a><span class="k">def</span> <span class="nf">get_corresponding_pickle</span><span class="p">(</span><span class="n">filename_rawdata</span><span class="p">,</span> <span class="n">path_pickle</span><span class="p">,</span> <span class="n">legacy_reader</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;get pickled file from previous read-in corresponding to raw data file&quot;&quot;&quot;</span>
     <span class="n">suffix</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
     <span class="k">if</span> <span class="n">legacy_reader</span><span class="p">:</span>
@@ -114,7 +114,7 @@
     <span class="k">return</span> <span class="n">pickle_load</span><span class="p">(</span><span class="n">pickle_file</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_files"><a class="viewcode-back" href="../../../mwr_raw2l1.utils.html#mwr_raw2l1.utils.file_utils.get_files">[docs]</a><span class="k">def</span> <span class="nf">get_files</span><span class="p">(</span><span class="n">dir_in</span><span class="p">,</span> <span class="n">basename</span><span class="p">,</span> <span class="n">time_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="get_files"><a class="viewcode-back" href="../../../api/utils.html#mwr_raw2l1.utils.file_utils.get_files">[docs]</a><span class="k">def</span> <span class="nf">get_files</span><span class="p">(</span><span class="n">dir_in</span><span class="p">,</span> <span class="n">basename</span><span class="p">,</span> <span class="n">time_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;get files in dir_in corresponding to basename.</span>
 
 <span class="sd">    If time_start and/or time_end are given only files with end time before/after these are returned.</span>
@@ -147,7 +147,7 @@
     <span class="k">return</span> <span class="n">files</span></div>
 
 
-<div class="viewcode-block" id="datestr_from_filename"><a class="viewcode-back" href="../../../mwr_raw2l1.utils.html#mwr_raw2l1.utils.file_utils.datestr_from_filename">[docs]</a><span class="k">def</span> <span class="nf">datestr_from_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">datestr_format</span><span class="o">=</span><span class="s1">&#39;yyyymmddHHMM&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="datestr_from_filename"><a class="viewcode-back" href="../../../api/utils.html#mwr_raw2l1.utils.file_utils.datestr_from_filename">[docs]</a><span class="k">def</span> <span class="nf">datestr_from_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">datestr_format</span><span class="o">=</span><span class="s1">&#39;yyyymmddHHMM&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;return date string from filename, assuming it consists of the last digits of the filename before the extension</span>
 
 <span class="sd">    Args:</span>
@@ -159,7 +159,7 @@
     <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">datestr_format</span><span class="p">):]</span></div>
 
 
-<div class="viewcode-block" id="generate_output_filename"><a class="viewcode-back" href="../../../mwr_raw2l1.utils.html#mwr_raw2l1.utils.file_utils.generate_output_filename">[docs]</a><span class="k">def</span> <span class="nf">generate_output_filename</span><span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s1">&#39;nc&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="generate_output_filename"><a class="viewcode-back" href="../../../api/utils.html#mwr_raw2l1.utils.file_utils.generate_output_filename">[docs]</a><span class="k">def</span> <span class="nf">generate_output_filename</span><span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s1">&#39;nc&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;generate filename from basename, ext and end time inferred from data time vector (basename_yyyymmddHHMM.ext)</span>
 
 <span class="sd">    Args:</span>
@@ -194,7 +194,13 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>  
+
+  <style>
+         .wy-nav-content { max-width: none; }
+  </style>
+
+
 
 </body>
 </html>

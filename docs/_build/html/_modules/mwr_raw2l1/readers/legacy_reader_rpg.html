@@ -34,9 +34,9 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">mwr_raw2l1</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
 </ul>
 
         </div>
@@ -78,7 +78,7 @@
 <span class="n">missing_int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9</span>
 
 
-<div class="viewcode-block" id="read_brt"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.legacy_reader_rpg.read_brt">[docs]</a><span class="k">def</span> <span class="nf">read_brt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="read_brt"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.legacy_reader_rpg.read_brt">[docs]</a><span class="k">def</span> <span class="nf">read_brt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read BRT file holding the MWR brightness temperatures of starring obs</span>
 <span class="sd">    (fixed azimuth and elevation)</span>
@@ -167,7 +167,7 @@
     <span class="k">return</span> <span class="n">data</span></div>
 
 
-<div class="viewcode-block" id="read_blb"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.legacy_reader_rpg.read_blb">[docs]</a><span class="k">def</span> <span class="nf">read_blb</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="read_blb"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.legacy_reader_rpg.read_blb">[docs]</a><span class="k">def</span> <span class="nf">read_blb</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read BLB file holding the MWR brightness temperatures of elevation scans</span>
 
@@ -191,7 +191,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">n_freq_default</span> <span class="o">=</span> <span class="mi">14</span>  <span class="c1"># used to read in files of structver=1 where spectram comes before n_freq</span>
-    <span class="c1"># TODO: check how RPG deals with files from TEMPRO or HUMPRO how would have different n_freq. Other filecodes? Could also get frequency info from BRT files but ugly dependency.</span>
 
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
@@ -253,7 +252,6 @@
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ele&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
-    <span class="c1"># TODO: find a way to infer data[&#39;azi&#39;]</span>
     <span class="n">single_scan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_freq&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">missing_float</span>
 
     <span class="c1"># read measurements. flatten scan in series of time at different azimuth and ele</span>
@@ -287,7 +285,7 @@
     <span class="k">return</span> <span class="n">data</span></div>
 
 
-<div class="viewcode-block" id="read_irt"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.legacy_reader_rpg.read_irt">[docs]</a><span class="k">def</span> <span class="nf">read_irt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="read_irt"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.legacy_reader_rpg.read_irt">[docs]</a><span class="k">def</span> <span class="nf">read_irt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read IRT file holding the infrared brightness temperatures</span>
 
@@ -384,7 +382,7 @@
     <span class="k">return</span> <span class="n">data</span></div>
 
 
-<div class="viewcode-block" id="read_met"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.legacy_reader_rpg.read_met">[docs]</a><span class="k">def</span> <span class="nf">read_met</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="read_met"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.legacy_reader_rpg.read_met">[docs]</a><span class="k">def</span> <span class="nf">read_met</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read MET file holding the observations of the weather sensors</span>
 
@@ -522,7 +520,7 @@
     <span class="k">return</span> <span class="n">data</span></div>
 
 
-<div class="viewcode-block" id="read_hkd"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.legacy_reader_rpg.read_hkd">[docs]</a><span class="k">def</span> <span class="nf">read_hkd</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="read_hkd"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.legacy_reader_rpg.read_hkd">[docs]</a><span class="k">def</span> <span class="nf">read_hkd</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read HKD file holding the housekeeping data</span>
 
@@ -721,7 +719,13 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>  
+
+  <style>
+         .wy-nav-content { max-width: none; }
+  </style>
+
+
 
 </body>
 </html>

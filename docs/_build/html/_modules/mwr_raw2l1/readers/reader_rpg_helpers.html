@@ -34,9 +34,9 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">mwr_raw2l1</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
 </ul>
 
         </div>
@@ -74,7 +74,7 @@
 <span class="kn">from</span> <span class="nn">mwr_raw2l1.errors</span> <span class="kn">import</span> <span class="n">UnknownFlagValue</span><span class="p">,</span> <span class="n">WrongInputFormat</span>
 
 
-<div class="viewcode-block" id="interpret_time"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_time">[docs]</a><span class="k">def</span> <span class="nf">interpret_time</span><span class="p">(</span><span class="n">time_in</span><span class="p">):</span>
+<div class="viewcode-block" id="interpret_time"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_time">[docs]</a><span class="k">def</span> <span class="nf">interpret_time</span><span class="p">(</span><span class="n">time_in</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;translate the time format of RPG files to datetime object&quot;&quot;&quot;</span>
     <span class="n">posix_offset</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">timestamp</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2001</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>  <span class="c1"># offset between RPG and POSIX time in seconds</span>
 
@@ -92,7 +92,7 @@
     <span class="k">return</span> <span class="n">out</span></div>
 
 
-<div class="viewcode-block" id="interpret_angle"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_angle">[docs]</a><span class="k">def</span> <span class="nf">interpret_angle</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
+<div class="viewcode-block" id="interpret_angle"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_angle">[docs]</a><span class="k">def</span> <span class="nf">interpret_angle</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    translate the angle encoding from RPG to elevation and azimuth in degrees</span>
 
@@ -139,7 +139,7 @@
     <span class="k">return</span> <span class="n">ele</span><span class="p">,</span> <span class="n">azi</span></div>
 
 
-<div class="viewcode-block" id="interpret_coord"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_coord">[docs]</a><span class="k">def</span> <span class="nf">interpret_coord</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<div class="viewcode-block" id="interpret_coord"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_coord">[docs]</a><span class="k">def</span> <span class="nf">interpret_coord</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="c1"># TODO: Ask Harald how to find out which coord version used. In manual 06/2020 version=1 is described</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Translate coordinate encoding from RPG to degrees with decimal digits.</span>
@@ -171,7 +171,7 @@
             <span class="n">version</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="interpret_met_auxsens_code"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_met_auxsens_code">[docs]</a><span class="k">def</span> <span class="nf">interpret_met_auxsens_code</span><span class="p">(</span><span class="n">auxsenscode</span><span class="p">):</span>
+<div class="viewcode-block" id="interpret_met_auxsens_code"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_met_auxsens_code">[docs]</a><span class="k">def</span> <span class="nf">interpret_met_auxsens_code</span><span class="p">(</span><span class="n">auxsenscode</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;interpret integer code for the availability of auxiliary sensors in MET files, return dict of contents vars&quot;&quot;&quot;</span>
     <span class="n">auxsenscode_int8</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">auxsenscode</span><span class="p">)</span>
     <span class="n">auxsensbits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unpackbits</span><span class="p">(</span><span class="n">auxsenscode_int8</span><span class="p">,</span> <span class="n">bitorder</span><span class="o">=</span><span class="s1">&#39;little&#39;</span><span class="p">)</span>
@@ -187,7 +187,7 @@
     <span class="k">return</span> <span class="n">out</span></div>
 
 
-<div class="viewcode-block" id="interpret_hkd_contents_code"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_hkd_contents_code">[docs]</a><span class="k">def</span> <span class="nf">interpret_hkd_contents_code</span><span class="p">(</span><span class="n">contents_code_integer</span><span class="p">):</span>
+<div class="viewcode-block" id="interpret_hkd_contents_code"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_hkd_contents_code">[docs]</a><span class="k">def</span> <span class="nf">interpret_hkd_contents_code</span><span class="p">(</span><span class="n">contents_code_integer</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;interpret the integer contents code from HKD files and return dict of contents variables&quot;&quot;&quot;</span>
 
     <span class="n">contents_code_int8</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">contents_code_integer</span><span class="p">])</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
@@ -203,7 +203,7 @@
     <span class="k">return</span> <span class="n">out</span></div>
 
 
-<div class="viewcode-block" id="interpret_statusflag"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_statusflag">[docs]</a><span class="k">def</span> <span class="nf">interpret_statusflag</span><span class="p">(</span><span class="n">flag_integer</span><span class="p">):</span>
+<div class="viewcode-block" id="interpret_statusflag"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_statusflag">[docs]</a><span class="k">def</span> <span class="nf">interpret_statusflag</span><span class="p">(</span><span class="n">flag_integer</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;interpret the statusflag from HKD files and return a dict of status variables (input time series or scalar)&quot;&quot;&quot;</span>
 
     <span class="n">n_freq_kband</span> <span class="o">=</span> <span class="mi">7</span>  <span class="c1"># number of frequency channels in K-band receiver</span>
@@ -234,7 +234,7 @@
     <span class="k">return</span> <span class="n">out</span></div>
 
 
-<div class="viewcode-block" id="interpret_scanflag"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_scanflag">[docs]</a><span class="k">def</span> <span class="nf">interpret_scanflag</span><span class="p">(</span><span class="n">flag_integer</span><span class="p">):</span>
+<div class="viewcode-block" id="interpret_scanflag"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_scanflag">[docs]</a><span class="k">def</span> <span class="nf">interpret_scanflag</span><span class="p">(</span><span class="n">flag_integer</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;interpret flag of BLB scan</span>
 
 <span class="sd">    Args:</span>
@@ -262,7 +262,7 @@
     <span class="k">return</span> <span class="n">out</span></div>
 
 
-<div class="viewcode-block" id="interpret_tstab_flag"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_tstab_flag">[docs]</a><span class="k">def</span> <span class="nf">interpret_tstab_flag</span><span class="p">(</span><span class="n">flag</span><span class="p">):</span>
+<div class="viewcode-block" id="interpret_tstab_flag"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_tstab_flag">[docs]</a><span class="k">def</span> <span class="nf">interpret_tstab_flag</span><span class="p">(</span><span class="n">flag</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;interpret temperature stability flag and return a flag saying stability ok (1), not ok (0) or unknown (NaN)</span>
 
 <span class="sd">    Notes:</span>
@@ -284,7 +284,7 @@
         <span class="k">raise</span> <span class="n">UnknownFlagValue</span><span class="p">(</span><span class="s1">&#39;Expected 0, 1 or 2 for RPG temperature stability flag but found </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="interpret_quadrant_int"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_quadrant_int">[docs]</a><span class="k">def</span> <span class="nf">interpret_quadrant_int</span><span class="p">(</span><span class="n">int_quadr</span><span class="p">):</span>
+<div class="viewcode-block" id="interpret_quadrant_int"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_quadrant_int">[docs]</a><span class="k">def</span> <span class="nf">interpret_quadrant_int</span><span class="p">(</span><span class="n">int_quadr</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;helper function for interpret scanflag for interpreting 2nd and 3rd bit (as int). See documentation from there&quot;&quot;&quot;</span>
     <span class="n">int2quadrant</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>  <span class="c1"># correspondence of int(2nd and 3rd bit) (keys) with quadrant (value)</span>
     <span class="k">try</span><span class="p">:</span>
@@ -296,7 +296,7 @@
         <span class="k">raise</span> <span class="n">UnknownFlagValue</span><span class="p">(</span><span class="s1">&#39;Expected 0, 1 or 2 for scan quadrant encoding but found </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="interpret_bit_order"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_bit_order">[docs]</a><span class="k">def</span> <span class="nf">interpret_bit_order</span><span class="p">(</span><span class="n">bit_order</span><span class="p">):</span>
+<div class="viewcode-block" id="interpret_bit_order"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg_helpers.interpret_bit_order">[docs]</a><span class="k">def</span> <span class="nf">interpret_bit_order</span><span class="p">(</span><span class="n">bit_order</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;interpret bit_order for use in :func:`numpy.unpackbits` so that it also &#39;&gt;&#39; and &#39;&lt;&#39; can be used&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">bit_order</span> <span class="o">==</span> <span class="s1">&#39;little&#39;</span> <span class="ow">or</span> <span class="n">bit_order</span> <span class="o">==</span> <span class="s1">&#39;big&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">bit_order</span>
@@ -308,7 +308,7 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;argument bit_order can receive &#39;&lt;&#39;, &#39;&gt;&#39;, &#39;little&#39; or &#39;big&#39; but got &quot;</span> <span class="o">+</span> <span class="n">bit_order</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="flag_int2bits"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg_helpers.flag_int2bits">[docs]</a><span class="k">def</span> <span class="nf">flag_int2bits</span><span class="p">(</span><span class="n">flag_integer</span><span class="p">):</span>
+<div class="viewcode-block" id="flag_int2bits"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg_helpers.flag_int2bits">[docs]</a><span class="k">def</span> <span class="nf">flag_int2bits</span><span class="p">(</span><span class="n">flag_integer</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;transform an integer value to bits. Input can be time series or scalars&quot;&quot;&quot;</span>
     <span class="c1"># format input</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">flag_integer</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># input is scalar</span>
@@ -349,7 +349,13 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>  
+
+  <style>
+         .wy-nav-content { max-width: none; }
+  </style>
+
+
 
 </body>
 </html>

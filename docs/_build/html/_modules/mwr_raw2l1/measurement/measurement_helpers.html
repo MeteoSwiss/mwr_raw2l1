@@ -34,9 +34,9 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">mwr_raw2l1</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
 </ul>
 
         </div>
@@ -71,7 +71,7 @@
 <span class="kn">from</span> <span class="nn">mwr_raw2l1.log</span> <span class="kn">import</span> <span class="n">logger</span>
 
 
-<div class="viewcode-block" id="make_dataset"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.measurement_helpers.make_dataset">[docs]</a><span class="k">def</span> <span class="nf">make_dataset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dims</span><span class="p">,</span> <span class="nb">vars</span><span class="p">,</span> <span class="n">vars_opt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">multidim_vars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="make_dataset"><a class="viewcode-back" href="../../../api/measurement.html#mwr_raw2l1.measurement.measurement_helpers.make_dataset">[docs]</a><span class="k">def</span> <span class="nf">make_dataset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dims</span><span class="p">,</span> <span class="nb">vars</span><span class="p">,</span> <span class="n">vars_opt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">multidim_vars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;generate a :class:`xarray.Dataset` from &#39;data&#39; dictionary using the dimensions and variables specified</span>
 
 <span class="sd">    Args:</span>
@@ -135,7 +135,7 @@
     <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="drop_duplicates"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.measurement_helpers.drop_duplicates">[docs]</a><span class="k">def</span> <span class="nf">drop_duplicates</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
+<div class="viewcode-block" id="drop_duplicates"><a class="viewcode-back" href="../../../api/measurement.html#mwr_raw2l1.measurement.measurement_helpers.drop_duplicates">[docs]</a><span class="k">def</span> <span class="nf">drop_duplicates</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;drop duplicates from all data in ds for duplicates in dimension vector</span>
 
 <span class="sd">    Args:</span>
@@ -173,7 +173,13 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>  
+
+  <style>
+         .wy-nav-content { max-width: none; }
+  </style>
+
+
 
 </body>
 </html>

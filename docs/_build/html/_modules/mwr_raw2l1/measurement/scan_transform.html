@@ -34,9 +34,9 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">mwr_raw2l1</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
 </ul>
 
         </div>
@@ -74,7 +74,7 @@
 <span class="kn">from</span> <span class="nn">mwr_raw2l1.utils.transformations</span> <span class="kn">import</span> <span class="n">timedelta2s</span>
 
 
-<div class="viewcode-block" id="scan_endtime_to_time"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.scan_transform.scan_endtime_to_time">[docs]</a><span class="k">def</span> <span class="nf">scan_endtime_to_time</span><span class="p">(</span><span class="n">endtime</span><span class="p">,</span> <span class="n">n_angles</span><span class="p">,</span> <span class="n">time_per_angle</span><span class="o">=</span><span class="mi">17</span><span class="p">):</span>
+<div class="viewcode-block" id="scan_endtime_to_time"><a class="viewcode-back" href="../../../api/measurement.html#mwr_raw2l1.measurement.scan_transform.scan_endtime_to_time">[docs]</a><span class="k">def</span> <span class="nf">scan_endtime_to_time</span><span class="p">(</span><span class="n">endtime</span><span class="p">,</span> <span class="n">n_angles</span><span class="p">,</span> <span class="n">time_per_angle</span><span class="o">=</span><span class="mi">17</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    RPG scan files only have one timestamp per scan. This function returns the approximate timestamp for the observation</span>
 <span class="sd">    at each angle</span>
@@ -83,11 +83,11 @@
 <span class="sd">        endtime (:class:`numpy.ndarray` of :class:`numpy.datetime64` or single :class:`datetime.datetime` object):</span>
 <span class="sd">            Corresponds ot the single timestamp saved with each angle scan. Assumed as the end time of the scan</span>
 <span class="sd">        n_angles : number of angles per scan.</span>
-<span class="sd">        time_per_angle : total time for scanning one angle including integration time and the time for moving the mirror.</span>
+<span class="sd">        time_per_angle : total time for scanning one angle incl. integration time and the time for moving the mirror.</span>
 <span class="sd">            Indicated in seconds. The default is 17.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        time : np.array of datetime.datetime objects. list of timestamps (end of integration) for each observed angle</span>
+<span class="sd">        time : :class:`numpy.ndarray` of :class:`datetime.datetime` objects of end times for each observed angle</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">endtime</span><span class="p">,</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
@@ -106,7 +106,7 @@
     <span class="k">return</span> <span class="n">time</span></div>
 
 
-<div class="viewcode-block" id="scantime_from_aux"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.scan_transform.scantime_from_aux">[docs]</a><span class="k">def</span> <span class="nf">scantime_from_aux</span><span class="p">(</span><span class="n">blb</span><span class="p">,</span> <span class="n">hkd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">brt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="scantime_from_aux"><a class="viewcode-back" href="../../../api/measurement.html#mwr_raw2l1.measurement.scan_transform.scantime_from_aux">[docs]</a><span class="k">def</span> <span class="nf">scantime_from_aux</span><span class="p">(</span><span class="n">blb</span><span class="p">,</span> <span class="n">hkd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">brt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;determine time of each elevation in scan using :func:`scan_endtime_to_time` inferring scan duration from aux data</span>
 
 <span class="sd">    If none of the optional arguments is provided default scan duration form :func:`scan_endtime_to_time` is used</span>
@@ -153,7 +153,7 @@
     <span class="k">return</span> <span class="n">scan_endtime_to_time</span><span class="p">(</span><span class="o">**</span><span class="n">endtime2time_params</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="scan_to_timeseries"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.scan_transform.scan_to_timeseries">[docs]</a><span class="k">def</span> <span class="nf">scan_to_timeseries</span><span class="p">(</span><span class="n">blb</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="scan_to_timeseries"><a class="viewcode-back" href="../../../api/measurement.html#mwr_raw2l1.measurement.scan_transform.scan_to_timeseries">[docs]</a><span class="k">def</span> <span class="nf">scan_to_timeseries</span><span class="p">(</span><span class="n">blb</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Transform scanning datasete to time series of Tb spectra and temperatures flattening the elevation dimension.</span>
 
 <span class="sd">    The time vector of each elevation in scan comes from scan_endtime_to_time inferring scan duration from aux data</span>
@@ -204,7 +204,7 @@
     <span class="k">return</span> <span class="n">blb</span></div>
 
 
-<div class="viewcode-block" id="scan_to_timeseries_from_dict"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.scan_transform.scan_to_timeseries_from_dict">[docs]</a><span class="k">def</span> <span class="nf">scan_to_timeseries_from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="scan_to_timeseries_from_dict"><a class="viewcode-back" href="../../../api/measurement.html#mwr_raw2l1.measurement.scan_transform.scan_to_timeseries_from_dict">[docs]</a><span class="k">def</span> <span class="nf">scan_to_timeseries_from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;transform scans to time series of spectra and temperatures starting from dict.</span>
 
 <span class="sd">    Not routinely used anymore. More hard coding than for scan_to_timeseries</span>

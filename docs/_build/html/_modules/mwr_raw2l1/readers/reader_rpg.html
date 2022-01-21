@@ -34,9 +34,9 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">mwr_raw2l1</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
 </ul>
 
         </div>
@@ -81,8 +81,8 @@
 <span class="c1"># TODO: check how RPG deals with files from TEMPRO or HUMPRO how would have different n_freq. Other filecodes?</span>
 
 
-<div class="viewcode-block" id="BRT"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.BRT">[docs]</a><span class="k">class</span> <span class="nc">BRT</span><span class="p">(</span><span class="n">BaseReader</span><span class="p">):</span>
-<div class="viewcode-block" id="BRT.interpret_filecode"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.BRT.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BRT"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg.BRT">[docs]</a><span class="k">class</span> <span class="nc">BRT</span><span class="p">(</span><span class="n">BaseReader</span><span class="p">):</span>
+<div class="viewcode-block" id="BRT.interpret_filecode"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg.BRT.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">BRT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpret_filecode</span><span class="p">()</span>
 
         <span class="c1"># check if filecode corresponds to a BRT file</span>
@@ -116,12 +116,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary_np</span><span class="p">(</span><span class="n">encodings_bin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="BLB"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.BLB">[docs]</a><span class="k">class</span> <span class="nc">BLB</span><span class="p">(</span><span class="n">BaseReader</span><span class="p">):</span>
+<div class="viewcode-block" id="BLB"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg.BLB">[docs]</a><span class="k">class</span> <span class="nc">BLB</span><span class="p">(</span><span class="n">BaseReader</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">header_reader</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">BLB</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="p">)</span>
 
-<div class="viewcode-block" id="BLB.interpret_filecode"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.BLB.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BLB.interpret_filecode"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg.BLB.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">BLB</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpret_filecode</span><span class="p">()</span>
 
         <span class="c1"># check if filecode corresponds to a BLB file</span>
@@ -183,7 +183,7 @@
             <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;scan_ele&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_ele</span><span class="p">,))]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary</span><span class="p">(</span><span class="n">encodings_bin_var_2</span><span class="p">)</span>
 
-<div class="viewcode-block" id="BLB.interpret_header"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.BLB.interpret_header">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BLB.interpret_header"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg.BLB.interpret_header">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">BLB</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpret_header</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_scans&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_ele&#39;</span><span class="p">]</span>
 
@@ -202,12 +202,12 @@
             <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;scanobs&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_freq</span><span class="p">,</span> <span class="n">n_ele</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>  <span class="c1"># Tb on n_ele + T (stored at n_ele+1)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary_np</span><span class="p">(</span><span class="n">encodings_bin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_scans&#39;</span><span class="p">])</span>
 
-<div class="viewcode-block" id="BLB.interpret_raw_data"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.BLB.interpret_raw_data">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BLB.interpret_raw_data"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg.BLB.interpret_raw_data">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">BLB</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpret_raw_data</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">interpret_scanobs</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">interpret_scanflag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;scanflag&#39;</span><span class="p">]))</span></div>
 
-<div class="viewcode-block" id="BLB.interpret_scanobs"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.BLB.interpret_scanobs">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_scanobs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BLB.interpret_scanobs"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg.BLB.interpret_scanobs">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_scanobs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;transform scanobs 3D array to time series of spectra and temperature&quot;&quot;&quot;</span>
 
         <span class="c1"># extract ambient temperature (ambient temperature equal for each frequency, one per scan)</span>
@@ -217,8 +217,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Tb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;scanobs&#39;</span><span class="p">][:,</span> <span class="p">:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div></div>
 
 
-<div class="viewcode-block" id="IRT"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.IRT">[docs]</a><span class="k">class</span> <span class="nc">IRT</span><span class="p">(</span><span class="n">BaseReader</span><span class="p">):</span>
-<div class="viewcode-block" id="IRT.interpret_filecode"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.IRT.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="IRT"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg.IRT">[docs]</a><span class="k">class</span> <span class="nc">IRT</span><span class="p">(</span><span class="n">BaseReader</span><span class="p">):</span>
+<div class="viewcode-block" id="IRT.interpret_filecode"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg.IRT.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">IRT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpret_filecode</span><span class="p">()</span>
 
         <span class="c1"># check if filecode corresponds to a IRT file</span>
@@ -262,8 +262,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary_np</span><span class="p">(</span><span class="n">encodings_bin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="MET"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.MET">[docs]</a><span class="k">class</span> <span class="nc">MET</span><span class="p">(</span><span class="n">BaseReader</span><span class="p">):</span>
-<div class="viewcode-block" id="MET.interpret_filecode"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.MET.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MET"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg.MET">[docs]</a><span class="k">class</span> <span class="nc">MET</span><span class="p">(</span><span class="n">BaseReader</span><span class="p">):</span>
+<div class="viewcode-block" id="MET.interpret_filecode"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg.MET.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">MET</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpret_filecode</span><span class="p">()</span>
 
         <span class="c1"># check if filecode corresponds to a MET file</span>
@@ -315,8 +315,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary_np</span><span class="p">(</span><span class="n">encodings_bin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="HKD"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.HKD">[docs]</a><span class="k">class</span> <span class="nc">HKD</span><span class="p">(</span><span class="n">BaseReader</span><span class="p">):</span>
-<div class="viewcode-block" id="HKD.interpret_filecode"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.HKD.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="HKD"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg.HKD">[docs]</a><span class="k">class</span> <span class="nc">HKD</span><span class="p">(</span><span class="n">BaseReader</span><span class="p">):</span>
+<div class="viewcode-block" id="HKD.interpret_filecode"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg.HKD.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">HKD</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpret_filecode</span><span class="p">()</span>
 
         <span class="c1"># check if filecode corresponds to a HKD file</span>
@@ -358,16 +358,12 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">decode_binary_np</span><span class="p">(</span><span class="n">encodings_bin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;n_meas&#39;</span><span class="p">])</span>
 
-<div class="viewcode-block" id="HKD.interpret_raw_data"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.HKD.interpret_raw_data">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="HKD.interpret_raw_data"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg.HKD.interpret_raw_data">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">HKD</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpret_raw_data</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">interpret_statusflag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;statusflag&#39;</span><span class="p">]))</span></div></div>
 
 
-<span class="c1"># TODO: Consider transforming to SI units. IRT/IRT_min/IRT_max -&gt; K; ir_wavelength -&gt; m; frequency -&gt; Hz.</span>
-<span class="c1">#  could be done in interpret_raw_data of BaseReader class</span>
-
-
-<div class="viewcode-block" id="read_multiple_files"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.read_multiple_files">[docs]</a><span class="k">def</span> <span class="nf">read_multiple_files</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
+<div class="viewcode-block" id="read_multiple_files"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg.read_multiple_files">[docs]</a><span class="k">def</span> <span class="nf">read_multiple_files</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;read multiple L1-related files and return dictionary of executed read-in class instances</span>
 
 <span class="sd">    Args:</span>
@@ -396,11 +392,11 @@
     <span class="k">return</span> <span class="n">all_data</span></div>
 
 
-<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.reader_rpg.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.reader_rpg.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
 
     <span class="n">base_filename</span> <span class="o">=</span> <span class="s1">&#39;MWR_0-20000-0-06610_A201908040100&#39;</span>
 
-    <span class="n">filename_noext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="s1">&#39;data/rpg/0-20000-0-06610&#39;</span> <span class="o">+</span> <span class="n">base_filename</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># join path and make sure filename has no ext</span>
+    <span class="n">filename_noext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="s1">&#39;data/rpg/0-20000-0-06610&#39;</span> <span class="o">+</span> <span class="n">base_filename</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="n">brt</span> <span class="o">=</span> <span class="n">BRT</span><span class="p">(</span><span class="n">filename_noext</span> <span class="o">+</span> <span class="s1">&#39;.BRT&#39;</span><span class="p">)</span>
     <span class="n">blb</span> <span class="o">=</span> <span class="n">BLB</span><span class="p">(</span><span class="n">filename_noext</span> <span class="o">+</span> <span class="s1">&#39;.BLB&#39;</span><span class="p">)</span>
@@ -459,7 +455,13 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>  
+
+  <style>
+         .wy-nav-content { max-width: none; }
+  </style>
+
+
 
 </body>
 </html>

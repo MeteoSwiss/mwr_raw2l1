@@ -34,9 +34,9 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">mwr_raw2l1</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
 </ul>
 
         </div>
@@ -66,20 +66,20 @@
   <h1>Source code for mwr_raw2l1.measurement.measurement</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">mwr_raw2l1.errors</span> <span class="kn">import</span> <span class="n">MissingDataSource</span><span class="p">,</span> <span class="n">CoordinateError</span>
+<span class="kn">from</span> <span class="nn">mwr_raw2l1.errors</span> <span class="kn">import</span> <span class="n">CoordinateError</span><span class="p">,</span> <span class="n">MissingDataSource</span>
 <span class="kn">from</span> <span class="nn">mwr_raw2l1.log</span> <span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span> <span class="nn">mwr_raw2l1.measurement.rpg_helpers</span> <span class="kn">import</span> <span class="n">merge_brt_blb</span><span class="p">,</span> <span class="n">to_datasets</span>
 
 
-<div class="viewcode-block" id="Measurement"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.measurement.Measurement">[docs]</a><span class="k">class</span> <span class="nc">Measurement</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Measurement"><a class="viewcode-back" href="../../../api/measurement.html#mwr_raw2l1.measurement.measurement.Measurement">[docs]</a><span class="k">class</span> <span class="nc">Measurement</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="Measurement.run"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.measurement.Measurement.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conf_inst</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Measurement.run"><a class="viewcode-back" href="../../../api/measurement.html#mwr_raw2l1.measurement.measurement.Measurement.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conf_inst</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_coord</span><span class="p">(</span><span class="n">conf_inst</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_statusflag</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Measurement.from_rpg"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.measurement.Measurement.from_rpg">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Measurement.from_rpg"><a class="viewcode-back" href="../../../api/measurement.html#mwr_raw2l1.measurement.measurement.Measurement.from_rpg">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_rpg</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">readin_data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;constructor for data read in from RPG instruments.</span>
 
@@ -98,7 +98,7 @@
                 <span class="s1">&#39;met&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">],</span>
                 <span class="s1">&#39;hkd&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]}</span>
         <span class="nb">vars</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;brt&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Tb&#39;</span><span class="p">,</span> <span class="s1">&#39;rainflag&#39;</span><span class="p">,</span> <span class="s1">&#39;ele&#39;</span><span class="p">,</span> <span class="s1">&#39;azi&#39;</span><span class="p">],</span>
-                <span class="s1">&#39;blb&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Tb&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;rainflag&#39;</span><span class="p">,</span> <span class="s1">&#39;scan_quadrant&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;blb&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Tb&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;rainflag&#39;</span><span class="p">,</span> <span class="s1">&#39;scan_quadrant&#39;</span><span class="p">],</span>  <span class="c1"># TODO: find a way to infer &#39;azi&#39; from blb</span>
                 <span class="s1">&#39;irt&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;IRT&#39;</span><span class="p">,</span> <span class="s1">&#39;rainflag&#39;</span><span class="p">,</span> <span class="s1">&#39;ele&#39;</span><span class="p">,</span> <span class="s1">&#39;azi&#39;</span><span class="p">],</span>
                 <span class="s1">&#39;met&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;RH&#39;</span><span class="p">],</span>
                 <span class="s1">&#39;hkd&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;alarm&#39;</span><span class="p">]}</span>
@@ -114,9 +114,10 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Creating instance of Measurement class&#39;</span><span class="p">)</span>
 
         <span class="c1"># require mandatory data sources</span>
-        <span class="k">if</span> <span class="s1">&#39;brt&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">readin_data</span> <span class="ow">and</span> <span class="s1">&#39;blb&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">readin_data</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;brt&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">readin_data</span> <span class="ow">and</span> <span class="s1">&#39;blb&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">readin_data</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="n">readin_data</span><span class="p">[</span><span class="s1">&#39;brt&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">readin_data</span><span class="p">[</span><span class="s1">&#39;blb&#39;</span><span class="p">]):</span>
             <span class="k">raise</span> <span class="n">MissingDataSource</span><span class="p">(</span><span class="s1">&#39;At least one file of brt (zenith MWR) or blb (scanning MWR) must be present&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s1">&#39;hkd&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">readin_data</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;hkd&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">readin_data</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">readin_data</span><span class="p">[</span><span class="s1">&#39;hkd&#39;</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="n">MissingDataSource</span><span class="p">(</span><span class="s1">&#39;The housekeeping file (hkd) must be present&#39;</span><span class="p">)</span>
 
         <span class="c1"># construct datasets</span>
@@ -151,15 +152,15 @@
 
         <span class="k">return</span> <span class="n">out</span></div>
 
-<div class="viewcode-block" id="Measurement.from_radiometrics"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.measurement.Measurement.from_radiometrics">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Measurement.from_radiometrics"><a class="viewcode-back" href="../../../api/measurement.html#mwr_raw2l1.measurement.measurement.Measurement.from_radiometrics">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_radiometrics</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">readin_data</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Measurement.from_attex"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.measurement.Measurement.from_attex">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Measurement.from_attex"><a class="viewcode-back" href="../../../api/measurement.html#mwr_raw2l1.measurement.measurement.Measurement.from_attex">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_attex</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">read_in_data</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Measurement.set_coord"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.measurement.Measurement.set_coord">[docs]</a>    <span class="k">def</span> <span class="nf">set_coord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conf_inst</span><span class="p">,</span> <span class="n">primary_src</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">delta_lat</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">delta_lon</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">delta_altitude</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<div class="viewcode-block" id="Measurement.set_coord"><a class="viewcode-back" href="../../../api/measurement.html#mwr_raw2l1.measurement.measurement.Measurement.set_coord">[docs]</a>    <span class="k">def</span> <span class="nf">set_coord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conf_inst</span><span class="p">,</span> <span class="n">primary_src</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">delta_lat</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">delta_lon</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">delta_altitude</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;(re)set coordinate variables (lat, lon, altitude) in self.data from datafile input and configuration</span>
 
 <span class="sd">        If both are available the method checks consistency between coordinates in datafile and configuration.</span>
@@ -201,7 +202,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using &#39;</span><span class="si">{}</span><span class="s2">&#39; from data files as coordinate variable&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Measurement.set_statusflag"><a class="viewcode-back" href="../../../mwr_raw2l1.measurement.html#mwr_raw2l1.measurement.measurement.Measurement.set_statusflag">[docs]</a>    <span class="k">def</span> <span class="nf">set_statusflag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Measurement.set_statusflag"><a class="viewcode-back" href="../../../api/measurement.html#mwr_raw2l1.measurement.measurement.Measurement.set_statusflag">[docs]</a>    <span class="k">def</span> <span class="nf">set_statusflag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;set statusflag from data&quot;&quot;&quot;</span>
         <span class="k">pass</span>  <span class="c1"># TODO: Implement method for setting statusflag from data (and possibly conf_inst)</span></div></div>
 
@@ -240,7 +241,13 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>  
+
+  <style>
+         .wy-nav-content { max-width: none; }
+  </style>
+
+
 
 </body>
 </html>
