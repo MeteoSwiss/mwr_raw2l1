@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.8', '3.9']
+        python-version: ['3.6', '3.8', '3.9']  # MetOffice hub runs on python 3.6 so important to be able to run on it
     steps:
       - uses: actions/checkout@v2
       - name: Set up python ${{ matrix.python-version }}

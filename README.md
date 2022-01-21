@@ -1,3 +1,4 @@
+[![CI](https://github.com/MeteoSwiss/mwr_raw2l1/actions/workflows/CI_tests.yaml/badge.svg)](https://github.com/MeteoSwiss/mwr_raw2l1/actions/workflows/CI_tests.yaml)
 [![Documentation Status](https://readthedocs.org/projects/mwr-raw2l1/badge/?version=latest)](https://mwr-raw2l1.readthedocs.io/en/latest/?badge=latest)
       
 
