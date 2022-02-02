@@ -5,7 +5,7 @@ from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement import Measurement
 from mwr_raw2l1.utils.config_utils import get_inst_config, get_nc_format_config
 from mwr_raw2l1.utils.file_utils import generate_output_filename, get_files
-from mwr_raw2l1.write_netcdf import write
+from mwr_raw2l1.write_netcdf import Writer
 # -------------------------------------------------------------------------- # noqa: F401, I001, I004
 # import readers                                                             # noqa: F401, I001, I004
 from mwr_raw2l1.readers.reader_rpg import read_multiple_files as reader_rpg  # noqa: F401, I001, I004
@@ -42,7 +42,8 @@ def main(inst_config_file, nc_format_config_file, **kwargs):
     # ------------
     outfile = generate_output_filename(conf_inst['base_filename_out'], meas.data['time'])
     outfile_with_path = os.path.join(conf_inst['output_directory'], outfile)
-    write(meas.data, outfile_with_path, conf_nc, conf_inst)
+    nc_writer = Writer(meas.data, outfile_with_path, conf_nc, conf_inst)
+    nc_writer.run()
 
     logger.info('Main function terminated successfully')
 
