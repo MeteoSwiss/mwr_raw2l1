@@ -5,7 +5,7 @@ description = ""
 authors = ["rruefenacht <rruefenacht@users.noreply.github.com>"]
 
 [tool.poetry.dependencies]
-python = ">=3.6,<3.11"  # for scipy
+python = ">=3.6.8,<3.11"  # for scipy
 netCDF4 = [
     {version = "^1.5.3", python = "3.6"},
     {version = "^1.5.6", python = "^3.7"}
