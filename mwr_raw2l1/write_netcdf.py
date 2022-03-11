@@ -101,10 +101,15 @@ class Writer(object):
 
     def add_history_attr(self):
         """add global attribute 'history' with date and version of mwr_raw2l1 code run"""
-        current_time = dt.datetime.now(tz=dt.timezone(dt.timedelta(0)))
+        current_time_str = dt.datetime.now(tz=dt.timezone(dt.timedelta(0))).strftime('%Y%m%d')  # ensure UTC
         proj_dir = mwr_raw2l1.__file__.split('/')[-2]
-        proj_dist = get_distribution(proj_dir)
-        hist_str = '{}: {} ({})'.format(current_time.strftime('%Y%m%d'), proj_dist.project_name, proj_dist.version)
+        try:
+            proj_dist = get_distribution(proj_dir)
+            hist_str = '{}: {} ({})'.format(current_time_str, proj_dist.project_name, proj_dist.version)
+        except Exception as err:  # noqa E722  # Don't want code to fail for just writing history
+            hist_str = '{}: mwr_raw2l1'.format(current_time_str)
+            logger.warning('Received error {} while trying to set history global attribute. Therefore, will be using '
+                           'hardcoded project name without version number'.format(err))
         self.data.attrs['history'] = hist_str
 
     def check_dims(self, var, specs):
