@@ -40,6 +40,8 @@ class FileTooShort(MWRFileError):
     """Raised if file seems too short, e.g. if parameter n_meas > rest of buffer"""
 
 
+class UnknownRecordType(MWRFileError):
+    """Raised if Radiometrics file contains a record type number that is not known, e.g. can't be matched with header"""
 # --------------------------
 class WrongInputFormat(MWRInputError):
     """Raised if format of input to a function or class does not correspond to expectations"""
