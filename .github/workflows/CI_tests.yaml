@@ -37,5 +37,9 @@ jobs:
           pip install poetry
       - name: Install package
         run: poetry install --no-dev
+      - name: Display installed packages
+        run: |
+          poetry env list
+          poetry show
       - name: Run tests
         run: poetry run python -m unittest discover tests/
