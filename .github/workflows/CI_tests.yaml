@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.6.8', '3.8', '3.9']  # TODO: find reason for fail to deploy on python 3.10
+        python-version: ['3.7', '3.8', '3.9']  # TODO: find reason for fail to deploy on python 3.6.8. and 3.10
     steps:
       - uses: actions/checkout@v2
       - name: Set up python ${{ matrix.python-version }}
