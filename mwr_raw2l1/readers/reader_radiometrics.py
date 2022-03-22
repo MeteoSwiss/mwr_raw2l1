@@ -3,12 +3,13 @@ import csv
 import numpy as np
 
 from mwr_raw2l1.errors import UnknownRecordType
+from mwr_raw2l1.readers.reader_radiometrics_helpers import check_vars, get_data
 from mwr_raw2l1.utils.file_utils import abs_file_path
 
 IND_RECORD_TYPE = 2  # third element in line of csv file refers to record type
 
 
-class reader(object):
+class Reader(object):
     def __init__(self, filename):
         self.filename = filename
         self.header = dict(col_headers={}, cfg_info=[], n_lines=np.nan, first_line_data=[])
@@ -20,6 +21,7 @@ class reader(object):
         self.interpret_data()
 
     def read(self, header_only=False):
+        """read the data form csv and fill self.header and self.data_raw"""
         with open(self.filename, newline='') as f:  # need to keep file open until all lines are consumed
             csv_lines = csv.reader(f, delimiter=',')
             self._read_header(csv_lines)
@@ -62,8 +64,8 @@ class reader(object):
         if rec_type_nb_header in self.data_raw:
             self.data_raw[rec_type_nb_header].append(line)
         else:
-            raise UnknownRecordType('Found data with record type number {} but no header with record type number {}'
-                                    'which was assumed to correspond'.fromat(rec_type_nb, rec_type_nb_header))
+            raise UnknownRecordType('Found data with record type number {} but no header with record type number {} '
+                                    'which was assumed to correspond'.format(rec_type_nb, rec_type_nb_header))
 
     def data_raw_to_np(self):
         """transform list of lists in data_raw to numpy array and remove entries without data"""
@@ -79,62 +81,30 @@ class reader(object):
             del self.data_raw[rec_type]
 
     def interpret_data(self):
+        """interpret the data in 'data_raw' and feed to 'data'"""
+        self.interpret_mwr()
+        self.interpret_aux()
 
-        self.data['Tb'], self.data['frequency'] = get_mwr(self.data_raw[50], self.header['col_headers'][50])
-        self.extract_data(self.data_raw[50], self.header['col_headers'][50])
+    def interpret_mwr(self):
+        """interpret microwave radiometer data"""
+        rec_type_nb = 50
+        mandatory_vars = ['time', 'frequency', 'Tb', 'azi', 'ele', 'quality']
 
-    def extract_data(self, data_raw, header):
-        # rec type 40 (aux=met+irt)
-        # Tamb(K),Rh(%),Pres(mb),Tir(K),Rain,DataQuality
-        # rec type 50 (mwr)
-        # Az(deg),El(deg),TkBB(K),Ch....,DataQuality
-        var2colheader = {'azi': 'Az(deg)', 'ele': 'El(deg)', 'T_amb': 'TkBB(K)',
-                         'T': 'Tamb(K)', 'RH': 'Rh(%)', 'p': 'Pres(mb)',
-                         'IRT': 'Tir(K)', 'rainflag': 'Rain', 'quality': 'DataQuality'}
-        for varname, colhead in var2colheader.items():
-            for ind, hd in enumerate(header):
-                if simplify_header(hd) == simplify_header(colhead):
-                    self.data[varname] = data_raw[:, ind].astype(float)  # TODO: do not directly write to data, only do this for right record types
+        data = get_data(self.data_raw[rec_type_nb], self.header['col_headers'][rec_type_nb])
+        check_vars(data, mandatory_vars)
+        self.data['mwr'] = data
 
+    def interpret_aux(self):
+        """interpret auxiliary data, i.e. infrared brightness temperatures and meteo observations"""
+        rec_type_nb = 40
+        mandatory_vars = ['time', 'T', 'RH', 'IRT', 'rainflag', 'quality']
 
-# to helpers
-def simplify_header(str_in):
-    """simplify strings to match col headers more robustly. Use on both sides of the '==' operator"""
-    return str_in.lower().replace(' ', '').replace('[', '(').replace(']', ')')
-
-
-def get_mwr(data_raw, header, only_observed_freq=True):
-    """extract the microwave radiometer brightness temperatures and frequencies from raw_data
-
-    Args:
-        data_raw: raw data as :class:`numpy.ndarray` object
-        header: column header belonging to data_raw
-        only_observed_freq: if True only frequencies with non-NaN observations are returned. Defaults to True.
-    Returns:
-        the tuple (brightness_temperature, frequency)
-    """
-
-    # find indices of MWR data and their frequency from header
-    ind_mwr = []
-    freq = []
-    for ind, colhead in enumerate(header):
-        if 'ch ' == colhead[0:3].lower():
-            ind_mwr.append(ind)
-            freq.append(float(colhead[3:]))
-    frequency = np.array(freq)
-
-    # get brightness temperatures and exclude channels without observations if requested
-    # TODO: ask Christine what she thinks about excluding unused channels. channel reporting temporarily NaN possible?
-    tb = data_raw[:, ind_mwr].astype(float)
-    if only_observed_freq:
-        ind_obs = ~np.all(np.isnan(tb), axis=0)
-        tb = tb[:, ind_obs]
-        frequency = frequency[ind_obs]
-
-    return tb, frequency
+        data = get_data(self.data_raw[rec_type_nb], self.header['col_headers'][rec_type_nb], no_mwr=True)
+        check_vars(data, mandatory_vars)
+        self.data['aux'] = data
 
 
 if __name__ == '__main__':
-    rd = reader(abs_file_path('mwr_raw2l1/data/radiometrics/orig/2021-01-31_00-04-08_lv1.csv'))
+    rd = Reader(abs_file_path('mwr_raw2l1/data/radiometrics/orig/2021-01-31_00-04-08_lv1.csv'))
     rd.run()
     pass

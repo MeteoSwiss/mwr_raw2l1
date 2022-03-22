@@ -7,7 +7,7 @@ import numpy as np
 
 from mwr_raw2l1.errors import WrongFileType, WrongNumberOfChannels
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.readers.base_reader_rpg import BaseReader
+from mwr_raw2l1.readers.reader_rpg_base import BaseReader
 from mwr_raw2l1.readers.reader_rpg_helpers import (interpret_hkd_contents_code, interpret_met_auxsens_code,
                                                    interpret_scanflag, interpret_statusflag)
 

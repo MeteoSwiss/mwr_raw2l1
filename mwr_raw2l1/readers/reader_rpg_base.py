@@ -2,7 +2,7 @@ import struct
 
 import numpy as np
 
-from mwr_raw2l1.errors import FileTooLong, FileTooShort, TimeInputMissing, TimerefError, UnknownFileType
+from mwr_raw2l1.errors import FileTooLong, FileTooShort, MissingTimeInput, TimerefError, UnknownFileType
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.readers.reader_rpg_helpers import interpret_angle, interpret_coord, interpret_time
 from mwr_raw2l1.utils.file_utils import get_binary
@@ -126,7 +126,7 @@ class BaseReader(object):
         try:  # assume data-dict in all subclasses contains time
             self.data['time'] = interpret_time(self.data['time_raw'])
         except KeyError as err:
-            raise TimeInputMissing('Did not find {} in read-in data from file {}'.format(err, self.filename))
+            raise MissingTimeInput('Did not find {} in read-in data from file {}'.format(err, self.filename))
         if 'pointing_raw' in self.data.keys():
             self.data['ele'], self.data['azi'] = interpret_angle(self.data['pointing_raw'], self.filestruct['anglever'])
         for coord in ('lon_raw', 'lat_raw'):

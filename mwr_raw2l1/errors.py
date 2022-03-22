@@ -42,6 +42,12 @@ class FileTooShort(MWRFileError):
 
 class UnknownRecordType(MWRFileError):
     """Raised if Radiometrics file contains a record type number that is not known, e.g. can't be matched with header"""
+
+
+class MissingVariable(MWRFileError):
+    """Raised if file seems not to contain a mandatory variable. Might be due to a modified header in the input file"""
+
+
 # --------------------------
 class WrongInputFormat(MWRInputError):
     """Raised if format of input to a function or class does not correspond to expectations"""
@@ -55,7 +61,7 @@ class CoordinateError(MWRInputError):
     """raised if something with station coordinates and altitude goes wrong"""
 
 
-class TimeInputMissing(MWRInputError):
+class MissingTimeInput(MWRInputError):
     """Raised if time is missing in an input file but is required by the reader"""
 
 
