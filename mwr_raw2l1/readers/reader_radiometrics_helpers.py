@@ -38,7 +38,8 @@ def get_simple_vars(data_raw, header):
     # matching between internal variable names and column headers in data file
     var2colheader = {'azi': 'Az(deg)', 'ele': 'El(deg)', 'T_amb': 'TkBB(K)',
                      'T': 'Tamb(K)', 'RH': 'Rh(%)', 'p': 'Pres(mb)',
-                     'IRT': 'Tir(K)', 'rainflag': 'Rain', 'quality': 'DataQuality'}
+                     'IRT': 'Tir(K)', 'rainflag': 'Rain',
+                     'record_nb': 'Record', 'quality': 'DataQuality'}
     # rec type 40 (aux=met+irt)
     # Tamb(K),Rh(%),Pres(mb),Tir(K),Rain,DataQuality
     # rec type 50 (mwr)

@@ -30,10 +30,10 @@ class Reader(object):
                 self.data_raw_to_np()
 
     def _read_header(self, csv_lines):
-        """read the header of the csv data"""
+        """read the header of the csv data (all 10-divisible record type numbers and 99)"""
 
         for n, line in enumerate(csv_lines):
-            line = [ll.strip() for ll in line]  # ugly csv formatting leaves white spaces with headers
+            line = [ll.strip() for ll in line]  # strip as ugly csv formatting leaves white spaces with headers
             rec_type_nb = int(line[IND_RECORD_TYPE])
             if (rec_type_nb % 10) == 0:  # 10-divisible: different column headers (expected as single line)
                 self.header['col_headers'][rec_type_nb] = line
@@ -87,8 +87,8 @@ class Reader(object):
 
     def interpret_mwr(self):
         """interpret microwave radiometer data"""
-        rec_type_nb = 50
-        mandatory_vars = ['time', 'frequency', 'Tb', 'azi', 'ele', 'quality']
+        rec_type_nb = 50  # record type number for header: 50; for data: 51.
+        mandatory_vars = ['record_nb', 'time', 'frequency', 'Tb', 'azi', 'ele', 'quality']
 
         data = get_data(self.data_raw[rec_type_nb], self.header['col_headers'][rec_type_nb])
         check_vars(data, mandatory_vars)
@@ -97,7 +97,7 @@ class Reader(object):
     def interpret_aux(self):
         """interpret auxiliary data, i.e. infrared brightness temperatures and meteo observations"""
         rec_type_nb = 40
-        mandatory_vars = ['time', 'T', 'RH', 'IRT', 'rainflag', 'quality']
+        mandatory_vars = ['record_nb', 'time', 'T', 'RH', 'IRT', 'rainflag', 'quality']
 
         data = get_data(self.data_raw[rec_type_nb], self.header['col_headers'][rec_type_nb], no_mwr=True)
         check_vars(data, mandatory_vars)
