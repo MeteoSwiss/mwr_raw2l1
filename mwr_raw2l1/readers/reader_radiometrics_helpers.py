@@ -111,7 +111,7 @@ def interpret_time_str(time_str):
     #    (full year           , month        , day          , hour          , minute         , second         )
     tt = ('20' + time_str[6:8], time_str[0:2], time_str[3:5], time_str[9:11], time_str[12:14], time_str[15:17])
     tt_int = [int(x) for x in tt]
-    return dt.datetime(*tt_int, tzinfo=dt.timezone(dt.timedelta(0)))
+    return dt.datetime(*tt_int)  # don't use tzinfo here, otherwise will not be able to convert to datetime64 by xarray
 
 
 def check_vars(data, mandatory_vars):
