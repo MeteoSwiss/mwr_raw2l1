@@ -2,7 +2,7 @@ import numpy as np
 
 from mwr_raw2l1.errors import CoordinateError, MissingDataSource
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.measurement.measurement_helpers import scanflag_from_ele
+from mwr_raw2l1.measurement.measurement_helpers import scanflag_from_ele, merge_aux_data
 from mwr_raw2l1.measurement.radiometrics_helpers import radiometrics_to_datasets
 from mwr_raw2l1.measurement.rpg_helpers import merge_brt_blb, rpg_to_datasets
 
@@ -69,25 +69,10 @@ class Measurement(object):
 
         # init measurement class and merge BRT and BLB data to time series of brightness temperatures
         out = cls()
-        out.data = mwr_data
+        out.data = merge_aux_data(mwr_data, all_data)
 
-        # bring other data to time grid of microwave brightness temperatures
-        for src in readin_data:
-            if src in ['brt', 'blb']:  # BRT and BLB data already treated
-                continue
-
-            # to make sure no variable is overwritten rename duplicates by suffixing it with its source
-            for var in all_data[src]:
-                if var in out.data:
-                    varname_map = {var: var + '_' + src}
-                    all_data[src] = all_data[src].rename(varname_map)
-
-            # interp to same time grid (time grid from blb now stems from some interp) and merge into out.data
-            srcdat_interp = all_data[src].interp(time=out.data['time'], method='nearest')  # nearest: flags stay integer
-            out.data = out.data.merge(srcdat_interp, join='left')
-
-            # round to ms to exclude rounding differences for scan transformation from different computers
-            out.data['time'] = out.data.time.dt.round('ms')
+        # round to ms to exclude rounding differences for scan transformation from different computers
+        out.data['time'] = out.data.time.dt.round('ms')
 
         return out
 
@@ -109,29 +94,14 @@ class Measurement(object):
                 'aux': ['IRT', 'p', 'T', 'RH', 'rainflag', 'quality']}
         vars_opt = {'mwr': [],
                     'aux': []}
-        pass
-        all_data = radiometrics_to_datasets(readin_data, dims, vars, vars_opt)
 
+        logger.info('Creating instance of Measurement class')
+
+        all_data = radiometrics_to_datasets(readin_data, dims, vars, vars_opt)
         all_data['mwr']['scanflag'] = scanflag_from_ele(all_data['mwr']['ele'])
 
-        # init measurement class and merge BRT and BLB data to time series of brightness temperatures
         out = cls()
-        out.data = all_data['mwr']
-
-        # bring other data to time grid of microwave brightness temperatures
-        for src in all_data:
-            if src == 'mwr':  # already treated
-                continue
-
-            # to make sure no variable is overwritten rename duplicates by suffixing it with its source
-            for var in all_data[src]:
-                if var in out.data:
-                    varname_map = {var: var + '_' + src}
-                    all_data[src] = all_data[src].rename(varname_map)
-
-            # interp to same time grid (time grid from blb now stems from some interp) and merge into out.data
-            srcdat_interp = all_data[src].interp(time=out.data['time'], method='nearest')  # nearest: flags stay integer
-            out.data = out.data.merge(srcdat_interp, join='left')
+        out.data = merge_aux_data(all_data['mwr'], all_data)
 
         return out
 

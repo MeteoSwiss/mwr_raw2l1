@@ -69,6 +69,40 @@ def make_dataset(data, dims, vars, vars_opt=None, multidim_vars=None, time_vecto
     return xr.Dataset.from_dict(spec)
 
 
+def merge_aux_data(mwr_data, all_data, srcs_to_ignore=None):
+    """merge auxiliary data to time grid of microwave data
+
+    Args:
+        mwr_data: :class:`xarray.Dataset` of microwave radiometer data
+        all_data: Dictionary of data from different sources (keys) as :class:`xarray.Dataset` (values). Can also contain
+            the data in 'mwr_data' in which case it must be made sure the key is specified in 'srcs_to_ignore'
+        srcs_to_ignore (optional): list of sources (keys) to ignore from 'all_data' e.g. because they are already
+            contained in 'mwr_data'. Defaults to ['mwr', 'brt', 'blb']
+    Returns:
+        merged dataset of type :class:`xarray.Dataset`
+    """
+
+    if srcs_to_ignore is None:
+        srcs_to_ignore = ['mwr', 'brt', 'blb']
+
+    out = mwr_data
+    for src in all_data:
+        if src in srcs_to_ignore:
+            continue
+
+        # to make sure no variable is overwritten rename duplicates by suffixing it with its source
+        for var in all_data[src]:
+            if var in out:
+                varname_map = {var: var + '_' + src}
+                all_data[src] = all_data[src].rename(varname_map)
+
+        # interp to same time grid (time grid from blb now stems from some interp) and merge into out
+        srcdat_interp = all_data[src].interp(time=out['time'], method='nearest')  # nearest: flags stay integer
+        out = out.merge(srcdat_interp, join='left')
+
+    return out
+
+
 def drop_duplicates(ds, dim):
     """drop duplicates from all data in ds for duplicates in dimension vector
 
