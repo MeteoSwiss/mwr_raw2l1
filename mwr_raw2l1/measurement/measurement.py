@@ -2,7 +2,7 @@ import numpy as np
 
 from mwr_raw2l1.errors import CoordinateError, MissingDataSource
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.measurement.measurement_helpers import scanflag_from_ele, merge_aux_data
+from mwr_raw2l1.measurement.measurement_helpers import merge_aux_data, scanflag_from_ele
 from mwr_raw2l1.measurement.radiometrics_helpers import radiometrics_to_datasets
 from mwr_raw2l1.measurement.rpg_helpers import merge_brt_blb, rpg_to_datasets
 
@@ -72,7 +72,7 @@ class Measurement(object):
         out.data = merge_aux_data(mwr_data, all_data)
 
         # round to ms to exclude rounding differences for scan transformation from different computers
-        out.data['time'] = out.data.time.dt.round('ms')
+        out.data['time'] = out.data.time.dt.round('ms')  # TODO: rather move to scan_transform.py
 
         return out
 
@@ -169,5 +169,5 @@ if __name__ == '__main__':
     rd = ReaderRadiometrics(abs_file_path('mwr_raw2l1/data/radiometrics/orig/2021-01-31_00-04-08_lv1.csv'))
     rd.run()
     meas = Measurement.from_radiometrics(rd)
-    meas.run()
+    # meas.run()  # TODO: meas.run seems to need config for Radiometrics instruments
     pass

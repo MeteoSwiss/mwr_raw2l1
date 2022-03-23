@@ -64,7 +64,7 @@ class Writer(object):
         self.global_attrs_from_conf(self.conf_nc, attr_key='attributes')
         self.global_attrs_from_conf(self.conf_inst, attr_key='nc_attributes')
         self.add_history_attr()
-        self.data.to_netcdf(self.filename, format=self.nc_format) # write to output NetCDF file
+        self.data.to_netcdf(self.filename, format=self.nc_format)  # write to output NetCDF file
         logger.info('Data written to ' + self.filename)
 
     def prepare_datavars(self):
