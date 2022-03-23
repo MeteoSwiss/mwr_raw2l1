@@ -9,8 +9,9 @@ def to_datasets(data, dims, vars, vars_opt):
     """generate unique :class:`xarray.Dataset` for each type of obs in 'data' using dimensions and variables specified
 
     Args:
-        data: dictionary of lists containing the obs (obs: a dictionary of variable names and values) for different
-            source files of same type. The dictionary keys correspond to the type of observations (e.g. brt, blb, ...)
+        data: dictionary containing the observations by type. Its keys correspond to the type of observations (e.g. brt,
+            blb, irt ...). The observations themselves can be given as a single instance of the read-in class
+            (with observations in variable 'data') or as a list containing a series of instances of read-in classes.
         dims: list of keys that are a dimension (must correspond to the order of dimensions in data)
         vars: list of keys that are data variables (dimensions don't need to be specified again)
         vars_opt: list of keys that are optional data variables (added as 1-dim series of NaN if missing in 'data')
@@ -35,6 +36,8 @@ def to_datasets(data, dims, vars, vars_opt):
             max_time = max([x.data['time'][-1] for x in data['hkd']])  # class instances in data['hkd'] can be unordered
             data_act.append(make_dataset(None, dims[src], vars[src], vars_opt[src], multidim_vars=multidim_vars,
                                          time_vector=[min_time, max_time]))
+        elif not isinstance(data_series, list):  # accept also single instances of read-in class not inside a list
+            data_series = [data_series]
         for dat in data_series:  # make a xarray dataset from the data dict in each class instance of the list
             data_act.append(make_dataset(dat.data, dims[src], vars[src], vars_opt[src], multidim_vars=multidim_vars))
         out[src] = xr.concat(data_act, dim='time')  # merge all datasets of the same type
