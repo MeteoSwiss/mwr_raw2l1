@@ -5,7 +5,7 @@ from mwr_raw2l1.measurement.measurement_helpers import drop_duplicates, make_dat
 from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries
 
 
-def to_datasets(data, dims, vars, vars_opt):
+def rpg_to_datasets(data, dims, vars, vars_opt):
     """generate unique :class:`xarray.Dataset` for each type of obs in 'data' using dimensions and variables specified
 
     Args:
@@ -50,7 +50,7 @@ def merge_brt_blb(all_data):
     """merge brt (zenith MWR) and blb (scanning MWR) observations from an RPG instrument
 
     Args:
-        all_data: dictionary with a :class:`xarray.Dataset` attached to each key (output of :func:`to_datasets`)
+        all_data: dictionary with a :class:`xarray.Dataset` attached to each key (output of :func:`rpg_to_datasets`)
     """
     if 'brt' in all_data:
         out = all_data['brt']

@@ -81,3 +81,21 @@ def drop_duplicates(ds, dim):
 
     _, ind = np.unique(ds[dim], return_index=True)  # keep first index but assume duplicate values identical anyway
     return ds.isel({dim: ind})
+
+
+def scanflag_from_ele(ele, use_ele_diff=False):
+    """infer scanflag (0: starring; 1: scanning) from elevation vector
+
+    Args:
+        ele: elevation vector as :class:`numpy.ndarray`
+        use_ele_diff: if True infer scanflag from differences in ele, if False ele>89 are assumed starring, all others
+            as scanning. Defaults to False.
+    Returns:
+        scanflags as :class:`numpy.ndarray` of same shape as ele
+    """
+
+    if use_ele_diff:
+        err_msg = 'currently scanflags can only be inferred from assuming ele>89 as starring and all others as scanning'
+        raise NotImplementedError(err_msg)
+    else:
+        return np.where(ele > 89, 0, 1)

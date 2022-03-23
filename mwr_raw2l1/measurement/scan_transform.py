@@ -141,7 +141,8 @@ def scan_to_timeseries(blb, *args, **kwargs):
 def scan_to_timeseries_from_dict(data, *args, **kwargs):
     """transform scans to time series of spectra and temperatures starting from dict.
 
-    Not routinely used anymore. More hard coding than for scan_to_timeseries
+    Warning:
+        Not routinely used anymore. More hard coding than for :func:`scan_to_timeseries`
 
     Args:
         data: dictioinary containing the scan observations (BLB)

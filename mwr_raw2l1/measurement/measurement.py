@@ -2,7 +2,9 @@ import numpy as np
 
 from mwr_raw2l1.errors import CoordinateError, MissingDataSource
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.measurement.rpg_helpers import merge_brt_blb, to_datasets
+from mwr_raw2l1.measurement.measurement_helpers import scanflag_from_ele
+from mwr_raw2l1.measurement.radiometrics_helpers import radiometrics_to_datasets
+from mwr_raw2l1.measurement.rpg_helpers import merge_brt_blb, rpg_to_datasets
 
 
 class Measurement(object):
@@ -20,7 +22,7 @@ class Measurement(object):
         Auxiliary data are merged to time grid of MWR data. Scanning MWR data are returned as time series (no ele dim)
 
         Args:
-            readin_data: dictionary with list of instances for each RPG read-in class (keys correspond to filetype)
+            readin_data: dictionary with (list of) instances for each RPG read-in class (keys correspond to filetype)
         Returns:
             an instance of the Measurement class with observations filled to self.data
         """
@@ -55,7 +57,7 @@ class Measurement(object):
             raise MissingDataSource('The housekeeping file (hkd) must be present')
 
         # construct datasets
-        all_data = to_datasets(readin_data, dims, vars, vars_opt)
+        all_data = rpg_to_datasets(readin_data, dims, vars, vars_opt)
 
         # infer MWR data sources (BRT and/or BLB) and add scanflag
         mwr_sources_present = []
@@ -69,7 +71,7 @@ class Measurement(object):
         out = cls()
         out.data = mwr_data
 
-        # bring other data to time grid of brightness temperatures
+        # bring other data to time grid of microwave brightness temperatures
         for src in readin_data:
             if src in ['brt', 'blb']:  # BRT and BLB data already treated
                 continue
@@ -91,7 +93,47 @@ class Measurement(object):
 
     @classmethod
     def from_radiometrics(cls, readin_data):
+        """constructor for data read in from RPG instruments.
+
+        Auxiliary data are merged to time grid of MWR data.
+
+        Args:
+            readin_data: instance or list of instances for the Radiometrics read-in class
+        Returns:
+            an instance of the Measurement class with observations filled to self.data
+        """
+        # dimensions and variable names for usage with make_dataset
+        dims = {'mwr': ['time', 'frequency'],
+                'aux': ['time']}  # TODO: ask Christine about wavelength of IR and add dimension here or elsewhere
+        vars = {'mwr': ['Tb', 'ele', 'azi', 'quality'],
+                'aux': ['IRT', 'p', 'T', 'RH', 'rainflag', 'quality']}
+        vars_opt = {'mwr': [],
+                    'aux': []}
         pass
+        all_data = radiometrics_to_datasets(readin_data, dims, vars, vars_opt)
+
+        all_data['mwr']['scanflag'] = scanflag_from_ele(all_data['mwr']['ele'])
+
+        # init measurement class and merge BRT and BLB data to time series of brightness temperatures
+        out = cls()
+        out.data = all_data['mwr']
+
+        # bring other data to time grid of microwave brightness temperatures
+        for src in all_data:
+            if src == 'mwr':  # already treated
+                continue
+
+            # to make sure no variable is overwritten rename duplicates by suffixing it with its source
+            for var in all_data[src]:
+                if var in out.data:
+                    varname_map = {var: var + '_' + src}
+                    all_data[src] = all_data[src].rename(varname_map)
+
+            # interp to same time grid (time grid from blb now stems from some interp) and merge into out.data
+            srcdat_interp = all_data[src].interp(time=out.data['time'], method='nearest')  # nearest: flags stay integer
+            out.data = out.data.merge(srcdat_interp, join='left')
+
+        return out
 
     @classmethod
     def from_attex(cls, read_in_data):
@@ -146,9 +188,16 @@ class Measurement(object):
 
 if __name__ == '__main__':
     from mwr_raw2l1.readers.reader_rpg import read_multiple_files
+    from mwr_raw2l1.readers.reader_radiometrics import Reader as ReaderRadiometrics
     from mwr_raw2l1.utils.file_utils import abs_file_path, get_files
 
-    files = get_files(abs_file_path('mwr_raw2l1/data/rpg/0-20000-0-06610/'), 'MWR_0-20000-0-06610_A')
-    all_data = read_multiple_files(files)
-    meas = Measurement.from_rpg(all_data)
+    # files = get_files(abs_file_path('mwr_raw2l1/data/rpg/0-20000-0-06610/'), 'MWR_0-20000-0-06610_A')
+    # all_data = read_multiple_files(files)
+    # meas = Measurement.from_rpg(all_data)
+    # meas.run()
+
+    rd = ReaderRadiometrics(abs_file_path('mwr_raw2l1/data/radiometrics/orig/2021-01-31_00-04-08_lv1.csv'))
+    rd.run()
+    meas = Measurement.from_radiometrics(rd)
     meas.run()
+    pass
