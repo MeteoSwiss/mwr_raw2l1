@@ -3,7 +3,7 @@
 reader: reader_radiometrics   # refers to name set at import into main.py near line 10
 meas_constructor: from_radiometrics  # constructor for Measurement class in measurement.measurement.py
 
-input_directory: data/rpg/0-20000-0-10393/  # use absolute path (or relative to location of main.py)
+input_directory: data/radiometrics/0-20000-0-10393/  # use absolute path (or relative to location of main.py)
 output_directory: data/output/  # use absolute path (or relative to location of main.py)
 base_filename_in: MWR_0-20000-0-10393_A
 base_filename_out: MWR_1C01_0-20000-0-10393_A
