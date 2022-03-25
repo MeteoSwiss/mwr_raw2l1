@@ -7,6 +7,9 @@ from mwr_raw2l1.measurement.radiometrics_helpers import radiometrics_to_datasets
 from mwr_raw2l1.measurement.rpg_helpers import merge_brt_blb, rpg_to_datasets
 
 
+DTYPE_SCANFLAG = 'u1'  # data type used for scanflags set by Measurement class
+
+
 class Measurement(object):
     def __init__(self):
         self.data = None
@@ -64,7 +67,8 @@ class Measurement(object):
         for src, flagval in scanflag_values.items():
             if src in all_data and all_data[src]:  # check corresponding data series is not an empty list
                 mwr_sources_present.append(src)
-                all_data[src]['scaflag'] = ('time', flagval * np.ones(np.shape(all_data[src].time), dtype='u1'))
+                flags_here = flagval * np.ones(np.shape(all_data[src].time), dtype=DTYPE_SCANFLAG)
+                all_data[src]['scanflag'] = ('time', flags_here)
         mwr_data = merge_brt_blb(all_data)
 
         # init measurement class and merge BRT and BLB data to time series of brightness temperatures
@@ -98,7 +102,8 @@ class Measurement(object):
         logger.info('Creating instance of Measurement class')
 
         all_data = radiometrics_to_datasets(readin_data, dims, vars, vars_opt)
-        all_data['mwr']['scanflag'] = scanflag_from_ele(all_data['mwr']['ele'])
+        flags_here = scanflag_from_ele(all_data['mwr']['ele']).astype(DTYPE_SCANFLAG)
+        all_data['mwr']['scanflag'] = ('time', flags_here)
 
         out = cls()
         out.data = merge_aux_data(all_data['mwr'], all_data)

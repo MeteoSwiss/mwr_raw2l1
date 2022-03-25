@@ -108,7 +108,7 @@ variables:
       units: degree
       comment: 0=horizon, 90=zenith
 
-  BLscan_active:
+  scanflag:  # previously used BLscan_active (from RPG's HDF files), now use scanflag determined from filetype or ele
     name: scanflag
     dim:
       - time
