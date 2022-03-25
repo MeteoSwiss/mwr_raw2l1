@@ -2,6 +2,7 @@ import datetime as dt
 from copy import deepcopy
 
 import netCDF4 as nc
+import numpy as np
 import xarray as xr
 from pkg_resources import get_distribution
 
@@ -49,7 +50,7 @@ class Writer(object):
     def run(self):
         """run writing procedure of class instance by picking the right writer according to the type of data"""
 
-        logger.info('Starting writing to ' + self.filename)
+        logger.info('Starting to write to ' + self.filename)
         if isinstance(self.data, xr.Dataset) or isinstance(self.data, xr.DataArray):
             self.write_from_xarray()
         elif isinstance(self.data, dict):
@@ -70,13 +71,13 @@ class Writer(object):
     def prepare_datavars(self):
         """prepare data variables :class:`xarray.Dataset` for writing to file standard specified in 'conf_nc'"""
 
-        self.data.encoding.update(                                   # acts during to_netcdf
+        self.data.encoding.update(                                   # acts during to_netcdf()
             unlimited_dims=self.conf_nc['dimensions']['unlimited'])  # default is fixed, i.e. only need to set unlimited
         for var, specs in self.conf_nc['variables'].items():
             if var not in self.data.keys():
                 if specs['optional']:
-                    # TODO: create a variable of fill values only. Currently this is handled in Measurement constructor
-                    continue
+                    shape_var = tuple(map(lambda x: len(self.data[x]), specs['dim']))
+                    self.data[var] = (specs['dim'], np.full(shape_var, np.nan))
                 else:
                     raise KeyError('Variable {} is a mandatory input but was not found in input dictionary'.format(var))
             self.check_dims(var, specs)
