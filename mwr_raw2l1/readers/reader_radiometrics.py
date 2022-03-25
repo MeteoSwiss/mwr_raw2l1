@@ -1,8 +1,10 @@
 import csv
+import os
 
 import numpy as np
 
 from mwr_raw2l1.errors import UnknownRecordType
+from mwr_raw2l1.log import logger
 from mwr_raw2l1.readers.reader_radiometrics_helpers import check_vars, get_data
 from mwr_raw2l1.utils.file_utils import abs_file_path
 
@@ -102,6 +104,34 @@ class Reader(object):
         data = get_data(self.data_raw[rec_type_nb], self.header['col_headers'][rec_type_nb], no_mwr=True)
         check_vars(data, mandatory_vars)
         self.data['aux'] = data
+        self.add_ir_wavelength()
+
+    def add_ir_wavelength(self):
+        self.data['aux']['ir_wavelength'] = np.array([10.5])  # TODO: ask Christine if right IR wavelength and how to best infer it
+
+
+def read_multiple_files(files):
+    """read multiple L1-related files and return list of executed read-in class instances
+
+    Args:
+        files: list of files to read in
+    Returns:
+        list of instances of executed read-in classes of :class:`Reader`.
+    """
+
+    all_data = []
+    for file in files:
+        suffix = os.path.splitext(file)[0].split('_')[-1]
+        if suffix.lower() == 'lv1':
+            reader_inst = Reader(file)
+            reader_inst.run()
+            all_data.append(reader_inst)
+            # TODO: decide what to do with processed files. Leave where they are, delete or move to other folder
+        else:
+            # TODO: decide what to do with unprocessable files. Leave where they are, delete or move to other folder
+            logger.warning('Cannot read {} as no reader is specified for files with suffix "{}"'.format(file, suffix))
+
+    return all_data
 
 
 if __name__ == '__main__':

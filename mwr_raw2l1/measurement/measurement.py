@@ -22,7 +22,7 @@ class Measurement(object):
         Auxiliary data are merged to time grid of MWR data. Scanning MWR data are returned as time series (no ele dim)
 
         Args:
-            readin_data: dictionary with (list of) instances for each RPG read-in class (keys correspond to filetype)
+            readin_data: dictionary with (list of) instance(s) for each RPG read-in class (keys correspond to filetype)
         Returns:
             an instance of the Measurement class with observations filled to self.data
         """
@@ -89,7 +89,7 @@ class Measurement(object):
         """
         # dimensions and variable names for usage with make_dataset
         dims = {'mwr': ['time', 'frequency'],
-                'aux': ['time']}  # TODO: ask Christine about wavelength of IR and add dimension here or elsewhere
+                'aux': ['time', 'ir_wavelength']}  # TODO: wavelength was added in reader, if from config better here
         vars = {'mwr': ['Tb', 'ele', 'azi', 'quality'],
                 'aux': ['IRT', 'p', 'T', 'RH', 'rainflag', 'quality']}
         vars_opt = {'mwr': [],

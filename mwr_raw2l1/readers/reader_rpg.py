@@ -306,7 +306,7 @@ def read_multiple_files(files):
         dictionary with keys brt, blb, irt, met, hkd containing list with all read-in class instances for the
         corresponding file extension matching basename and the timing requirement. If no file of the corresponding type
         is found an empty list is returned for this key.
-        """
+    """
 
     # assign reader class (value) to lowercase file extension (key). All keys will have an entry in the output dict
     reader_for_ext = {'brt': BRT, 'blb': BLB, 'irt': IRT, 'met': MET, 'hkd': HKD}
