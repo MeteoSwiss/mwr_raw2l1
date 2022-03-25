@@ -145,7 +145,7 @@ variables:
       long_name: Infrared brightness temperatures
       units: K
 
-  T_amb_1:
+  T_amb:
     name: t_amb
     dim:
       - time

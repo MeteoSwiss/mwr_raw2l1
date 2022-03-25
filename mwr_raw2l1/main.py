@@ -73,5 +73,5 @@ def get_meas_constructor(name):
 
 
 if __name__ == '__main__':
-    # main('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml')
+    main('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml')
     main('config/config_0-20000-0-10393_A.yaml', 'config/L1_format.yaml')

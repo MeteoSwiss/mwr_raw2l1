@@ -37,7 +37,7 @@ class Measurement(object):
                 'met': ['time'],
                 'hkd': ['time']}
         vars = {'brt': ['Tb', 'rainflag', 'ele', 'azi'],
-                'blb': ['Tb', 'T', 'rainflag', 'scan_quadrant'],  # TODO: find a way to infer 'azi' from blb
+                'blb': ['Tb', 'T', 'rainflag', 'scan_quadrant'],  # TODO: ask Bernhard: find way to infer 'azi' from blb
                 'irt': ['IRT', 'rainflag', 'ele', 'azi'],
                 'met': ['p', 'T', 'RH'],
                 'hkd': ['alarm']}
@@ -74,6 +74,10 @@ class Measurement(object):
         # init measurement class and merge BRT and BLB data to time series of brightness temperatures
         out = cls()
         out.data = merge_aux_data(mwr_data, all_data)
+
+        # take mean of ambient temperature load (one load with two temperature sensors (code works with up to 9))
+        tamb_vars = [var for var in out.data.data_vars if var[:-1] == 'T_amb_']
+        out.data['T_amb'] = out.data[tamb_vars].to_array(dim='tmpdim').mean(dim='tmpdim', skipna=True)
 
         # round to ms to exclude rounding differences for scan transformation from different computers
         out.data['time'] = out.data.time.dt.round('ms')  # TODO: rather move to scan_transform.py
