@@ -67,6 +67,7 @@ def get_files(dir_in, basename, time_start=None, time_end=None):
     if time_start is None and time_end is None:
         return files
 
+    # select only files between time_start and time_end
     for file in files[:]:
         fn_date = datestr_from_filename(file)
         if time_start is not None:

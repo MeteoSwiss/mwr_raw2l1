@@ -9,6 +9,7 @@ from mwr_raw2l1.write_netcdf import Writer
 # -------------------------------------------------------------------------- # noqa: F401, I001, I004
 # import readers                                                             # noqa: F401, I001, I004
 from mwr_raw2l1.readers.reader_rpg import read_multiple_files as reader_rpg  # noqa: F401, I001, I004
+from mwr_raw2l1.readers.reader_radiometrics import read_multiple_files as reader_radiometrics  # noqa: F401, I001, I004
 
 
 def main(inst_config_file, nc_format_config_file, **kwargs):
@@ -31,9 +32,13 @@ def main(inst_config_file, nc_format_config_file, **kwargs):
     meas_constructor = get_meas_constructor(conf_inst['meas_constructor'])
 
     files = get_files(conf_inst['input_directory'], conf_inst['base_filename_in'], **kwargs)
+    if not files:
+        logger.info('No files matching pattern {} in {}. Main functions returns without action.'.format(
+            conf_inst['base_filename_in'], conf_inst['input_directory']))
+        return
 
-    # read and interpret
-    # ------------------
+    # read and interpret data
+    # -----------------------
     all_data = reader(files)
     meas = meas_constructor(all_data)
     meas.run(conf_inst)
@@ -69,3 +74,4 @@ def get_meas_constructor(name):
 
 if __name__ == '__main__':
     main('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml')
+    main('config/config_0-20000-0-10393_A.yaml', 'config/L1_format.yaml')
