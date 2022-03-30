@@ -5,7 +5,8 @@ import numpy as np
 
 from mwr_raw2l1.errors import UnknownRecordType
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.readers.reader_radiometrics_helpers import check_vars, get_data
+from mwr_raw2l1.readers.reader_helpers import check_vars
+from mwr_raw2l1.readers.reader_radiometrics_helpers import get_data
 from mwr_raw2l1.utils.file_utils import abs_file_path
 
 IND_RECORD_TYPE = 2  # third element in line of csv file refers to record type
@@ -107,7 +108,8 @@ class Reader(object):
         self.add_ir_wavelength()
 
     def add_ir_wavelength(self):
-        self.data['aux']['ir_wavelength'] = np.array([10.5])  # TODO: ask Christine if right IR wavelength and how to best infer it
+        self.data['aux']['ir_wavelength'] = np.array([10.5])
+        # TODO: ask Christine if right IR wavelength and how to best infer it
 
 
 def read_multiple_files(files):
