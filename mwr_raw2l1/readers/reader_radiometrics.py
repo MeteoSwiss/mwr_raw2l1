@@ -55,7 +55,7 @@ class Reader(object):
 
         # continue iterating over csv_lines assuming header has already been read (incl. first data line)
         self.sort_data_line(self.header['first_line_data'])
-        for n, line in enumerate(csv_lines):
+        for line in csv_lines:
             self.sort_data_line(line)
 
     def sort_data_line(self, line):
