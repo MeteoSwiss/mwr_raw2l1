@@ -15,7 +15,7 @@ def get_data(data_raw, header, no_mwr=False, **kwargs):
         a dictionary with variable name as key and :class:`numpy.ndarray` as values
     """
     data = get_simple_vars(data_raw, header)
-    data['time'] = get_time(data_raw, header, 'date/time')
+    data['time'] = get_time(data_raw, header, 'date/time', '%m/%d/%y %H:%M:%S')
     if not no_mwr:
         data['Tb'], data['frequency'] = get_mwr(data_raw, header, **kwargs)
     return data
