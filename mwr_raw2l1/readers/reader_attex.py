@@ -1,6 +1,9 @@
 import csv
 
 import numpy as np
+
+from mwr_raw2l1.errors import MissingVariable
+from mwr_raw2l1.readers.reader_helpers import get_time
 from mwr_raw2l1.utils.file_utils import abs_file_path
 
 
@@ -9,7 +12,7 @@ class Reader(object):
         self.filename = filename
         self.header = dict(col_header=[], cfg_info=[], n_lines=np.nan)
         self.data_raw = []
-        self.data = []
+        self.data = {}
 
     def run(self):
         self.read()
@@ -43,7 +46,34 @@ class Reader(object):
         self.data_raw = np.array(self.data_raw)
 
     def interpret_data(self):
-        pass
+        time_header = 'data time'
+        time_format = '%d/%m/%Y %H:%M:%S'
+        temperature_header = 'OutsideTemperature'
+
+        self.data['time'] = get_time(self.data_raw, self.header['col_header'], time_header, time_format)
+        self.data['frequency'] = self.get_freq()
+        self.data['ele'], cols_tb = self.get_ele()
+        self.data['Tb'] = self.data_raw[:, cols_tb]
+        col_temperature = self.header['col_header'].index(temperature_header)
+        self.data['T'] = self.data_raw[:, col_temperature]
+
+    def get_freq(self):
+        for line in self.header['cfg_info']:
+            if 'Freq[GHz]' in line:
+                return line[0]
+        raise MissingVariable('Frequency not found in {}'.format(self.filename))
+
+    def get_ele(self):
+        """interpret all numeric column headers as elevations"""
+        ele = []
+        columns_ele = []
+        for n, hd in enumerate(self.header['col_header']):
+            try:
+                ele.append(float(hd))
+            except ValueError:
+                continue
+            columns_ele.append(n)
+        return np.array(ele), columns_ele
 
 
 if __name__ == '__main__':
