@@ -65,7 +65,7 @@ class Reader(object):
         """get frequency from header info"""
         for line in self.header['cfg_info']:
             if 'Freq[GHz]' in line:
-                return line[0]
+                return np.array([float(line[0])])
         raise MissingVariable('Frequency not found in {}'.format(self.filename))
 
     def get_ele(self):
