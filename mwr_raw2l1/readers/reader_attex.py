@@ -58,10 +58,10 @@ class Reader(object):
 
         self.data['time'] = get_time(self.data_raw, self.header['col_header'], time_header, time_format)
         self.data['frequency'] = self.get_freq()
-        self.data['ele'], cols_tb = self.get_ele()
-        self.data['Tb'] = self.data_raw[:, cols_tb]
+        self.data['scan_ele'], cols_tb = self.get_ele()
+        self.data['Tb'] = self.data_raw[:, cols_tb].astype(float)
         col_temperature = self.header['col_header'].index(temperature_header)
-        self.data['T'] = self.data_raw[:, col_temperature]
+        self.data['T'] = self.data_raw[:, col_temperature].astype(float)
 
     def get_freq(self):
         """get frequency from header info"""
