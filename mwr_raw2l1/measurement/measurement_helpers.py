@@ -6,6 +6,30 @@ from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries
 
 
+def attex_to_datasets(data_all, dims, vars, vars_opt):
+    """generate unique :class:`xarray.Dataset` for each type of obs in 'data' using dimensions and variables specified
+
+    Args:
+        data_all: single instance of the read-in class (with observations in instance variable 'data') or as a list
+             containing a series of instances of read-in classes.
+        dims: list of keys that are a dimension (must correspond to the order of dimensions in data)
+        vars: list of keys that are data variables (dimensions don't need to be specified again)
+        vars_opt: list of keys that are optional data variables
+    Returns:
+        a :class:`xarray.Dataset` containing the data
+    """
+
+    if not isinstance(data_all, list):  # accept also single instances of read-in class not inside a list
+        data_all = [data_all]
+
+    # add dim in second pos as Attex are single-channel instruments but frequency shall be present as 2nd
+    for dat in data_all:
+        if dat.data['Tb'].ndim == 2:
+            dat.data['Tb'] = np.expand_dims(dat.data['Tb'], 1)
+
+    return to_single_dataset([dat.data for dat in data_all], dims, vars, vars_opt)
+
+
 def radiometrics_to_datasets(data_all, dims, vars, vars_opt):
     """generate unique :class:`xarray.Dataset` for each type of obs in 'data' using dimensions and variables specified
 

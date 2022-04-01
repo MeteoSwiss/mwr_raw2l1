@@ -3,7 +3,7 @@ import numpy as np
 from mwr_raw2l1.errors import CoordinateError, MissingDataSource
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement_helpers import merge_aux_data, rpg_to_datasets, \
-    merge_brt_blb, radiometrics_to_datasets
+    merge_brt_blb, radiometrics_to_datasets, attex_to_datasets
 from mwr_raw2l1.measurement.scan_transform import scanflag_from_ele
 
 DTYPE_SCANFLAG = 'u1'  # data type used for scanflags set by Measurement class
@@ -18,8 +18,21 @@ class Measurement(object):
         self.set_statusflag()
 
     @classmethod
-    def from_attex(cls, read_in_data):
-        pass
+    def from_attex(cls, readin_data):
+        dims = ['time', 'frequency', 'scan_ele']
+        vars = ['Tb', 'T']
+        vars_opt = []
+
+        logger.info('Creating instance of Measurement class from Attex data')
+
+        out = cls()
+        out.data = attex_to_datasets(readin_data, dims, vars, vars_opt)
+        flags_here = np.ones(np.shape(out.data.time), dtype=DTYPE_SCANFLAG)  # Attex always scanning > flag=1
+        out.data['scanflag'] = ('time', flags_here)
+
+        # TODO: Flatten dimension scan_ele to time series (analogously to BLB from RPG)
+
+        return out
 
     @classmethod
     def from_radiometrics(cls, readin_data):
@@ -40,7 +53,7 @@ class Measurement(object):
         vars_opt = {'mwr': [],
                     'aux': []}
 
-        logger.info('Creating instance of Measurement class')
+        logger.info('Creating instance of Measurement class from Radiometrics data')
 
         all_data = radiometrics_to_datasets(readin_data, dims, vars, vars_opt)
         flags_here = scanflag_from_ele(all_data['mwr']['ele']).astype(DTYPE_SCANFLAG)
@@ -83,7 +96,7 @@ class Measurement(object):
         # TODO : check what other hkd variables are needed for output statusflag and monitoring!!!
         scanflag_values = {'brt': 0, 'blb': 1}  # for generating a scan flag indicating whether scanning or zenith obs
 
-        logger.info('Creating instance of Measurement class')
+        logger.info('Creating instance of Measurement class from RPG data')
 
         # require mandatory data sources
         if ('brt' not in readin_data and 'blb' not in readin_data) or (
