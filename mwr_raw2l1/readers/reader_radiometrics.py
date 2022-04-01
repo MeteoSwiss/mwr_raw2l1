@@ -20,6 +20,7 @@ class Reader(object):
         self.data = {}
 
     def run(self):
+        """main method of the class"""
         self.read()
         self.interpret_data()
 
@@ -31,6 +32,30 @@ class Reader(object):
             if not header_only:
                 self._read_data(csv_lines)
                 self.data_raw_to_np()
+
+    def interpret_data(self):
+        """interpret the data in self.data_raw and feed to self.data"""
+        self.interpret_mwr()
+        self.interpret_aux()
+
+    def interpret_mwr(self):
+        """interpret microwave radiometer data"""
+        rec_type_nb = 50  # record type number for header: 50; for data: 51.
+        mandatory_vars = ['record_nb', 'time', 'frequency', 'Tb', 'azi', 'ele', 'quality']
+
+        data = get_data(self.data_raw[rec_type_nb], self.header['col_headers'][rec_type_nb])
+        check_vars(data, mandatory_vars)
+        self.data['mwr'] = data
+
+    def interpret_aux(self):
+        """interpret auxiliary data, i.e. infrared brightness temperatures and meteo observations"""
+        rec_type_nb = 40
+        mandatory_vars = ['record_nb', 'time', 'T', 'RH', 'IRT', 'rainflag', 'quality']
+
+        data = get_data(self.data_raw[rec_type_nb], self.header['col_headers'][rec_type_nb], no_mwr=True)
+        check_vars(data, mandatory_vars)
+        self.data['aux'] = data
+        self.add_ir_wavelength()
 
     def _read_header(self, csv_lines):
         """read the header of the csv data (all 10-divisible record type numbers and 99)"""
@@ -71,7 +96,7 @@ class Reader(object):
                                     'which was assumed to correspond'.format(rec_type_nb, rec_type_nb_header))
 
     def data_raw_to_np(self):
-        """transform list of lists in data_raw to numpy array and remove entries without data"""
+        """transform data_raw to a dictionary with values of :class:`numpy.ndarray` and remove entries without data"""
         empty_rec = []
         for rec_type, dat in self.data_raw.items():
             if not dat:
@@ -83,31 +108,8 @@ class Reader(object):
         for rec_type in empty_rec:
             del self.data_raw[rec_type]
 
-    def interpret_data(self):
-        """interpret the data in 'data_raw' and feed to 'data'"""
-        self.interpret_mwr()
-        self.interpret_aux()
-
-    def interpret_mwr(self):
-        """interpret microwave radiometer data"""
-        rec_type_nb = 50  # record type number for header: 50; for data: 51.
-        mandatory_vars = ['record_nb', 'time', 'frequency', 'Tb', 'azi', 'ele', 'quality']
-
-        data = get_data(self.data_raw[rec_type_nb], self.header['col_headers'][rec_type_nb])
-        check_vars(data, mandatory_vars)
-        self.data['mwr'] = data
-
-    def interpret_aux(self):
-        """interpret auxiliary data, i.e. infrared brightness temperatures and meteo observations"""
-        rec_type_nb = 40
-        mandatory_vars = ['record_nb', 'time', 'T', 'RH', 'IRT', 'rainflag', 'quality']
-
-        data = get_data(self.data_raw[rec_type_nb], self.header['col_headers'][rec_type_nb], no_mwr=True)
-        check_vars(data, mandatory_vars)
-        self.data['aux'] = data
-        self.add_ir_wavelength()
-
     def add_ir_wavelength(self):
+        """add the wavelength of IR sensor from config"""
         self.data['aux']['ir_wavelength'] = np.array([10.5])
         # TODO: ask Christine if right IR wavelength and how to best infer it
 

@@ -15,11 +15,12 @@ class Reader(object):
         self.data = {}
 
     def run(self):
+        """main method of the class"""
         self.read()
         self.interpret_data()
 
     def read(self, header_only=False):  # same as radiometrics except delimiter='\t'
-        """read the data form csv and fill self.header and self.data_raw"""
+        """read the data form csv and fill self.header (dictionary) and self.data_raw (:class:`numpy.ndarray`)"""
         with open(self.filename, newline='') as f:  # need to keep file open until all lines are consumed
             csv_lines = csv.reader(f, delimiter='\t')
             self._read_header(csv_lines)
@@ -42,10 +43,12 @@ class Reader(object):
         for line in csv_lines:
             self.data_raw.append(line)
 
-    def data_raw_to_np(self):  # trivial for attex
+    def data_raw_to_np(self):  # trivial for Attex but keep function for analogy to Radiometrcs
+        """in-place replacement for """
         self.data_raw = np.array(self.data_raw)
 
     def interpret_data(self):
+        """fill up self.data using self.data_raw and self.header"""
         time_header = 'data time'
         time_format = '%d/%m/%Y %H:%M:%S'
         temperature_header = 'OutsideTemperature'
@@ -58,13 +61,20 @@ class Reader(object):
         self.data['T'] = self.data_raw[:, col_temperature]
 
     def get_freq(self):
+        """get frequency from header info"""
         for line in self.header['cfg_info']:
             if 'Freq[GHz]' in line:
                 return line[0]
         raise MissingVariable('Frequency not found in {}'.format(self.filename))
 
     def get_ele(self):
-        """interpret all numeric column headers as elevations"""
+        """get elevations from column headers
+
+        interpret all numeric column headers as elevations. Returned column indices can be used to get corresponding Tb
+
+        Returns:
+             ele, column_indices
+        """
         ele = []
         columns_ele = []
         for n, hd in enumerate(self.header['col_header']):
