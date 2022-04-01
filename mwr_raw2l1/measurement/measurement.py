@@ -2,10 +2,9 @@ import numpy as np
 
 from mwr_raw2l1.errors import CoordinateError, MissingDataSource
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.measurement.measurement_helpers import merge_aux_data, scanflag_from_ele
-from mwr_raw2l1.measurement.radiometrics_helpers import radiometrics_to_datasets
-from mwr_raw2l1.measurement.rpg_helpers import merge_brt_blb, rpg_to_datasets
-
+from mwr_raw2l1.measurement.measurement_helpers import merge_aux_data, rpg_to_datasets, \
+    merge_brt_blb, radiometrics_to_datasets
+from mwr_raw2l1.measurement.scan_transform import scanflag_from_ele
 
 DTYPE_SCANFLAG = 'u1'  # data type used for scanflags set by Measurement class
 
@@ -17,6 +16,40 @@ class Measurement(object):
     def run(self, conf_inst=None):
         self.set_coord(conf_inst)
         self.set_statusflag()
+
+    @classmethod
+    def from_attex(cls, read_in_data):
+        pass
+
+    @classmethod
+    def from_radiometrics(cls, readin_data):
+        """constructor for data read in from RPG instruments.
+
+        Auxiliary data are merged to time grid of MWR data.
+
+        Args:
+            readin_data: instance or list of instances for the Radiometrics read-in class
+        Returns:
+            an instance of the Measurement class with observations filled to self.data
+        """
+        # dimensions and variable names for usage with make_dataset
+        dims = {'mwr': ['time', 'frequency'],
+                'aux': ['time', 'ir_wavelength']}  # TODO: wavelength was added in reader, if from config better here
+        vars = {'mwr': ['Tb', 'ele', 'azi', 'quality'],
+                'aux': ['IRT', 'p', 'T', 'RH', 'rainflag', 'quality']}
+        vars_opt = {'mwr': [],
+                    'aux': []}
+
+        logger.info('Creating instance of Measurement class')
+
+        all_data = radiometrics_to_datasets(readin_data, dims, vars, vars_opt)
+        flags_here = scanflag_from_ele(all_data['mwr']['ele']).astype(DTYPE_SCANFLAG)
+        all_data['mwr']['scanflag'] = ('time', flags_here)
+
+        out = cls()
+        out.data = merge_aux_data(all_data['mwr'], all_data)
+
+        return out
 
     @classmethod
     def from_rpg(cls, readin_data):
@@ -83,40 +116,6 @@ class Measurement(object):
         out.data['time'] = out.data.time.dt.round('ms')  # TODO: rather move to scan_transform.py
 
         return out
-
-    @classmethod
-    def from_radiometrics(cls, readin_data):
-        """constructor for data read in from RPG instruments.
-
-        Auxiliary data are merged to time grid of MWR data.
-
-        Args:
-            readin_data: instance or list of instances for the Radiometrics read-in class
-        Returns:
-            an instance of the Measurement class with observations filled to self.data
-        """
-        # dimensions and variable names for usage with make_dataset
-        dims = {'mwr': ['time', 'frequency'],
-                'aux': ['time', 'ir_wavelength']}  # TODO: wavelength was added in reader, if from config better here
-        vars = {'mwr': ['Tb', 'ele', 'azi', 'quality'],
-                'aux': ['IRT', 'p', 'T', 'RH', 'rainflag', 'quality']}
-        vars_opt = {'mwr': [],
-                    'aux': []}
-
-        logger.info('Creating instance of Measurement class')
-
-        all_data = radiometrics_to_datasets(readin_data, dims, vars, vars_opt)
-        flags_here = scanflag_from_ele(all_data['mwr']['ele']).astype(DTYPE_SCANFLAG)
-        all_data['mwr']['scanflag'] = ('time', flags_here)
-
-        out = cls()
-        out.data = merge_aux_data(all_data['mwr'], all_data)
-
-        return out
-
-    @classmethod
-    def from_attex(cls, read_in_data):
-        pass
 
     def set_coord(self, conf_inst, primary_src='data', delta_lat=0.01, delta_lon=0.02, delta_altitude=10):
         """(re)set coordinate variables (lat, lon, altitude) in self.data from datafile input and configuration

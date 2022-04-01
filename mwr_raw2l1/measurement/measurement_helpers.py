@@ -3,6 +3,78 @@ import xarray as xr
 
 from mwr_raw2l1.errors import DimensionError, MissingInputArgument
 from mwr_raw2l1.log import logger
+from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries
+
+
+def radiometrics_to_datasets(data_all, dims, vars, vars_opt):
+    """generate unique :class:`xarray.Dataset` for each type of obs in 'data' using dimensions and variables specified
+
+    Args:
+        data_all: single instance of the read-in class (with observations in instance variable 'data') or as a list
+             containing a series of instances of read-in classes.
+        dims: list of keys that are a dimension (must correspond to the order of dimensions in data)
+        vars: list of keys that are data variables (dimensions don't need to be specified again)
+        vars_opt: list of keys that are optional data variables (added as 1-dim series of NaN if missing in 'data')
+    Returns:
+        dictionary with one :class:`xarray.Dataset` for each key. It contains one item for each key in data
+    """
+
+    out = {}
+
+    if not isinstance(data_all, list):  # accept also single instances of read-in class not inside a list
+        data_all = [data_all]
+
+    sources = data_all[0].data.keys()
+
+    for src in sources:
+        data_act = []
+        for dat in data_all:
+            data_act.append(make_dataset(dat.data[src], dims[src], vars[src], vars_opt[src]))
+        out[src] = xr.concat(data_act, dim='time')  # merge all datasets of the same type
+        out[src] = drop_duplicates(out[src], dim='time')  # remove duplicate measurements
+
+    return out
+
+
+def rpg_to_datasets(data, dims, vars, vars_opt):
+    """generate unique :class:`xarray.Dataset` for each type of obs in 'data' using dimensions and variables specified
+
+    Args:
+        data: dictionary containing the observations by type. Its keys correspond to the type of observations (e.g. brt,
+            blb, irt ...). The observations themselves can be given as a single instance of the read-in class
+            (with observations in variable 'data') or as a list containing a series of instances of read-in classes.
+        dims: list of keys that are a dimension (must correspond to the order of dimensions in data)
+        vars: list of keys that are data variables (dimensions don't need to be specified again)
+        vars_opt: list of keys that are optional data variables (added as 1-dim series of NaN if missing in 'data')
+    Returns:
+        dictionary with one :class:`xarray.Dataset` for each key. It contains one item for each key in data
+    """
+    multidim_vars_per_obstype = {'irt': {'IRT': 2}, 'brt': {'Tb': 2}, 'blb': {'Tb': 3}}
+
+    out = {}
+
+    for src, data_series in data.items():
+        if src in multidim_vars_per_obstype:
+            multidim_vars = multidim_vars_per_obstype[src]
+        else:
+            multidim_vars = {}
+        data_act = []
+        if not data_series:  # fill in NaN variables if meas source does not exist (loop over empty data_series skipped)
+            if src in ('brt', 'blb'):  # don't create empty datasets for missing MWR data
+                continue
+            logger.info('No {}-data available. Will generate a dataset fill values only for {}'.format(src, src))
+            min_time = min([x.data['time'][0] for x in data['hkd']])  # class instances in data['hkd'] can be unordered
+            max_time = max([x.data['time'][-1] for x in data['hkd']])  # class instances in data['hkd'] can be unordered
+            data_act.append(make_dataset(None, dims[src], vars[src], vars_opt[src], multidim_vars=multidim_vars,
+                                         time_vector=[min_time, max_time]))
+        elif not isinstance(data_series, list):  # accept also single instances of read-in class not inside a list
+            data_series = [data_series]
+        for dat in data_series:  # make a xarray dataset from the data dict in each class instance of the list
+            data_act.append(make_dataset(dat.data, dims[src], vars[src], vars_opt[src], multidim_vars=multidim_vars))
+        out[src] = xr.concat(data_act, dim='time')  # merge all datasets of the same type
+        out[src] = drop_duplicates(out[src], dim='time')  # remove duplicate measurements
+
+    return out
 
 
 def make_dataset(data, dims, vars, vars_opt=None, multidim_vars=None, time_vector=None):
@@ -117,19 +189,19 @@ def drop_duplicates(ds, dim):
     return ds.isel({dim: ind})
 
 
-def scanflag_from_ele(ele, use_ele_diff=False):
-    """infer scanflag (0: starring; 1: scanning) from elevation vector
+def merge_brt_blb(all_data):
+    """merge brt (zenith MWR) and blb (scanning MWR) observations from an RPG instrument
 
     Args:
-        ele: elevation vector as :class:`numpy.ndarray`
-        use_ele_diff: if True infer scanflag from differences in ele, if False ele>89 are assumed starring, all others
-            as scanning. Defaults to False.
-    Returns:
-        scanflags as :class:`numpy.ndarray` of same shape as ele
+        all_data: dictionary with a :class:`xarray.Dataset` attached to each key (output of :func:`rpg_to_datasets`)
     """
+    if 'brt' in all_data:
+        out = all_data['brt']
+    if 'blb' in all_data:
+        if 'brt' in all_data:
+            blb_ts = scan_to_timeseries(all_data['blb'], hkd=all_data['hkd'], brt=all_data['brt'])
+            out = out.merge(blb_ts, join='outer')
+        else:
+            out = scan_to_timeseries(all_data['blb'], hkd=all_data['hkd'])
 
-    if use_ele_diff:
-        err_msg = 'currently scanflags can only be inferred from assuming ele>89 as starring and all others as scanning'
-        raise NotImplementedError(err_msg)
-    else:
-        return np.where(ele > 89, 0, 1)
+    return out
