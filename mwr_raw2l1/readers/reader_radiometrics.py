@@ -23,6 +23,7 @@ class Reader(object):
         """main method of the class"""
         self.read()
         self.interpret_data()
+        del self.data_raw  # after interpret_data() all contents of data_raw have been translated to data
 
     def read(self, header_only=False):
         """read the data form csv and fill self.header and self.data_raw"""

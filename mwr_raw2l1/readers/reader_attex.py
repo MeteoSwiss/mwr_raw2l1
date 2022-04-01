@@ -18,8 +18,9 @@ class Reader(object):
         """main method of the class"""
         self.read()
         self.interpret_data()
+        del self.data_raw  # after interpret_data() all contents of data_raw have been translated to data
 
-    def read(self, header_only=False):  # same as radiometrics except delimiter='\t'
+    def read(self, header_only=False):  # same as Radiometrics except delimiter='\t' instead of ','
         """read the data form csv and fill self.header (dictionary) and self.data_raw (:class:`numpy.ndarray`)"""
         with open(self.filename, newline='') as f:  # need to keep file open until all lines are consumed
             csv_lines = csv.reader(f, delimiter='\t')
