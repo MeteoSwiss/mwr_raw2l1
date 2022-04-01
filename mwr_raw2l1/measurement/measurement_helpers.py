@@ -45,27 +45,25 @@ def rpg_to_datasets(data, dims, vars, vars_opt):
     multidim_vars_per_obstype = {'irt': {'IRT': 2}, 'brt': {'Tb': 2}, 'blb': {'Tb': 3}}
 
     out = {}
-
     for src, data_series in data.items():
         if src in multidim_vars_per_obstype:
             multidim_vars = multidim_vars_per_obstype[src]
         else:
             multidim_vars = {}
-        data_act = []
+
         if not data_series:  # fill in NaN variables if meas source does not exist (loop over empty data_series skipped)
             if src in ('brt', 'blb'):  # don't create empty datasets for missing MWR data
                 continue
             logger.info('No {}-data available. Will generate a dataset fill values only for {}'.format(src, src))
             min_time = min([x.data['time'][0] for x in data['hkd']])  # class instances in data['hkd'] can be unordered
             max_time = max([x.data['time'][-1] for x in data['hkd']])  # class instances in data['hkd'] can be unordered
-            data_act.append(make_dataset(None, dims[src], vars[src], vars_opt[src], multidim_vars=multidim_vars,
-                                         time_vector=[min_time, max_time]))
+            out[src] = make_dataset(None, dims[src], vars[src], vars_opt[src],
+                                    multidim_vars=multidim_vars, time_vector=[min_time, max_time])
+            continue
         elif not isinstance(data_series, list):  # accept also single instances of read-in class not inside a list
             data_series = [data_series]
-        for dat in data_series:  # make a xarray dataset from the data dict in each class instance of the list
-            data_act.append(make_dataset(dat.data, dims[src], vars[src], vars_opt[src], multidim_vars=multidim_vars))
-        out[src] = xr.concat(data_act, dim='time')  # merge all datasets of the same type
-        out[src] = drop_duplicates(out[src], dim='time')  # remove duplicate measurements
+        out[src] = to_single_dataset([dat.data for dat in data_series], dims[src], vars[src], vars_opt[src],
+                                     multidim_vars=multidim_vars)
 
     return out
 
