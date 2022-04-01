@@ -6,10 +6,11 @@ from mwr_raw2l1.measurement.measurement import Measurement
 from mwr_raw2l1.utils.config_utils import get_inst_config, get_nc_format_config
 from mwr_raw2l1.utils.file_utils import generate_output_filename, get_files
 from mwr_raw2l1.write_netcdf import Writer
-# -------------------------------------------------------------------------- # noqa: F401, I001, I004
-# import readers                                                             # noqa: F401, I001, I004
-from mwr_raw2l1.readers.reader_rpg import read_multiple_files as reader_rpg  # noqa: F401, I001, I004
-from mwr_raw2l1.readers.reader_radiometrics import read_multiple_files as reader_radiometrics  # noqa: F401, I001, I004
+# --------------------------------------------------------------------------------------------- # noqa: F401, I001, I004
+# import readers for different instrument types                                                 # noqa: F401, I001, I004
+from mwr_raw2l1.readers.reader_attex import read_multiple_files as reader_attex                 # noqa: F401, I001, I004
+from mwr_raw2l1.readers.reader_radiometrics import read_multiple_files as reader_radiometrics   # noqa: F401, I001, I004
+from mwr_raw2l1.readers.reader_rpg import read_multiple_files as reader_rpg                     # noqa: F401, I001, I004
 
 
 def main(inst_config_file, nc_format_config_file, **kwargs):

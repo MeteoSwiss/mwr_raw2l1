@@ -5,7 +5,7 @@ import numpy as np
 
 from mwr_raw2l1.errors import UnknownRecordType
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.readers.reader_helpers import check_vars
+from mwr_raw2l1.readers.reader_helpers import check_input_filelist, check_vars
 from mwr_raw2l1.readers.reader_radiometrics_helpers import get_data
 from mwr_raw2l1.utils.file_utils import abs_file_path
 
@@ -124,6 +124,7 @@ def read_multiple_files(files):
         list of instances of executed read-in classes of :class:`Reader`.
     """
 
+    check_input_filelist(files)
     all_data = []
     for file in files:
         suffix = os.path.splitext(file)[0].split('_')[-1]
@@ -134,7 +135,7 @@ def read_multiple_files(files):
             # TODO: decide what to do with processed files. Leave where they are, delete or move to other folder
         else:
             # TODO: decide what to do with unprocessable files. Leave where they are, delete or move to other folder
-            logger.warning('Cannot read {} as no reader is specified for files with suffix "{}"'.format(file, suffix))
+            logger.warning("Cannot read {} as no reader is specified for files with suffix '{}'".format(file, suffix))
 
     return all_data
 

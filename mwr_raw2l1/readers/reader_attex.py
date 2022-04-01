@@ -1,9 +1,11 @@
 import csv
+import os
 
 import numpy as np
 
 from mwr_raw2l1.errors import MissingVariable
-from mwr_raw2l1.readers.reader_helpers import get_time
+from mwr_raw2l1.log import logger
+from mwr_raw2l1.readers.reader_helpers import check_input_filelist, get_time
 from mwr_raw2l1.utils.file_utils import abs_file_path
 
 
@@ -76,6 +78,7 @@ class Reader(object):
         Returns:
              ele, column_indices
         """
+
         ele = []
         columns_ele = []
         for n, hd in enumerate(self.header['col_header']):
@@ -87,7 +90,34 @@ class Reader(object):
         return np.array(ele), columns_ele
 
 
+def read_multiple_files(files):
+    """read multiple L1-related files and return list of executed read-in class instances
+
+    Args:
+        files: list of files to read in
+    Returns:
+        list of instances of executed read-in classes of :class:`Reader`.
+    """
+
+    check_input_filelist(files)
+    all_data = []
+    for file in files:
+        extension = os.path.splitext(file)[-1]
+        if extension.lower() == '.tbr':
+            reader_inst = Reader(file)
+            reader_inst.run()
+            all_data.append(reader_inst)
+            # TODO: decide what to do with processed files. Leave where they are, delete or move to other folder
+        else:
+            # TODO: decide what to do with unprocessable files. Leave where they are, delete or move to other folder
+            logger.warning("Cannot read {} as no reader is specified for files with extension '{}'".format(
+                file, extension))
+
+    return all_data
+
+
 if __name__ == '__main__':
+    r1 = read_multiple_files([abs_file_path('mwr_raw2l1/data/attex/orig/0mtp20211107.tbr')])
     rd = Reader(abs_file_path('mwr_raw2l1/data/attex/orig/0mtp20211107.tbr'))
     rd.run()
     pass

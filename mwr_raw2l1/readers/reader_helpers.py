@@ -3,7 +3,7 @@ import datetime as dt
 
 import numpy as np
 
-from mwr_raw2l1.errors import MissingVariable
+from mwr_raw2l1.errors import MissingVariable, WrongInputFormat
 
 
 def get_time(data_raw, header, header_time, date_format):
@@ -31,6 +31,11 @@ def check_vars(data, mandatory_vars):
     for var in mandatory_vars:
         if var not in data:
             raise MissingVariable("Mandatory variable '{}' was not found in data".format(var))
+
+
+def check_input_filelist(files):
+    if isinstance(files, str):
+        raise WrongInputFormat('input needs to be a list of files but got a string')
 
 
 def simplify_header(str_in):
