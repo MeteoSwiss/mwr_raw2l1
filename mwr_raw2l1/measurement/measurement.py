@@ -4,7 +4,7 @@ from mwr_raw2l1.errors import CoordinateError, MissingDataSource
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement_helpers import merge_aux_data, rpg_to_datasets, \
     merge_brt_blb, radiometrics_to_datasets, attex_to_datasets
-from mwr_raw2l1.measurement.scan_transform import scanflag_from_ele
+from mwr_raw2l1.measurement.scan_transform import scanflag_from_ele, scan_to_timeseries_from_scanonly
 
 DTYPE_SCANFLAG = 'u1'  # data type used for scanflags set by Measurement class
 
@@ -25,12 +25,12 @@ class Measurement(object):
 
         logger.info('Creating instance of Measurement class from Attex data')
 
-        out = cls()
-        out.data = attex_to_datasets(readin_data, dims, vars, vars_opt)
-        flags_here = np.ones(np.shape(out.data.time), dtype=DTYPE_SCANFLAG)  # Attex always scanning > flag=1
-        out.data['scanflag'] = ('time', flags_here)
+        mwr_data = attex_to_datasets(readin_data, dims, vars, vars_opt)
+        flags_here = np.ones(np.shape(mwr_data.time), dtype=DTYPE_SCANFLAG)  # Attex always scanning > flag=1
+        mwr_data['scanflag'] = ('time', flags_here)
 
-        # TODO: Flatten dimension scan_ele to time series (analogously to BLB from RPG)
+        out = cls()
+        out.data = scan_to_timeseries_from_scanonly(mwr_data)
 
         return out
 
@@ -125,9 +125,6 @@ class Measurement(object):
         tamb_vars = [var for var in out.data.data_vars if var[:-1] == 'T_amb_']
         out.data['T_amb'] = out.data[tamb_vars].to_array(dim='tmpdim').mean(dim='tmpdim', skipna=True)
 
-        # round to ms to exclude rounding differences for scan transformation from different computers
-        out.data['time'] = out.data.time.dt.round('ms')  # TODO: rather move to scan_transform.py
-
         return out
 
     def set_coord(self, conf_inst, primary_src='data', delta_lat=0.01, delta_lon=0.02, delta_altitude=10):
@@ -179,23 +176,28 @@ class Measurement(object):
 
 
 if __name__ == '__main__':
-    from mwr_raw2l1.readers.reader_rpg import read_multiple_files
+    from mwr_raw2l1.readers.reader_attex import Reader as ReaderAttex
     from mwr_raw2l1.readers.reader_radiometrics import Reader as ReaderRadiometrics
+    from mwr_raw2l1.readers.reader_rpg import read_multiple_files
     from mwr_raw2l1.utils.config_utils import get_inst_config
     from mwr_raw2l1.utils.file_utils import abs_file_path, get_files
 
-    # RPG
-    conf_rpg = get_inst_config(abs_file_path('mwr_raw2l1/config/config_0-20000-0-06610_A.yaml'))
-    files = get_files(abs_file_path('mwr_raw2l1/data/rpg/0-20000-0-06610/'), 'MWR_0-20000-0-06610_A')
-    all_data = read_multiple_files(files)
-    meas = Measurement.from_rpg(all_data)
-    meas.run(conf_rpg)
+    # # RPG
+    # conf_rpg = get_inst_config(abs_file_path('mwr_raw2l1/config/config_0-20000-0-06610_A.yaml'))
+    # files = get_files(abs_file_path('mwr_raw2l1/data/rpg/0-20000-0-06610/'), 'MWR_0-20000-0-06610_A')
+    # all_data = read_multiple_files(files)
+    # meas = Measurement.from_rpg(all_data)
+    # meas.run(conf_rpg)
+    #
+    # # Radiometrics
+    # conf_radiometrics = get_inst_config(abs_file_path('mwr_raw2l1/config/config_0-20000-0-10393_A.yaml'))
+    # rd = ReaderRadiometrics(abs_file_path('mwr_raw2l1/data/radiometrics/orig/2021-01-31_00-04-08_lv1.csv'))
+    # rd.run()
+    # meas = Measurement.from_radiometrics(rd)
+    # meas.run(conf_radiometrics)
 
-    # Radiometrics
-    conf_radiometrics = get_inst_config(abs_file_path('mwr_raw2l1/config/config_0-20000-0-10393_A.yaml'))
-    rd = ReaderRadiometrics(abs_file_path('mwr_raw2l1/data/radiometrics/orig/2021-01-31_00-04-08_lv1.csv'))
+    # Attex
+    rd = ReaderAttex(abs_file_path('mwr_raw2l1/data/attex/orig/0mtp20211107.tbr'))
     rd.run()
-    meas = Measurement.from_radiometrics(rd)
-    meas.run(conf_radiometrics)
-
+    meas = Measurement.from_attex(rd)
     pass

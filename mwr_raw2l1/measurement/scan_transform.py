@@ -4,14 +4,15 @@ import datetime as dt
 
 import numpy as np
 
+from mwr_raw2l1.errors import MWRDataError
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.utils.transformations import timedelta2s
 
 
 def scan_endtime_to_time(endtime, n_angles, time_per_angle=17):
     """
-    RPG scan files only have one timestamp per scan. This function returns the approximate timestamp for the observation
-    at each angle
+    RPG and Attex scan files only have one timestamp per scan. This function returns the approximate timestamp for the
+    observation at each angle
 
     Args:
         endtime (:class:`numpy.ndarray` of :class:`numpy.datetime64` or single :class:`datetime.datetime` object):
@@ -28,7 +29,9 @@ def scan_endtime_to_time(endtime, n_angles, time_per_angle=17):
         endtime = np.array([endtime])
         def timedelta_method(seconds): return dt.timedelta(seconds=seconds)
     else:
-        def timedelta_method(seconds): return np.timedelta64(int(seconds*1000), 'ms')  # use ms as timedelta needs int
+        def timedelta_method(seconds):
+            # use ms as timedelta needs int. Will truncate to ms what should also avoid rounding errors in tests
+            return np.timedelta64(int(seconds*1000), 'ms')
 
     delta = [timedelta_method(n * time_per_angle) for n in reversed(range(n_angles))]
     delta = np.array(delta)
@@ -87,62 +90,101 @@ def scantime_from_aux(blb, hkd=None, brt=None):
     return scan_endtime_to_time(**endtime2time_params)
 
 
-def scan_to_timeseries(blb, *args, **kwargs):
-    """Transform scanning datasete to time series of Tb spectra and temperatures flattening the elevation dimension.
-
-    The time vector of each elevation in scan comes from scan_endtime_to_time inferring scan duration from aux data
+def scan_to_timeseries(scanobs, time_all_angles):
+    """Transform scanning dataset to time series of Tb spectra and temperatures flattening the elevation dimension.
 
     Args:
-        blb: :class:`xarray.Dataset` of the scan observations (BLB)
-        *args: Auxiliary observations (HKD, BRT) as :class:`xarray.Dataset` passed on to :func:`scan_endtime_to_time`
-        **kwargs: Auxiliary observations (HKD, BRT) as :class:`xarray.Dataset` passed on to :func:`scan_endtime_to_time`
+        scanobs: :class:`xarray.Dataset` of the scan observations with dimensions time, frequency, scan_ele
+        time_all_angles: :class:`numpy.ndarray` indicating the time for each observation at each elevation. Can be
+            inferred from :func:`scan_endtime_to_time` or :func:`scantime_from_aux`
     Returns:
-        blb with elevation-dimension transformed to time series
+        scanobs with elevation-dimension transformed to time series
     """
 
     time_dim = 'time'
     ele_dim = 'scan_ele'
-    n_ele = len(blb[ele_dim])
-    n_scans = len(blb[time_dim])
+    n_ele = len(scanobs[ele_dim])
+    n_scans = len(scanobs[time_dim])
 
-    # transform time vector and assign as temporary dimension
-    time_all_angles = scantime_from_aux(blb, *args, **kwargs)
-    blb = blb.assign_coords({'time_tmp': time_all_angles})
+    # assign time vector for all angles and as temporary dimension
+    scanobs = scanobs.assign_coords({'time_tmp': time_all_angles})
 
     # reshape data variables to correct dimension
-    for var in blb.data_vars:
-        var_tmp = blb[var].values
-        if len(blb[var].dims) == 3 and blb[var].dims[-1] == ele_dim and blb[var].dims[0] == time_dim:  # 3 dimensional
+    for var in scanobs.data_vars:
+        var_tmp = scanobs[var].values
+        # 3-dimensional variables (time, freq, ele_dim)
+        if len(scanobs[var].dims) == 3 and \
+                scanobs[var].dims[-1] == ele_dim and scanobs[var].dims[0] == time_dim:
             var_tmp = var_tmp.swapaxes(0, 1)  # swap dim to (xxx, time, ele) where xxx is usually frequency
-            var_tmp = var_tmp.reshape(-1, n_scans*n_ele, order='C').transpose()
-            dims_act = ('time_tmp', blb[var].dims[1])
-        elif len(blb[var].dims) == 1 and blb[var].dims[0] == time_dim:
+            var_tmp = var_tmp.reshape(-1, n_scans * n_ele, order='C').transpose()
+            dims_act = ('time_tmp', scanobs[var].dims[1])
+        # 1-dimensional variables (time, )
+        elif len(scanobs[var].dims) == 1 and scanobs[var].dims[0] == time_dim:
             var_tmp = var_tmp.repeat(n_ele)
             dims_act = ('time_tmp',)
         else:
             raise NotImplementedError('transformation only implemented for 1d timeseries and 3d variables with '
                                       'time as first and elevation as third dimension')
-        blb = blb.drop_vars(var)  # remove original variable from dataset
-        blb = blb.assign({var: (dims_act, var_tmp)})  # assign reshaped variable to dataset
+        scanobs = scanobs.drop_vars(var)  # remove original variable from dataset
+        scanobs = scanobs.assign({var: (dims_act, var_tmp)})  # assign reshaped variable to dataset
 
     # reshape elevation remove as dimension and assign as variable
-    ele_tmp = blb[ele_dim].values
+    ele_tmp = scanobs[ele_dim].values
     ele_tmp = np.tile(ele_tmp, n_scans)
-    blb = blb.drop_dims(ele_dim)
-    blb = blb.assign({'ele': (('time_tmp',), ele_tmp)})
+    scanobs = scanobs.drop_dims(ele_dim)
+    scanobs = scanobs.assign({'ele': (('time_tmp',), ele_tmp)})
 
-    # replace old time dimension by the freshly created one
-    blb = blb.drop_dims(time_dim)
-    blb = blb.rename({'time_tmp': time_dim})
+    # replace old time dimension by the one covering all angles created in this function
+    scanobs = scanobs.drop_dims(time_dim)
+    scanobs = scanobs.rename({'time_tmp': time_dim})
 
-    return blb
+    return scanobs
+
+
+def scan_to_timeseries_from_aux(blb, *args, **kwargs):
+    """Transform scanning dataset to time series of Tb spectra and temperatures flattening the elevation dimension.
+
+    The time vector of each elevation in scan comes from scantime_from_aux inferring scan duration from auxiliary data
+
+    Args:
+        blb: :class:`xarray.Dataset` of the scan observations (BLB)
+        *args: Auxiliary observations (HKD, BRT) as :class:`xarray.Dataset` passed on to :func:`scantime_from_aux`
+        **kwargs: Auxiliary observations (HKD, BRT) as :class:`xarray.Dataset` passed on to :func:`scantime_from_aux`
+    Returns:
+        blb with elevation-dimension transformed to time series
+    """
+    time_all_angles = scantime_from_aux(blb, *args, **kwargs)
+    return scan_to_timeseries(blb, time_all_angles)
+
+
+def scan_to_timeseries_from_scanonly(scanobs):
+    """Transform scanning dataset to time series of Tb spectra and temperatures flattening the elevation dimension.
+
+    The time vector of each elevation is inferred from scanobs assuming that median(interval between scans) is constant
+    and corresponds to the time between subsequent scan end times
+
+    Args:
+        scanobs: :class:`xarray.Dataset` of the scan observations (e.g. from Attex or from RPG in scan-only mode)
+    Returns:
+        scanobs with elevation-dimension transformed to time series
+    """
+    time_scan = scanobs['time'].values
+    n_ele = len(scanobs['scan_ele'].values)
+
+    dt_all = np.diff(time_scan)
+    scan_duration = np.median(dt_all)
+    if scan_duration - dt_all.min() > np.timedelta64(30, 's'):
+        raise MWRDataError('highly irregular scan duration in input data, refusing to guess default duration from this')
+    time_all_angles = scan_endtime_to_time(time_scan, n_ele, timedelta2s(scan_duration)/n_ele)
+
+    return scan_to_timeseries(scanobs, time_all_angles)
 
 
 def scan_to_timeseries_from_dict(data, *args, **kwargs):
     """transform scans to time series of spectra and temperatures starting from dict.
 
     Warning:
-        Not routinely used anymore. More hard coding than for :func:`scan_to_timeseries`
+        Not routinely used anymore. More hard coding than for :func:`scan_to_timeseries_from_aux`
 
     Args:
         data: dictioinary containing the scan observations (BLB)

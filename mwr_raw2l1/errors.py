@@ -11,6 +11,10 @@ class MWRInputError(MWRError):
     """Base exception for calling of MWR reader/helper function or generating measurement from it"""
 
 
+class MWRDataError(MWRError):
+    """Base exeption if some feature of data triggers and error in a function"""
+
+
 class MWROutputError(MWRError):
     """Raised when something with the output file goes wrong"""
 

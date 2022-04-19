@@ -3,7 +3,7 @@ import xarray as xr
 
 from mwr_raw2l1.errors import DimensionError, MissingInputArgument
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries
+from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries_from_aux
 
 
 def attex_to_datasets(data_all, dims, vars, vars_opt):
@@ -230,9 +230,9 @@ def merge_brt_blb(all_data):
         out = all_data['brt']
     if 'blb' in all_data:
         if 'brt' in all_data:
-            blb_ts = scan_to_timeseries(all_data['blb'], hkd=all_data['hkd'], brt=all_data['brt'])
+            blb_ts = scan_to_timeseries_from_aux(all_data['blb'], hkd=all_data['hkd'], brt=all_data['brt'])
             out = out.merge(blb_ts, join='outer')
         else:
-            out = scan_to_timeseries(all_data['blb'], hkd=all_data['hkd'])
+            out = scan_to_timeseries_from_aux(all_data['blb'], hkd=all_data['hkd'])
 
     return out
