@@ -131,7 +131,7 @@ class Measurement(object):
         return out
 
     def set_coord(self, conf_inst, primary_src='data', delta_lat=0.01, delta_lon=0.02, delta_altitude=10):
-        """(re)set coordinate variables (lat, lon, altitude) in self.data from datafile input and configuration
+        """(re)set geographical coordinates (lat, lon, altitude) in self.data from datafile input and configuration
 
         If both are available the method checks consistency between coordinates in datafile and configuration.
 
@@ -148,8 +148,9 @@ class Measurement(object):
                 Defaults to 10.
         """
 
-        # matching of variable names between self.data and conf and between data variables and accuracy limits
+        # matching of variable names between self.data and conf
         var_data_conf = {'lat': 'station_latitude', 'lon': 'station_longitude', 'altitude': 'station_altitude'}
+        # matching between data variables and accuracy limits
         acc_matching = {'lat': delta_lat, 'lon': delta_lon, 'altitude': delta_altitude}
 
         # strategy: do nothing if using variable from data, reset if using variable from config
@@ -157,7 +158,7 @@ class Measurement(object):
             for var in var_data_conf.keys():
                 if var not in self.data.keys():
                     raise CoordinateError("Cannot set coordinates. 'conf_inst' was set to None, but '{}' is missing "
-                                          'in read in data'.format(var))
+                                          'in data read in from data file'.format(var))
         elif not all(var in conf_inst for var in var_data_conf.values()):  # missing keys in config
             err_msg = "'conf_inst' needs to contain all of the following keys: {}".format(list(var_data_conf.values()))
             raise CoordinateError(err_msg)
@@ -180,15 +181,21 @@ class Measurement(object):
 if __name__ == '__main__':
     from mwr_raw2l1.readers.reader_rpg import read_multiple_files
     from mwr_raw2l1.readers.reader_radiometrics import Reader as ReaderRadiometrics
+    from mwr_raw2l1.utils.config_utils import get_inst_config
     from mwr_raw2l1.utils.file_utils import abs_file_path, get_files
 
-    # files = get_files(abs_file_path('mwr_raw2l1/data/rpg/0-20000-0-06610/'), 'MWR_0-20000-0-06610_A')
-    # all_data = read_multiple_files(files)
-    # meas = Measurement.from_rpg(all_data)
-    # meas.run()
+    # RPG
+    conf_rpg = get_inst_config(abs_file_path('mwr_raw2l1/config/config_0-20000-0-06610_A.yaml'))
+    files = get_files(abs_file_path('mwr_raw2l1/data/rpg/0-20000-0-06610/'), 'MWR_0-20000-0-06610_A')
+    all_data = read_multiple_files(files)
+    meas = Measurement.from_rpg(all_data)
+    meas.run(conf_rpg)
 
+    # Radiometrics
+    conf_radiometrics = get_inst_config(abs_file_path('mwr_raw2l1/config/config_0-20000-0-10393_A.yaml'))
     rd = ReaderRadiometrics(abs_file_path('mwr_raw2l1/data/radiometrics/orig/2021-01-31_00-04-08_lv1.csv'))
     rd.run()
     meas = Measurement.from_radiometrics(rd)
-    # meas.run()  # TODO: meas.run seems to need config for Radiometrics instruments
+    meas.run(conf_radiometrics)
+
     pass
