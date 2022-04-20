@@ -45,7 +45,7 @@ class Measurement(MeasurementConstructors):
         Args:
             delta (optional): maximum allowed difference between IR wavelength in config and in datafile in nm.
                 Defaults to 1.
-            **kwargs: keyword arguments passed on to :meth:`set_wavelength`
+            **kwargs: keyword arguments passed on to :meth:`set_vars`
         """
         varname_wavelength = 'ir_wavelength'
 
