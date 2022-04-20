@@ -29,8 +29,6 @@ class MeasurementConstructors(object):
         out = cls()
         out.data = scan_to_timeseries_from_scanonly(mwr_data)
 
-        # TODO: find a good place to set missing ir_wavelength (and possibly IRT) to NaN as done for RPG
-
         return out
 
     @classmethod

@@ -12,11 +12,13 @@ station_latitude: 45.40
 station_longitude: 11.88
 station_altitude: 30
 
+ir_wavelength: .NaN  # need to specify as NaN if no IR instrument present
+
 nc_attributes:
   wigos_station_id: 0-20000-0-99999
   instrument_id: A
   site_location: Padua, Italy
-  institution: METEOSWISS Remote Sensing Group
+  institution: ARPA Veneto Remote Sensing Group
   principal_investigator: Remote Sensing Group
   instrument_manufacturer: Attex
   instrument_model: MTP5-HE
