@@ -1,4 +1,3 @@
-import datetime
 import datetime as dt
 
 import numpy as np
@@ -23,7 +22,7 @@ def get_time(data_raw, header, header_time, date_format):
             t_raw = data_raw[:, ind]
             break
 
-    return np.array([datetime.datetime.strptime(tt, date_format) for tt in t_raw])
+    return np.array([dt.datetime.strptime(tt, date_format) for tt in t_raw])
 
 
 def check_vars(data, mandatory_vars):

@@ -28,27 +28,17 @@ def interpret_time(time_in):
 
 
 def interpret_angle(x, version):
+    """translate the angle encoding from RPG to elevation and azimuth in degrees
+
+    Args:
+        x: RPG angle.
+        version: version of RPG angle encoding:
+            1: sign(ele) * (abs(ele)+1000*azi)
+            2: digits 1-5 = elevation*100; digits 6-10 = azimuth*100
+    Returns:
+        elevation, azimuth
     """
-    translate the angle encoding from RPG to elevation and azimuth in degrees
-
-    Parameters
-    ----------
-    x : float
-        RPG angle.
-    version : int
-        version of RPG angle encoding:
-        1: sign(ele) * (abs(ele)+1000*azi)
-        2: digits 1-5 = elevation*100; digits 6-10 = azimuth*100
-
-    Returns
-    -------
-    ele : float
-        elevation
-    azi : float
-        azimuth
-
-    """
-    scalar_input = False  # TODO: ask Volker about this code copy between interpret_angle and interpret_time
+    scalar_input = False
     if np.isscalar(x):
         x = np.array([x])
         scalar_input = True
@@ -67,7 +57,7 @@ def interpret_angle(x, version):
     else:
         raise NotImplementedError('Known versions for angle encoding are 1 and 2, but received {:f}'.format(version))
 
-    if scalar_input:  # TODO: ask Volker about this code copy between interpret_angle and interpret_time
+    if scalar_input:
         ele = ele[0]
         azi = azi[0]
 
@@ -76,23 +66,16 @@ def interpret_angle(x, version):
 
 def interpret_coord(x, version=2):
     # TODO: Ask Harald how to find out which coord version used. In manual 06/2020 version=1 is described
-    """
-    Translate coordinate encoding from RPG to degrees with decimal digits.
+    """Translate coordinate encoding from RPG to degrees with decimal digits.
 
-    Parameters
-    ----------
-    x : float
-    version : int
-        version of RPG angle encoding:
-        1: latitude of lognitude in fomrat (-)DDDMM.mmmm where DDD is degrees,
-        MM is minutes and mmmm is the decimal fraction of MM
-        2: latitude and longitude already in decimal degrees. function does nothing
-
-    Returns
-    -------
-    out : float
+    Args:
+        x: float encoding latitude of longitude coordinate in RPG binaries
+        version: version of RPG coordinate encoding:
+            1: latitude of lognitude in fomrat (-)DDDMM.mmmm where DDD is degrees, MM is minutes and mmmm is the decimal
+                fraction of MM
+            2: latitude and longitude already in decimal degrees, function does nothing.
+    Returns:
         latitude or longitude in format decimal degrees.
-
     """
 
     if version == 1:

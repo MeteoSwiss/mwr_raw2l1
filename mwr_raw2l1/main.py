@@ -3,14 +3,12 @@ import os.path
 from mwr_raw2l1.errors import MWRConfigError
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement import Measurement
+from mwr_raw2l1.readers.reader_attex import read_multiple_files as reader_attex  # noqa: F401
+from mwr_raw2l1.readers.reader_radiometrics import read_multiple_files as reader_radiometrics  # noqa: F401
+from mwr_raw2l1.readers.reader_rpg import read_multiple_files as reader_rpg  # noqa: F401
 from mwr_raw2l1.utils.config_utils import get_inst_config, get_nc_format_config
 from mwr_raw2l1.utils.file_utils import generate_output_filename, get_files
 from mwr_raw2l1.write_netcdf import Writer
-# --------------------------------------------------------------------------------------------- # noqa: F401, I001, I004
-# import readers for different instrument types                                                 # noqa: F401, I001, I004
-from mwr_raw2l1.readers.reader_attex import read_multiple_files as reader_attex                 # noqa: F401, I001, I004
-from mwr_raw2l1.readers.reader_radiometrics import read_multiple_files as reader_radiometrics   # noqa: F401, I001, I004
-from mwr_raw2l1.readers.reader_rpg import read_multiple_files as reader_rpg                     # noqa: F401, I001, I004
 
 
 def main(inst_config_file, nc_format_config_file, **kwargs):
@@ -55,7 +53,11 @@ def main(inst_config_file, nc_format_config_file, **kwargs):
 
 
 def get_reader(name):
-    """get data reader from name string"""
+    """get data reader from string
+
+    Args:
+        name: name of the reader as string. Known readers are reader_attex, reader_radiometrics and reader_rpg
+    """
     try:
         reader = globals()[name]  # need globals() here, not locals()
     except KeyError:
@@ -64,7 +66,10 @@ def get_reader(name):
 
 
 def get_meas_constructor(name):
-    """get constructor method for measurement class from name string"""
+    """get constructor method for Measurement class from string
+
+    Args:
+        name: name of the constuctor as string. Known constructors are from_attex, from_radiometrics and from_rpg"""
     try:
         meas_constructor = getattr(Measurement, name)
     except AttributeError:
@@ -77,4 +82,3 @@ if __name__ == '__main__':
     main('config/config_0-20000-0-99999_A.yaml', 'config/L1_format.yaml')  # Attex
     main('config/config_0-20000-0-10393_A.yaml', 'config/L1_format.yaml')  # Radiometrics MP3000
     main('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml')  # RPG HATPRO
-

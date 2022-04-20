@@ -83,10 +83,10 @@ class Measurement(MeasurementConstructors):
         # missing keys in config
         elif not all(var in self.conf_inst for var in varname_data_conf.values()):
             if all(var in self.data for var in varname_data_conf.keys()):
-                logger.info("Using {} from data files without check by config values"
+                logger.info('Using {} from data files without check by config values'
                             .format(list(varname_data_conf.keys())))
             else:
-                raise MissingConfig("'conf_inst' needs to contain all of the following keys as not all are in data: " 
+                raise MissingConfig("'conf_inst' needs to contain all of the following keys as not all are in data: "
                                     '{}'.format(list(varname_data_conf.values())))
         # necessary values present in config
         else:
