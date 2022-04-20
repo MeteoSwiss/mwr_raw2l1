@@ -11,11 +11,21 @@ DTYPE_SCANFLAG = 'u1'  # data type used for scanflags set by Measurement class
 
 class MeasurementConstructors(object):
 
-    def __init__(self):
-        self.data = None
+    def __init__(self, data, conf_inst):
+        self.data = data
+        self.conf_inst = conf_inst
 
     @classmethod
-    def from_attex(cls, readin_data):
+    def from_attex(cls, readin_data, conf_inst=None):
+        """constructor for data read in from Attex instruments.
+
+        Args:
+            readin_data: instance or list of instances for the Attex read-in class
+            conf_inst (optional): dictionary of instrument configuration. Set to None if no config is needed.
+                Defaults to None.
+        Returns:
+            instance of the Measurement class with observations filled to self.data and config to self.conf_inst
+        """
         dims = ['time', 'frequency', 'scan_ele']
         vars = ['Tb', 'T']
         vars_opt = []
@@ -25,22 +35,22 @@ class MeasurementConstructors(object):
         mwr_data = attex_to_datasets(readin_data, dims, vars, vars_opt)
         flags_here = np.ones(np.shape(mwr_data.time), dtype=DTYPE_SCANFLAG)  # Attex always scanning > flag=1
         mwr_data['scanflag'] = ('time', flags_here)
+        mwr_data = scan_to_timeseries_from_scanonly(mwr_data)
 
-        out = cls()
-        out.data = scan_to_timeseries_from_scanonly(mwr_data)
-
-        return out
+        return cls(mwr_data, conf_inst)
 
     @classmethod
-    def from_radiometrics(cls, readin_data):
+    def from_radiometrics(cls, readin_data, conf_inst=None):
         """constructor for data read in from RPG instruments.
 
         Auxiliary data are merged to time grid of MWR data.
 
         Args:
             readin_data: instance or list of instances for the Radiometrics read-in class
+            conf_inst (optional): dictionary of instrument configuration. Set to None if no config is needed.
+                Defaults to None.
         Returns:
-            an instance of the Measurement class with observations filled to self.data
+            instance of the Measurement class with observations filled to self.data and config to self.conf_inst
         """
         # dimensions and variable names for usage with make_dataset
         dims = {'mwr': ['time', 'frequency'],
@@ -55,22 +65,22 @@ class MeasurementConstructors(object):
         all_data = radiometrics_to_datasets(readin_data, dims, vars, vars_opt)
         flags_here = scanflag_from_ele(all_data['mwr']['ele']).astype(DTYPE_SCANFLAG)
         all_data['mwr']['scanflag'] = ('time', flags_here)
+        data = merge_aux_data(all_data['mwr'], all_data)
 
-        out = cls()
-        out.data = merge_aux_data(all_data['mwr'], all_data)
-
-        return out
+        return cls(data, conf_inst)
 
     @classmethod
-    def from_rpg(cls, readin_data):
+    def from_rpg(cls, readin_data, conf_inst=None):
         """constructor for data read in from RPG instruments.
 
         Auxiliary data are merged to time grid of MWR data. Scanning MWR data are returned as time series (no ele dim)
 
         Args:
             readin_data: dictionary with (list of) instance(s) for each RPG read-in class (keys correspond to filetype)
+            conf_inst (optional): dictionary of instrument configuration. Set to None if no config is needed.
+                Defaults to None.
         Returns:
-            an instance of the Measurement class with observations filled to self.data
+            instance of the Measurement class with observations filled to self.data and config to self.conf_inst
         """
 
         # dimensions and variable names for usage with make_dataset
@@ -113,13 +123,10 @@ class MeasurementConstructors(object):
                 flags_here = flagval * np.ones(np.shape(all_data[src].time), dtype=DTYPE_SCANFLAG)
                 all_data[src]['scanflag'] = ('time', flags_here)
         mwr_data = merge_brt_blb(all_data)
-
-        # init measurement class and merge BRT and BLB data to time series of brightness temperatures
-        out = cls()
-        out.data = merge_aux_data(mwr_data, all_data)
+        data = merge_aux_data(mwr_data, all_data)
 
         # take mean of ambient temperature load (one load with two temperature sensors (code works with up to 9))
-        tamb_vars = [var for var in out.data.data_vars if var[:-1] == 'T_amb_']
-        out.data['T_amb'] = out.data[tamb_vars].to_array(dim='tmpdim').mean(dim='tmpdim', skipna=True)
+        tamb_vars = [var for var in data.data_vars if var[:-1] == 'T_amb_']
+        data['T_amb'] = data[tamb_vars].to_array(dim='tmpdim').mean(dim='tmpdim', skipna=True)
 
-        return out
+        return cls(data, conf_inst)

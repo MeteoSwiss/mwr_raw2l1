@@ -41,8 +41,8 @@ def main(inst_config_file, nc_format_config_file, **kwargs):
     # read and interpret data
     # -----------------------
     all_data = reader(files)
-    meas = meas_constructor(all_data)
-    meas.run(conf_inst)
+    meas = meas_constructor(all_data, conf_inst)
+    meas.run()
 
     # write output
     # ------------
