@@ -123,15 +123,28 @@ class BaseReader(object):
 
     def interpret_raw_data(self):
         """interpret data read in with _read_meas (e.g. get ele/azi from pointing code or datetime from timecode)"""
+        # interpret time
         try:  # assume data-dict in all subclasses contains time
             self.data['time'] = interpret_time(self.data['time_raw'])
         except KeyError as err:
             raise MissingTimeInput('Did not find {} in read-in data from file {}'.format(err, self.filename))
+
+        # interpret ele/azi
         if 'pointing_raw' in self.data.keys():
             self.data['ele'], self.data['azi'] = interpret_angle(self.data['pointing_raw'], self.filestruct['anglever'])
+
+        # interpret lat/lon
         for coord in ('lon_raw', 'lat_raw'):
             if coord in self.data.keys():
                 self.data[coord[0:3]] = interpret_coord(self.data[coord])
+
+        # set zeros in brightness temperatures to NaN
+        for var in ('Tb', 'Tb_scan', 'IRT' 'tb', 'tb_scan', 'irt'):
+            if var in self.data.keys():
+                if (self.data[var] == 0).any():
+                    if self.data[var].flags['WRITEABLE'] is False:  # make a copy if variable is not writeable
+                        self.data[var] = self.data[var].copy()
+                    self.data[var][self.data[var] == 0] = np.nan
 
     def check_data(self):
         """general checks for the consistency of the data which can be applied to all file type readers"""

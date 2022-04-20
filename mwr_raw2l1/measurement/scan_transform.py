@@ -6,7 +6,7 @@ import numpy as np
 
 from mwr_raw2l1.errors import MWRDataError
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.utils.transformations import timedelta2s
+from mwr_raw2l1.utils.num_utils import timedelta2s
 
 
 def scan_endtime_to_time(endtime, n_angles, time_per_angle=17):
