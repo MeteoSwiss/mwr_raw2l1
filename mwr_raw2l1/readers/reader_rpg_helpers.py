@@ -126,6 +126,7 @@ def interpret_statusflag(flag_integer):
 
     n_freq_kband = 7  # number of frequency channels in K-band receiver
     n_freq_vband = 7  # number of frequency channels in V-band receiver
+    ind_start_vband = 8  # index of start of frequency channel quality flag for V-band
 
     statusflagbits = flag_int2bits(flag_integer)
 
@@ -133,8 +134,9 @@ def interpret_statusflag(flag_integer):
     tstabflag_kband = statusflagbits[:, 24] + 2 * statusflagbits[:, 25]
     tstabflag_vband = statusflagbits[:, 26] + 2 * statusflagbits[:, 27]
     out = {
-        'channel_quality_ok_kband': statusflagbits[:, 0:n_freq_kband],
-        'channel_quality_ok_vband': statusflagbits[:, 8:(8 + n_freq_vband)],
+        'channel_quality_ok': np.concatenate([statusflagbits[:, 0:n_freq_kband],
+                                              statusflagbits[:, ind_start_vband:(ind_start_vband + n_freq_vband)]],
+                                             axis=1),
         'rainflag': statusflagbits[:, 16],
         'blowerspeed_status': statusflagbits[:, 17],
         'BLscan_active': statusflagbits[:, 18],
