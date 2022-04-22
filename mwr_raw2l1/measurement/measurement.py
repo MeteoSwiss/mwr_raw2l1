@@ -1,8 +1,10 @@
 import numpy as np
+import xarray as xr
 
 from mwr_raw2l1.errors import MissingConfig, MWRDataError
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement_constructors import MeasurementConstructors
+from mwr_raw2l1.utils.num_utils import unsetbit, setbit
 
 
 class Measurement(MeasurementConstructors):
@@ -11,7 +13,7 @@ class Measurement(MeasurementConstructors):
         """main method of the class"""
         self.set_coords()
         self.set_wavelength()
-        self.set_statusflag()
+        self.apply_quality_control()
 
     def set_coords(self, delta_lat=0.01, delta_lon=0.02, delta_altitude=10, **kwargs):
         """(re)set geographical coordinates (lat, lon, altitude) in self.data accounting for self.conf_inst
@@ -104,9 +106,51 @@ class Measurement(MeasurementConstructors):
                 else:
                     logger.info("Using '{}' from data files".format(var))
 
-    def set_statusflag(self):
-        """set statusflag from data"""
-        pass  # TODO: Implement method for setting statusflag from data (and possibly conf_inst)
+    def apply_quality_control(self):
+        """set quality_flag and quality_flag_status according to quality control"""
+
+        conf_qc = {
+            'flag_status': [0, 0, 0, 0, 0, 0, 0, 1],  # 0: active, 1: not checked
+            'Tb_threshold': np.array([2.7, 330.]),
+            'check_missing_Tb': True,
+            'check_min_Tb': True,
+            'check_max_Tb': True,
+            'check_spectral_consistency': False,
+            'check_receiver_status': True,
+        }
+        n_bits = 8  # number of bits in quality flag
+
+        # initialise quality flag with 'all good' and quality_flag_status with 'nothing checked'
+        self.data['quality_flag'] = xr.zeros_like(self.data['Tb'], dtype=np.int32)
+        self.data['quality_flag_status'] = xr.ones_like(self.data['quality_flag'], dtype=np.int32) * (2**n_bits - 1)
+
+        n_channels = self.data['quality_flag'].sizes['frequency']
+        if n_channels != self.data['quality_flag'].shape[1]:
+            raise MWRDataError("expected 'Tb' and 'quality_flag' of dimension (time, frequency) but found shape={} and "
+                               'len(frequency)={}'.format(self.data['quality_flag'].shape, len(self.data.frequency)))
+
+        for ch in range(n_channels):
+            # bit 0
+            if conf_qc['check_missing_Tb']:
+                self._setbits_qc(bit_nb=0, channel=ch, mask_fail=self.data['Tb'][:, ch].isnull())
+            # bit 1
+            if conf_qc['check_min_Tb']:
+                self._setbits_qc(bit_nb=1, channel=ch, mask_fail=(self.data['Tb'][:, ch] < conf_qc['Tb_threshold'][0]))
+            # bit 2
+            if conf_qc['check_min_Tb']:
+                self._setbits_qc(bit_nb=2, channel=ch, mask_fail=(self.data['Tb'][:, ch] > conf_qc['Tb_threshold'][1]))
+            # bit 3
+            if conf_qc['check_spectral_consistency']:
+                raise NotImplementedError('checker for spectral consistency not implemented')
+            # bit 4
+            if conf_qc['check_receiver_status']:
+                pass
+                # TODO something instrument-specific w.r.t instrument manufacturer's statusflag here
+        pass
+
+    def _setbits_qc(self, bit_nb, channel, mask_fail):
+        self.data['quality_flag'][mask_fail, channel] = setbit(self.data['quality_flag'][mask_fail, channel], bit_nb)
+        self.data['quality_flag_status'][:, channel] = unsetbit(self.data['quality_flag_status'][:, channel], bit_nb)
 
 
 if __name__ == '__main__':

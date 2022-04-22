@@ -18,7 +18,7 @@ nc_attributes:
   site_location: Payerne, Switzerland
   institution: METEOSWISS Remote Sensing Group
   principal_investigator: Remote Sensing Group
-  instrument_manufacturer: RPG
+  instrument_manufacturer: Radiometer Physics (RPG)
   instrument_model: RPG-HATPRO
   instrument_generation: G2
   instrument_hw_id: R-DPR-09-016

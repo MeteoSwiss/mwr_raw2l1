@@ -12,7 +12,8 @@ the repository. Additionally, each instrument needs an own config file.
 
 The main routine does the following:
   - read in raw data files with the reader defined in the instrument's config file
-  - generate an instance of the Measurement class with the read-in data
+  - generate an instance of the Measurement class. This class combines read-in data from datafile inputs with config
+    file inputs and applies quality checks.
   - output the data to a NetCDF file according to the definitions in the file format config
 
 The operational processing at the E-PROFILE hub executes the code from this repository.

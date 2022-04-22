@@ -12,12 +12,13 @@ def timedelta2s(t_diff):
 
 
 def isbitset(x, nth_bit):
-    """Check if n-th bit is set (==1) in x.
+    """check if n-th bit is set (==1) in x
+
     Args:
-        x: Integer or :class:`numpy.ndarray` of integers.
-        nth_bit: Position of investigated bit (0, 1, 2, ...)
+        x: integer or :class:`numpy.ndarray` of integers
+        nth_bit: position of investigated bit (0, 1, 2, ...)
     Returns:
-        Boolean or boolean array denoting values whether the nth_bit is set.
+        boolean or boolean array denoting whether the nth_bit is set in x.
     Examples:
         >>> isbitset(3, 0)
             True
@@ -25,27 +26,46 @@ def isbitset(x, nth_bit):
             False
     """
     if nth_bit < 0:
-        raise ValueError('bit number cannot be negative')
+        raise ValueError('position of bit cannot be negative')
     mask = 1 << nth_bit
     return x & mask > 0
 
 
 def setbit(x, nth_bit):
-    """Sets nth bit (i.e. sets to 1) in an integer or array of integers.
+    """set n-th bit (i.e. set to 1) in an integer or array of integers
+
     Args:
-        x: Integer or :class:`numpy.ndarray` of integers.
-        nth_bit: Bit to be set.
+        x: integer or :class:`numpy.ndarray` of integers
+        nth_bit: position of bit to be set (0, 1, 2, ..)
     Returns:
-        Integer where nth bit is set.
+        integer or array of integers where n-th bit is set while all other bits are kept as in input x
     Examples:
         >>> setbit(0, 1)
             2
         >>> setbit(3, 2)
             7
     """
-
     if nth_bit < 0:
-        raise ValueError('bit number cannot be negative')
+        raise ValueError('position of bit cannot be negative')
     mask = 1 << nth_bit
-    x |= mask
-    return x
+    return x | mask
+
+
+def unsetbit(x, nth_bit):
+    """unset n-th bit (i.e. set to 0) in an integer or array of integers
+
+    Args:
+        x: integer or :class:`numpy.ndarray` of integers
+        nth_bit: position of bit to be set (0, 1, 2, ..)
+    Returns:
+        integer or array of integers where n-th bit is unset while all other bits are kept as in input x
+    Examples:
+        >>> unsetbit(7, 2)
+            3
+        >>> unsetbit(8, 2)
+            8
+    """
+    if nth_bit < 0:
+        raise ValueError('position of bit cannot be negative')
+    mask = 1 << nth_bit
+    return x & ~mask
