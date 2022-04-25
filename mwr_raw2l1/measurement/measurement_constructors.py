@@ -37,6 +37,8 @@ class MeasurementConstructors(object):
         mwr_data['scanflag'] = ('time', flags_here)
         mwr_data = scan_to_timeseries_from_scanonly(mwr_data)
 
+        mwr_data['mfr'] = 'attex'  # manufacturer (lowercase)
+
         return cls(mwr_data, conf_inst)
 
     @classmethod
@@ -66,6 +68,8 @@ class MeasurementConstructors(object):
         flags_here = scanflag_from_ele(all_data['mwr']['ele']).astype(DTYPE_SCANFLAG)
         all_data['mwr']['scanflag'] = ('time', flags_here)
         data = merge_aux_data(all_data['mwr'], all_data)
+
+        data['mfr'] = 'radiometrics'  # manufacturer (lowercase)
 
         return cls(data, conf_inst)
 
@@ -131,5 +135,7 @@ class MeasurementConstructors(object):
         # take mean of ambient temperature load (one load with two temperature sensors (code works with up to 9))
         tamb_vars = [var for var in data.data_vars if var[:-1] == 'T_amb_']
         data['T_amb'] = data[tamb_vars].to_array(dim='tmpdim').mean(dim='tmpdim', skipna=True)
+
+        data['mfr'] = 'rpg'  # manufacturer (lowercase)
 
         return cls(data, conf_inst)
