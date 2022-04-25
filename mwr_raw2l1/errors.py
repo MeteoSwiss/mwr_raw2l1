@@ -12,7 +12,7 @@ class MWRInputError(MWRError):
 
 
 class MWRDataError(MWRError):
-    """Base exeption if some feature of data triggers and error in a function"""
+    """Base exception if some feature of data triggers and error in a function"""
 
 
 class MWROutputError(MWRError):
@@ -59,6 +59,10 @@ class WrongInputFormat(MWRInputError):
 
 class UnknownFlagValue(MWRInputError):
     """Raised if the value of a flag in the input files does not correspond to the range of known values"""
+
+
+class UnknownManufacturer(MWRInputError):
+    """Raised if the manufacturer specified in Measurement is not known"""
 
 
 class MissingTimeInput(MWRInputError):

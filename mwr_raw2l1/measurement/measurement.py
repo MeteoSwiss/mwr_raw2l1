@@ -4,7 +4,8 @@ import xarray as xr
 from mwr_raw2l1.errors import MissingConfig, MWRDataError
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement_constructors import MeasurementConstructors
-from mwr_raw2l1.utils.num_utils import unsetbit, setbit
+from mwr_raw2l1.measurement.measurement_qc_helpers import check_rain, check_receiver_sanity
+from mwr_raw2l1.utils.num_utils import setbit, unsetbit
 
 
 class Measurement(MeasurementConstructors):
@@ -110,17 +111,19 @@ class Measurement(MeasurementConstructors):
         """set quality_flag and quality_flag_status according to quality control"""
 
         conf_qc = {
-            'flag_status': [0, 0, 0, 0, 0, 0, 0, 1],  # 0: active, 1: not checked
-            'Tb_threshold': np.array([2.7, 330.]),
+            'Tb_threshold': np.array([2.7, 330.]),  # Threshold for min and max Tb
             'check_missing_Tb': True,
             'check_min_Tb': True,
             'check_max_Tb': True,
             'check_spectral_consistency': False,
-            'check_receiver_status': True,
+            'check_receiver_sanity': True,
+            'check_rain': True,
+            'check_sun': True,
+            'check_Tb_offset': False,
         }
         n_bits = 8  # number of bits in quality flag
 
-        # initialise quality flag with 'all good' and quality_flag_status with 'nothing checked'
+        # initialise quality flag with 'all good' and quality_flag_status with 'nothing checked'. Dim=(time, frequency)
         self.data['quality_flag'] = xr.zeros_like(self.data['Tb'], dtype=np.int32)
         self.data['quality_flag_status'] = xr.ones_like(self.data['quality_flag'], dtype=np.int32) * (2**n_bits - 1)
 
@@ -129,6 +132,13 @@ class Measurement(MeasurementConstructors):
             raise MWRDataError("expected 'Tb' and 'quality_flag' of dimension (time, frequency) but found shape={} and "
                                'len(frequency)={}'.format(self.data['quality_flag'].shape, len(self.data.frequency)))
 
+        # perform channel-independent quality checks (generate masks for usage in following loop)
+        if conf_qc['check_rain']:
+            mask_rain, check_rain_applied = check_rain(self.data)
+        if conf_qc['check_sun']:
+            pass
+
+        # set quality_flag and quality_flag_status for each channel
         for ch in range(n_channels):
             # bit 0
             if conf_qc['check_missing_Tb']:
@@ -141,11 +151,27 @@ class Measurement(MeasurementConstructors):
                 self._setbits_qc(bit_nb=2, channel=ch, mask_fail=(self.data['Tb'][:, ch] > conf_qc['Tb_threshold'][1]))
             # bit 3
             if conf_qc['check_spectral_consistency']:
+                # TODO: ask Bernhard how to best implement this. important flag, should be done.
+                #       when done set check_spectral_consistency=True
                 raise NotImplementedError('checker for spectral consistency not implemented')
             # bit 4
-            if conf_qc['check_receiver_status']:
-                pass
-                # TODO something instrument-specific w.r.t instrument manufacturer's statusflag here
+            if conf_qc['check_receiver_sanity']:
+                mask_fail, check_applied = check_receiver_sanity(self.data, ch)
+                if check_applied:
+                    self._setbits_qc(bit_nb=4, channel=ch, mask_fail=mask_fail)
+                else:  # if check cannot be applied to one channel, it cannot be applied to any (because a var misses)
+                    conf_qc['check_receiver_sanity'] = False
+            # bit 5
+            if conf_qc['check_rain']:
+                if check_rain_applied:
+                    self._setbits_qc(bit_nb=5, channel=ch, mask_fail=mask_rain)
+            # bit 6
+            if conf_qc['check_sun']:
+                pass  # TODO: implement check_sun according to ephemerides here or better before loop
+            # bit 7
+            if conf_qc['check_Tb_offset']:
+                NotImplementedError('checker for Tb_offset not implemented')  # not most important, same for ACTRIS
+
         pass
 
     def _setbits_qc(self, bit_nb, channel, mask_fail):
