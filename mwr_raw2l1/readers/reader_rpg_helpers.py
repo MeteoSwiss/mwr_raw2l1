@@ -134,6 +134,7 @@ def interpret_statusflag(flag_integer):
     tstabflag_kband = statusflagbits[:, 24] + 2 * statusflagbits[:, 25]
     tstabflag_vband = statusflagbits[:, 26] + 2 * statusflagbits[:, 27]
     out = {
+        'channels': np.arange(n_freq_kband + n_freq_vband),  # needed as dim for channel_quality_ok
         'channel_quality_ok': np.concatenate([statusflagbits[:, 0:n_freq_kband],
                                               statusflagbits[:, ind_start_vband:(ind_start_vband + n_freq_vband)]],
                                              axis=1),

@@ -88,7 +88,7 @@ class MeasurementConstructors(object):
                 'blb': ['time', 'frequency', 'scan_ele'],
                 'irt': ['time', 'ir_wavelength'],
                 'met': ['time'],
-                'hkd': ['time']}
+                'hkd': ['time', 'channels']}
         vars = {'brt': ['Tb', 'rainflag', 'ele', 'azi'],
                 'blb': ['Tb', 'T', 'rainflag', 'scan_quadrant'],  # TODO: ask Bernhard: find way to infer 'azi' from blb
                 'irt': ['IRT', 'rainflag', 'ele', 'azi'],
@@ -99,8 +99,11 @@ class MeasurementConstructors(object):
                     'irt': [],
                     'met': ['windspeed', 'winddir', 'rainrate'],
                     'hkd': ['lat', 'lon', 'T_amb_1', 'T_amb_2', 'T_receiver_kband', 'T_receiver_vband',
-                            'Tstab_kband', 'Tstab_vband', 'flashmemory_remaining', 'BLscan_active']}
-        # TODO : check what other hkd variables are needed for output statusflag and monitoring!!!
+                            'Tstab_kband', 'Tstab_vband', 'flashmemory_remaining', 'BLscan_active',
+                            'channel_quality_ok', 'noisediode_ok_kband', 'noisediode_ok_vband',
+                            'Tstab_ok_kband', 'Tstab_ok_vband', 'Tstab_ok_amb']}
+        # TODO : introduce a variable 'monitoring' in output L1 (inform task force) to collect relevant variables of HKD
+
         scanflag_values = {'brt': 0, 'blb': 1}  # for generating a scan flag indicating whether scanning or zenith obs
 
         logger.info('Creating instance of Measurement class from RPG data')

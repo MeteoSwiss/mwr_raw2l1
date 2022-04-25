@@ -86,6 +86,11 @@ def rpg_to_datasets(data, dims, vars, vars_opt):
             continue
         elif not isinstance(data_series, list):  # accept also single instances of read-in class not inside a list
             data_series = [data_series]
+
+        # if HKD has no statusflag (has_statusflag=0) 'channels' variable will not be set, hence dim must not be set
+        if src == 'hkd' and 'channels' not in data_series[0].data and 'channels' in dims[src]:
+            dims[src].remove('channels')
+
         out[src] = to_single_dataset([dat.data for dat in data_series], dims[src], vars[src], vars_opt[src],
                                      multidim_vars=multidim_vars)
 
