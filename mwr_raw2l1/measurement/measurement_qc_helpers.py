@@ -1,5 +1,9 @@
+import ephem
+import numpy as np
+
 from mwr_raw2l1.errors import UnknownManufacturer
 from mwr_raw2l1.log import logger
+from mwr_raw2l1.measurement.measurement_construct_helpers import drop_duplicates
 
 
 def check_receiver_sanity(data, channel):
@@ -45,6 +49,60 @@ def check_rain(data):
     else:
         UnknownManufacturer("known manufacturers for this method are ['attex', 'radiometrics', 'rpg'] "
                             "but data['mfr']={}".format(data['mfr']))
+
+
+def check_sun(data, delta_ele, delta_azi):
+    if 'azi' not in data or 'ele' not in data:
+        logger.warning("Cannot set solar flag as 'azi' or 'ele' is missing in data.")
+        return None, False
+    if data.azi.isnull().any() or data.ele.isnull().any():
+        logger.warning("Cannot set solar flag as NaN was found in 'azi' or 'ele'.")
+        return None, False
+
+    sun_ele, sun_azi = orbit_position_interp(data)  # additional keyword arg body='moon' could be used for lunar flag
+    mask = np.logical_and(np.abs(data.ele - sun_ele) < delta_ele,  np.abs(data.azi - sun_azi) < delta_azi)
+    return mask, True
+
+
+def orbit_position_interp(data, delta_t=300, **kwargs):
+    time_rough = np.append(np.arange(data['time'][0].values, data['time'][-1].values, np.timedelta64(delta_t, 's')),
+                           data['time'][-1].values)  # include also last time to span full grid for following interp
+    data_rough = drop_duplicates(data.sel(time=time_rough, method='nearest'), 'time')
+    ele_rough, azi_rough = orbit_position(data_rough, **kwargs)
+
+    # append to rough dataset and interpolate to time vector of original dataset
+    data_rough['sun_ele'] = (('time',), ele_rough)
+    data_rough['sun_azi'] = (('time',), azi_rough)
+    ele = data_rough.sun_ele.interp(time=data.time).values
+    azi = data_rough.sun_azi.interp(time=data.time).values
+
+    return ele, azi
+
+
+def orbit_position(data, body='sun'):
+    obs = ephem.Observer()
+    if body == 'sun':
+        obj = ephem.Sun()
+    elif body == 'moon':
+        obj = ephem.Moon()
+    else:
+        raise NotImplementedError("function only implemented for 'body' in ['sun', 'moon']")
+
+    ele = np.full(data['time'].shape, np.nan)
+    azi = np.full(data['time'].shape, np.nan)
+    for ind, time in enumerate(data['time']):
+        # observer settings
+        obs.lat = str(data['lat'][ind].values)  # needs to be string to be interpreted as degrees
+        obs.lon = str(data['lon'][ind].values)  # needs to be string to be interpreted as degrees
+        obs.elevation = data['altitude'][ind].values
+        obs.date = str(time.dt.strftime('%Y/%m/%d %H:%M:%S').values)
+
+        # get object's position in degrees
+        obj.compute(obs)
+        ele[ind] = np.rad2deg(obj.alt)
+        azi[ind] = np.rad2deg(obj.az)
+
+    return ele, azi
 
 
 def flag_check(data, varname, value, channel=None):

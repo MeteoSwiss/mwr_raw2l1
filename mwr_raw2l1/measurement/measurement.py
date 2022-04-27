@@ -4,7 +4,7 @@ import xarray as xr
 from mwr_raw2l1.errors import MissingConfig, MWRDataError
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement_constructors import MeasurementConstructors
-from mwr_raw2l1.measurement.measurement_qc_helpers import check_rain, check_receiver_sanity
+from mwr_raw2l1.measurement.measurement_qc_helpers import check_rain, check_receiver_sanity, check_sun
 from mwr_raw2l1.utils.num_utils import setbit, unsetbit
 
 
@@ -139,7 +139,8 @@ class Measurement(MeasurementConstructors):
         if conf_qc['check_rain']:
             mask_rain, check_rain_applied = check_rain(self.data)
         if conf_qc['check_sun']:
-            pass
+            mask_sun, check_sun_applied = check_sun(self.data, conf_qc['delta_ele_sun'], conf_qc['delta_azi_sun'])
+
         # set quality_flag and quality_flag_status for each channel
         for ch in range(n_channels):
             # bit 0
@@ -164,12 +165,11 @@ class Measurement(MeasurementConstructors):
                 else:  # if check cannot be applied to one channel, it cannot be applied to any (because a var misses)
                     conf_qc['check_receiver_sanity'] = False
             # bit 5
-            if conf_qc['check_rain']:
-                if check_rain_applied:
-                    self._setbits_qc(bit_nb=5, channel=ch, mask_fail=mask_rain)
+            if conf_qc['check_rain'] and check_rain_applied:
+                self._setbits_qc(bit_nb=5, channel=ch, mask_fail=mask_rain)
             # bit 6
-            if conf_qc['check_sun']:
-                pass  # TODO: implement check_sun according to ephemerides here or better before loop
+            if conf_qc['check_sun'] and check_sun_applied:
+                self._setbits_qc(bit_nb=6, channel=ch, mask_fail=mask_sun)
             # bit 7
             if conf_qc['check_Tb_offset']:
                 NotImplementedError('checker for Tb_offset not implemented')  # not most important, same for ACTRIS
@@ -179,15 +179,13 @@ class Measurement(MeasurementConstructors):
             qc_thresholds += ' Tb_min={},'.format(conf_qc['Tb_threshold'][0])
         if conf_qc['check_max_Tb']:
             qc_thresholds += ' Tb_max={},'.format(conf_qc['Tb_threshold'][1])
-        if conf_qc['check_sun']:
+        if conf_qc['check_sun'] and check_sun_applied:
             qc_thresholds += ' delta_ele_sun={},'.format(conf_qc['delta_ele_sun'])
             qc_thresholds += ' delta_azi_sun={},'.format(conf_qc['delta_azi_sun'])
         # remove tailing comma if needed and store to self.data
         if qc_thresholds[-1] == ',':
             qc_thresholds = qc_thresholds[:-1]
         self.data['qc_thresholds'] = qc_thresholds
-
-        pass
 
     def _setbits_qc(self, bit_nb, channel, mask_fail):
         self.data['quality_flag'][mask_fail, channel] = setbit(self.data['quality_flag'][mask_fail, channel], bit_nb)

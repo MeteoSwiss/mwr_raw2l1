@@ -24,6 +24,7 @@ xarray = [
     {version = "<=0.16.2", python = "3.6"},
     {version = "^0.20.1", python = "^3.7"}
     ]
+ephem = "^4.1.3"  # used for setting sun-in-beam flag in quality_flag
 
 
 [tool.poetry.dev-dependencies]
