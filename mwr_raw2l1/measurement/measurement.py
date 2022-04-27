@@ -108,10 +108,12 @@ class Measurement(MeasurementConstructors):
                     logger.info("Using '{}' from data files".format(var))
 
     def apply_quality_control(self):
-        """set quality_flag and quality_flag_status according to quality control"""
+        """set quality_flag and quality_flag_status and qc_thresholds according to quality control"""
 
         conf_qc = {
-            'Tb_threshold': np.array([2.7, 330.]),  # Threshold for min and max Tb
+            'Tb_threshold': [2.7, 330.],  # Threshold for min and max Tb
+            'delta_ele_sun': 7,
+            'delta_azi_sun': 7,
             'check_missing_Tb': True,
             'check_min_Tb': True,
             'check_max_Tb': True,
@@ -126,6 +128,7 @@ class Measurement(MeasurementConstructors):
         # initialise quality flag with 'all good' and quality_flag_status with 'nothing checked'. Dim=(time, frequency)
         self.data['quality_flag'] = xr.zeros_like(self.data['Tb'], dtype=np.int32)
         self.data['quality_flag_status'] = xr.ones_like(self.data['quality_flag'], dtype=np.int32) * (2**n_bits - 1)
+        qc_thresholds = 'Thresholds used for quality control:'  # used to set self.data['qc_thresholds']
 
         n_channels = self.data['quality_flag'].sizes['frequency']
         if n_channels != self.data['quality_flag'].shape[1]:
@@ -137,7 +140,6 @@ class Measurement(MeasurementConstructors):
             mask_rain, check_rain_applied = check_rain(self.data)
         if conf_qc['check_sun']:
             pass
-
         # set quality_flag and quality_flag_status for each channel
         for ch in range(n_channels):
             # bit 0
@@ -171,6 +173,19 @@ class Measurement(MeasurementConstructors):
             # bit 7
             if conf_qc['check_Tb_offset']:
                 NotImplementedError('checker for Tb_offset not implemented')  # not most important, same for ACTRIS
+
+        # store used thresholds as string for comment in output file
+        if conf_qc['check_min_Tb']:
+            qc_thresholds += ' Tb_min={},'.format(conf_qc['Tb_threshold'][0])
+        if conf_qc['check_max_Tb']:
+            qc_thresholds += ' Tb_max={},'.format(conf_qc['Tb_threshold'][1])
+        if conf_qc['check_sun']:
+            qc_thresholds += ' delta_ele_sun={},'.format(conf_qc['delta_ele_sun'])
+            qc_thresholds += ' delta_azi_sun={},'.format(conf_qc['delta_azi_sun'])
+        # remove tailing comma if needed and store to self.data
+        if qc_thresholds[-1] == ',':
+            qc_thresholds = qc_thresholds[:-1]
+        self.data['qc_thresholds'] = qc_thresholds
 
         pass
 
