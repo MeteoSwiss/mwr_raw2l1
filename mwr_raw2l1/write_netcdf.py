@@ -1,7 +1,6 @@
 import datetime as dt
 from copy import deepcopy
 
-import netCDF4 as nc
 import numpy as np
 import xarray as xr
 from pkg_resources import get_distribution
@@ -161,8 +160,8 @@ class Writer(object):
         # cases that need no action by this method
         if var not in self.conf_nc['variables']:
             return
-        if ('append_thresholds' in self.conf_nc['variables'][var] and
-                not self.conf_nc['variables'][var]['append_thresholds']):
+        if ('append_thresholds' in self.conf_nc['variables'][var] and not
+                self.conf_nc['variables'][var]['append_thresholds']):
             return
 
         # append thresholds to comment (or set new comment if absent)

@@ -72,7 +72,7 @@ def check_sun(data, delta_ele, delta_azi):
         return None, False
 
     ele_sun, azi_sun = orbit_position_interp(data)  # additional keyword arg body='moon' could be used for lunar flag
-    mask = np.logical_and(np.abs(data.ele - ele_sun) < delta_ele,  np.abs(data.azi - azi_sun) < delta_azi)
+    mask = np.logical_and(np.abs(data.ele - ele_sun) < delta_ele, np.abs(data.azi - azi_sun) < delta_azi)
     return mask, True
 
 
