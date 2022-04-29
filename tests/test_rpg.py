@@ -16,6 +16,7 @@ import xarray as xr
 import yaml
 
 from mwr_raw2l1.errors import MissingDataSource, MWRTestError
+from mwr_raw2l1.log import logger
 from mwr_raw2l1.main import main
 from mwr_raw2l1.utils.config_utils import get_inst_config
 from mwr_raw2l1.utils.file_utils import abs_file_path
@@ -133,6 +134,11 @@ class TestRPG(unittest.TestCase):
             ds_ref_sel = self.ds_ref.sel(time=self.ds.time)  # only time period of ds_ref that has also data in ds
             ds_ref_sel = ds_ref_sel.drop_vars(vars_to_ignore, errors='ignore')  # no error if var to ignore is missing
             ds_sel = self.ds.drop_vars(vars_to_ignore, errors='ignore')
+            vars_not_in_ref = [var for var in list(ds_sel.keys()) if var not in list(ds_ref_sel.keys())]
+            if vars_not_in_ref:
+                logger.warning('The following variables cannot be tested as they are not in the reference dataset: {}'
+                               .format(vars_not_in_ref))
+                ds_sel = ds_sel.drop_vars(vars_not_in_ref)
             xr.testing.assert_allclose(ds_sel, ds_ref_sel)
         if check_timeseries_length:
             with self.subTest(operation='check_whole_timeseries_in_nc'):
