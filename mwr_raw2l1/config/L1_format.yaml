@@ -129,12 +129,13 @@ variables:
     type: i2
     _FillValue: -999
     optional: False
+    append_thresholds: True  # if True or not set thresholds used in determination will be appended to comment
     attributes:
       long_name: Quality flag
       standard_name: quality_flag
       flag_masks: 1b, 2b, 4b, 8b, 16b, 32b, 64b, 128b
       flag_meanings: missing_tb tb_below_threshold tb_above_threshold spectral_consistency_above_threshold receiver_sanity_failed rain_detected sun_in_beam tb_offset_above_threshold
-      comment: 0 indicates data with good quality according to applied tests. The list of (not) applied tests is encoded in quality_flag_status
+      comment: 0 indicates data with good quality according to applied tests. The list of (not) applied tests is encoded in quality_flag_status.
 
   quality_flag_status:
     name: quality_flag_status

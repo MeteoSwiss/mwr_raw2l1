@@ -110,7 +110,7 @@ class Measurement(MeasurementConstructors):
     def apply_quality_control(self):
         """set quality_flag and quality_flag_status and qc_thresholds according to quality control"""
 
-        conf_qc = {
+        conf_qc = {  # TODO: extract to config file possibly include n_bits
             'Tb_threshold': [2.7, 330.],  # Threshold for min and max Tb
             'delta_ele_sun': 7,
             'delta_azi_sun': 7,
@@ -125,11 +125,14 @@ class Measurement(MeasurementConstructors):
         }
         n_bits = 8  # number of bits in quality flag
 
-        # initialise quality flag with 'all good' and quality_flag_status with 'nothing checked'. Dim=(time, frequency)
+        logger.info('Setting quality_flag and quality_flag_status')
+
+        # initialise quality_flag with 'all good' and quality_flag_status with 'nothing checked'. Dim=(time, frequency)
         self.data['quality_flag'] = xr.zeros_like(self.data['Tb'], dtype=np.int32)
         self.data['quality_flag_status'] = xr.ones_like(self.data['quality_flag'], dtype=np.int32) * (2**n_bits - 1)
         qc_thresholds = 'Thresholds used for quality control:'  # used to set self.data['qc_thresholds']
 
+        # check for expected shape
         n_channels = self.data['quality_flag'].sizes['frequency']
         if n_channels != self.data['quality_flag'].shape[1]:
             raise MWRDataError("expected 'Tb' and 'quality_flag' of dimension (time, frequency) but found shape={} and "
@@ -189,6 +192,7 @@ class Measurement(MeasurementConstructors):
         self.data['qc_thresholds'] = qc_thresholds
 
     def _setbits_qc(self, bit_nb, channel, mask_fail):
+        """set values for quality_flag and quality_flag status for executed checks"""
         self.data['quality_flag'][mask_fail, channel] = setbit(self.data['quality_flag'][mask_fail, channel], bit_nb)
         self.data['quality_flag_status'][:, channel] = unsetbit(self.data['quality_flag_status'][:, channel], bit_nb)
 
