@@ -192,33 +192,3 @@ class Writer(object):
             if var not in self.config_dims:
                 dims_to_drop.append(var)
         self.data = self.data.drop_dims(dims_to_drop)
-
-    def write_from_dict(self):
-        """write data dictionary to NetCDF according to the format definition in conf_file by using the netCDF4 module
-
-        CARE: This is a legacy function here for completeness but not maintained any further.
-              Especially, writing of global attributes is not yet included.
-        """
-
-        logger.warning('This function is not maintained any further and comes with no guarantee at all. Consider using '
-                       'write_from_xarray instead.')
-
-        with nc.Dataset(self.filename, 'w', format=self.nc_format) as ncid:
-            for dimact in self.conf_nc['dimensions']['unlimited']:
-                ncid.createDimension(self.conf_nc['variables'][dimact]['name'], size=None)
-            for dimact in self.conf_nc['dimensions']['fixed']:
-                ncid.createDimension(self.conf_nc['variables'][dimact]['name'], size=len(self.data[dimact]))
-            for var, specs in self.conf_nc['variables'].items():
-                ncvar = ncid.createVariable(specs['name'], specs['type'], specs['dim'], fill_value=specs['_FillValue'])
-                ncvar.setncatts(specs['attributes'])
-                if var not in self.data.keys():
-                    if specs['optional']:
-                        # TODO: check that this creates variable of right size with only fill values
-                        continue
-                    else:
-                        raise KeyError('Variable {} is a mandatory input but is not in data dictionary'.format(var))
-                if var == 'time':
-                    ncvar[:] = nc.date2num(self.data[var], specs['attributes']['units'])
-                else:
-                    ncvar[:] = self.data[var]
-        logger.info('Data written to {}'.format(self.filename))
