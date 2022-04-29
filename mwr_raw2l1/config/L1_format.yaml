@@ -108,18 +108,6 @@ variables:
       units: degree
       comment: 0=horizon, 90=zenith
 
-  scanflag:  # previously used BLscan_active (from RPG's HDF files), now use scanflag determined from filetype or ele
-    name: scanflag
-    dim:
-      - time
-    type: i1
-    _FillValue: -128
-    optional: True
-    attributes:
-      long_name: Flag elevation scan
-      flag_values: 0b, 1b, 2b
-      flag_meanings: zenith_observation elevation_scan_ongoing unknown
-
   Tb:
     name: tb
     dim:
@@ -132,6 +120,29 @@ variables:
       long_name: Microwave brightness temperatures
       standard_name: brightness_temperature
       units: K
+
+  scanflag:  # previously used BLscan_active (from RPG's HDF files), now use scanflag determined from filetype or ele
+    name: scanflag
+    dim:
+      - time
+    type: i1
+    _FillValue: -128
+    optional: True
+    attributes:
+      long_name: Flag elevation scan
+      flag_values: 0b, 1b, 2b
+      flag_meanings: zenith_observation elevation_scan_ongoing unknown
+
+  statusflag:
+    name: instrument_statusflag
+    dim:
+      - time
+    type: i4
+    _FillValue: -999
+    optional: True
+    attributes:
+      long_name: Native statuscode of the instrument
+      comment: Encodes housekeeping data and warnings. Refer to the respective user manual for interpretation
 
   IRT:
     name: irt

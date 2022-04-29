@@ -102,7 +102,7 @@ class MeasurementConstructors(object):
                     'blb': [],
                     'irt': [],
                     'met': ['windspeed', 'winddir', 'rainrate'],
-                    'hkd': ['lat', 'lon', 'T_amb_1', 'T_amb_2', 'T_receiver_kband', 'T_receiver_vband',
+                    'hkd': ['lat', 'lon', 'T_amb_1', 'T_amb_2', 'T_receiver_kband', 'T_receiver_vband', 'statusflag',
                             'Tstab_kband', 'Tstab_vband', 'flashmemory_remaining', 'BLscan_active',
                             'channel_quality_ok', 'noisediode_ok_kband', 'noisediode_ok_vband',
                             'Tstab_ok_kband', 'Tstab_ok_vband', 'Tstab_ok_amb']}

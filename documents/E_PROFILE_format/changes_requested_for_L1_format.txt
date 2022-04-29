@@ -22,3 +22,8 @@ where to get the following data from:
 - time_bounds: must know integration time from somewhere
 - t_rec: not in data for RPG
 - n_sidebands (dimension) and its variables sideband_count, sideband_IF_separation, maybe freqshift
+
+
+new_changes
+-----------
+- add instrument_statusflag: important for monitoring

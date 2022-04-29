@@ -25,6 +25,8 @@ def check_receiver_sanity(data, channel):
     elif data['mfr'] == 'rpg':
         return flag_check(data, 'channel_quality_ok', 0, channel)  # exclusively base check on channel_qality_ok
         # could add checks for noisediode_ok_kband, noisediode_ok_vband, Tstab_ok_kband, Tstab_ok_vband, Tstab_ok_amb
+        # TODO: would better base this check on data['alarm'] present in all datasets. should add additional checks for
+        #  channel ok to func for all inst types based also on a inst_config entry channels_to_ignore or the like
     UnknownManufacturer("known manufacturers for this method are ['attex', 'radiometrics', 'rpg'] "
                         "but data['mfr']={}".format(data['mfr']))
 
