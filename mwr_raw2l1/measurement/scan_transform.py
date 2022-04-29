@@ -17,8 +17,8 @@ def scan_endtime_to_time(endtime, n_angles, time_per_angle=17):
     Args:
         endtime (:class:`numpy.ndarray` of :class:`numpy.datetime64` or single :class:`datetime.datetime` object):
             Corresponds ot the single timestamp saved with each angle scan. Assumed as the end time of the scan
-        n_angles : number of angles per scan.
-        time_per_angle : total time for scanning one angle incl. integration time and the time for moving the mirror.
+        n_angles: number of angles per scan.
+        time_per_angle: total time for scanning one angle incl. integration time and the time for moving the mirror.
             Indicated in seconds. The default is 17.
 
     Returns:

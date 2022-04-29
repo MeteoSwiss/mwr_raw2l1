@@ -52,6 +52,16 @@ def check_rain(data):
 
 
 def check_sun(data, delta_ele, delta_azi):
+    """check if sun is in beam within the tolerances 'delta_ele', 'delta_azi' ( abs(data['ele'] - ele_sun) < delta_ele )
+
+    Args:
+        data: :class:`xarray.Dataset`, commonly Measurement.data
+        delta_ele:
+    Returns:
+        tuple containing:
+            mask_fail: None if check_applied=False, otherwise array of size (time,) set True where sun is in beam
+            check_applied (bool): True if check was applied, False if check could not be applied (no ele/azi in data)
+    """
     if 'azi' not in data or 'ele' not in data:
         logger.warning("Cannot set solar flag as 'azi' or 'ele' is missing in data.")
         return None, False
@@ -59,12 +69,14 @@ def check_sun(data, delta_ele, delta_azi):
         logger.warning("Cannot set solar flag as NaN was found in 'azi' or 'ele'.")
         return None, False
 
-    sun_ele, sun_azi = orbit_position_interp(data)  # additional keyword arg body='moon' could be used for lunar flag
-    mask = np.logical_and(np.abs(data.ele - sun_ele) < delta_ele,  np.abs(data.azi - sun_azi) < delta_azi)
+    ele_sun, azi_sun = orbit_position_interp(data)  # additional keyword arg body='moon' could be used for lunar flag
+    mask = np.logical_and(np.abs(data.ele - ele_sun) < delta_ele,  np.abs(data.azi - azi_sun) < delta_azi)
     return mask, True
 
 
 def orbit_position_interp(data, delta_t=300, **kwargs):
+    """wrapper to :func:`orbit_position` doing orbit calculations only each 'delta_t' seconds and interpolate to time"""
+
     time_rough = np.append(np.arange(data['time'][0].values, data['time'][-1].values, np.timedelta64(delta_t, 's')),
                            data['time'][-1].values)  # include also last time to span full grid for following interp
     data_rough = drop_duplicates(data.sel(time=time_rough, method='nearest'), 'time')
@@ -80,6 +92,16 @@ def orbit_position_interp(data, delta_t=300, **kwargs):
 
 
 def orbit_position(data, body='sun'):
+    """calculate orbit position of sun or moon for instrument position at each time in 'data' using :class:`ephem`
+
+    Args:
+        data: :class:`xarray.Dataset`, commonly Measurement.data
+        body (optional): name of astronomical body to calculate orbit from ('sun' or 'moon'). Defaults to 'sun'
+    Returns:
+        tuple containing:
+            ele: :class:`numpy.ndarray` of elevations of the body for each time step
+            azi: :class:`numpy.ndarray` of azimuths of the body for each time step
+    """
     obs = ephem.Observer()
     if body == 'sun':
         obj = ephem.Sun()
@@ -118,7 +140,6 @@ def flag_check(data, varname, value, channel=None):
         tuple containing:
             mask_fail: None if check_applied=False, otherwise array of size (time,) set True where value is 'matched'
             check_applied (bool): True if check has been applied, False if check could not be applied (not enough info)
-
     """
     if varname in data:
         if channel is None:

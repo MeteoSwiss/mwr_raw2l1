@@ -155,7 +155,8 @@ class Measurement(MeasurementConstructors):
             # bit 3
             if conf_qc['check_spectral_consistency']:
                 # TODO: ask Bernhard how to best implement this. important flag, should be done.
-                #       when done set check_spectral_consistency=True
+                #       when done set check_spectral_consistency=True in conf_qc
+                # TODO: ask Christine how she would implement this.
                 raise NotImplementedError('checker for spectral consistency not implemented')
             # bit 4
             if conf_qc['check_receiver_sanity']:
