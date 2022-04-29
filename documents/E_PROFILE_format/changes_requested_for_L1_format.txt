@@ -26,4 +26,7 @@ where to get the following data from:
 
 new_changes
 -----------
-- add instrument_statusflag: important for monitoring
+- add instrument_status_code: important for monitoring
+- scanflag -> scan_flag
+- quality_flag, quality_flag_status, liquid_cloud_flag, liquid_cloud_flag_status: set _FillValue to -999 and remove units
+- pointing_flag add value 2b and unknown to flag_values/meanings

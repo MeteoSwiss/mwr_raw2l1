@@ -121,28 +121,82 @@ variables:
       standard_name: brightness_temperature
       units: K
 
-  scanflag:  # previously used BLscan_active (from RPG's HDF files), now use scanflag determined from filetype or ele
-    name: scanflag
+  quality_flag:
+    name: quality_flag
+    dim:
+      - time
+      - frequency
+    type: i2
+    _FillValue: -999
+    optional: False
+    attributes:
+      long_name: Quality flag
+      standard_name: quality_flag
+      flag_masks: 1b, 2b, 4b, 8b, 16b, 32b, 64b, 128b
+      flag_meanings: missing_tb tb_below_threshold tb_above_threshold spectral_consistency_above_threshold receiver_sanity_failed rain_detected sun_in_beam tb_offset_above_threshold
+      comment: 0 indicates data with good quality according to applied tests. The list of (not) applied tests is encoded in quality_flag_status
+
+  quality_flag_status:
+    name: quality_flag_status
+    dim:
+      - time
+      - frequency
+    type: i2
+    _FillValue: -999
+    optional: False
+    attributes:
+      long_name: Checks not executed in determination of quality_flag
+      flag_masks: 1b, 2b, 4b, 8b, 16b, 32b, 64b, 128b
+      flag_meanings: missing_tb_not_checked tb_lower_threshold_not_checked tb_upper_threshold_not_checked spectral_consistency_not_checked receiver_sanity_not_checked rain_not_checked sun_in_beam_not_checked tb_offset_not_checked
+
+  liquid_cloud_flag:
+    name: liquid_cloud_flag
     dim:
       - time
     type: i1
     _FillValue: -128
     optional: True
     attributes:
-      long_name: Flag elevation scan
+      long_name: Presence of liquid clouds in beam
       flag_values: 0b, 1b, 2b
-      flag_meanings: zenith_observation elevation_scan_ongoing unknown
+      flag_meanings: no_liquid_cloud liquid_cloud_present undefined
+      comment: The way this flag was determined is encoded in liquid_cloud_flag_status
+
+  liquid_cloud_flag_status:
+    name: liquid_cloud_flag_status
+    dim:
+      - time
+    type: i1
+    _FillValue: -128
+    optional: True
+    attributes:
+      long_name: Method for determination of liquid_cloud_flag
+      flag_values: 0b, 1b, 2b
+      flag_meanings: using_mwr_and_ir using_mwr_only other
+
+  scanflag:  # previously used BLscan_active (from RPG's HDF files), now use scanflag determined from filetype or ele
+    name: pointing_flag
+    dim:
+      - time
+    type: i1
+    _FillValue: -128
+    optional: True
+    attributes:
+      long_name: Flag indicating a single pointing (starring) or multiple pointing (scanning) observation sequence
+      flag_values: 0b, 1b, 2b
+      flag_meanings: single_pointing multiple_pointing unknown
+      comment: Series of multiple-pointing observations (elevation scans) provide more information on boundary layer temperature profiles compared to single pointing observations. If available, it is advised to prefer elevation scans over starring observations for temperature profile retrievals
 
   statusflag:
-    name: instrument_statusflag
+    name: instrument_status_code
     dim:
       - time
     type: i4
     _FillValue: -999
     optional: True
     attributes:
-      long_name: Native statuscode of the instrument
-      comment: Encodes housekeeping data and warnings. Refer to the respective user manual for interpretation
+      long_name: Native status code of the instrument
+      comment: Encodes housekeeping data and warnings. Refer to the respective user manual for interpretation.
 
   IRT:
     name: irt

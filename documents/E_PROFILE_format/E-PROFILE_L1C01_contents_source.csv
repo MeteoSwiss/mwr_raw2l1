@@ -25,7 +25,8 @@ azi,x,,,x,
 ele,x,,,x,
 tb_accuracy,,,x,,x
 tb_cov,,,x,,x
-quality_flag,x,x,,,x
+quality_flag,x,x,,x,
+quality_flag_status,x,x,,x,
 t_amb,x,,,x,
 t_rec,x,,,,x
 ir_wavelength,x,,,x,
