@@ -1,9 +1,11 @@
 import glob
 import os
 import pickle
+from itertools import groupby
 from pathlib import Path
 
 import mwr_raw2l1
+from mwr_raw2l1.errors import MWRInputError
 
 
 def abs_file_path(*file_path):
@@ -103,3 +105,35 @@ def generate_output_filename(basename, time, ext='nc'):
         ext (optional): filename extension. Defaults to 'nc'. Empty not permitted.
     """
     return '{}{}.{}'.format(basename, time[-1].dt.strftime('%Y%m%d%H%M').data, ext)
+
+
+def group_files(files, fileparts_to_ignore):
+    """group files in a list of files
+
+    Args:
+        files: list of files
+        fileparts_to_ignore ('ext', 'suffix'): file parts to ignore for the grouping process
+    Returns:
+        list of lists with files for which the parts except 'fileparts_to_ignore' are identical
+    """
+    if fileparts_to_ignore in ['ext', 'extension']:
+        pattern_builder = remove_ext
+    elif fileparts_to_ignore == 'suffix':
+        pattern_builder = remove_suffix
+    else:
+        MWRInputError("Known values for 'fileparts_to_ignore' are 'ext' and 'suffix' but found '{}'".
+                      format(fileparts_to_ignore))
+
+    files_sorted = sorted(files, key=pattern_builder)
+    return [list(file_group) for _, file_group in groupby(files_sorted, key=pattern_builder)]
+
+
+def remove_ext(file):
+    """remove extension and just return pure filename including path"""
+    return os.path.splitext(file)[0]
+
+
+def remove_suffix(file, sep='_'):
+    """remove suffix including extension (all that comes after last 'sep') and return pure filename including path"""
+    fn_parts = remove_ext(file).split(sep)
+    return sep.join(fn_parts[:-1])
