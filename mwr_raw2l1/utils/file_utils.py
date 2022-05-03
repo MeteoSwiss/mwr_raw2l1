@@ -107,22 +107,22 @@ def generate_output_filename(basename, time, ext='nc'):
     return '{}{}.{}'.format(basename, time[-1].dt.strftime('%Y%m%d%H%M').data, ext)
 
 
-def group_files(files, fileparts_to_ignore):
+def group_files(files, name_scheme):
     """group files in a list of files
 
     Args:
         files: list of files
-        fileparts_to_ignore ('ext', 'suffix'): file parts to ignore for the grouping process
+        name_scheme {'attex', 'rpg', 'radiometrics'}: scheme of filename used to set parts to ignore in grouping process
     Returns:
         list of lists with files for which the parts except 'fileparts_to_ignore' are identical
     """
-    if fileparts_to_ignore in ['ext', 'extension']:
+    if name_scheme in ['attex', 'rpg']:
         pattern_builder = remove_ext
-    elif fileparts_to_ignore == 'suffix':
+    elif name_scheme == 'radiometrics':
         pattern_builder = remove_suffix
     else:
-        MWRInputError("Known values for 'fileparts_to_ignore' are 'ext' and 'suffix' but found '{}'".
-                      format(fileparts_to_ignore))
+        MWRInputError("Known values for 'name_scheme' are 'attex', 'radiometrics' and 'rpg' but found '{}'".
+                      format(name_scheme))
 
     files_sorted = sorted(files, key=pattern_builder)
     return [list(file_group) for _, file_group in groupby(files_sorted, key=pattern_builder)]
