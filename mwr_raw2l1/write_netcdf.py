@@ -52,8 +52,8 @@ class Writer(object):
         self.prepare_datavars()
         self.global_attrs_from_conf(self.conf_nc, attr_key='attributes')
         self.global_attrs_from_conf(self.conf_inst, attr_key='nc_attributes')
+        self.add_title_attr()  # compose title
         self.add_history_attr()
-        self.add_title_attr()
         self.data.to_netcdf(self.filename, format=self.nc_format)  # write to output NetCDF file
         logger.info('Data written to ' + self.filename)
 
@@ -90,6 +90,18 @@ class Writer(object):
         for attname, attval in conf[attr_key].items():
             self.data.attrs[attname] = attval
 
+    def add_title_attr(self):
+        """add global attribute 'title' recombining info from other previously set global attributes"""
+        if 'title' in self.data.attrs:
+            return  # do not overwrite a title deliberately set by config
+        # specify global attributes in order they will be used to set the title
+        att_seq = ['instrument_model', 'instrument_generation', 'site_location', 'institution']
+        for att in att_seq:
+            if att not in self.data.attrs:
+                raise MissingConfig("cannot set global attribute 'title' as attribute '{}' was not found in config"
+                                    .format(att))
+        self.data.attrs['title'] = '{} {} MWR at {} ({})'.format(*[self.data.attrs[att] for att in att_seq])
+
     def add_history_attr(self):
         """add global attribute 'history' with date and version of mwr_raw2l1 code run"""
         current_time_str = dt.datetime.now(tz=dt.timezone(dt.timedelta(0))).strftime('%Y%m%d')  # ensure UTC
@@ -102,18 +114,6 @@ class Writer(object):
             logger.warning('Received error {} while trying to set history global attribute. Therefore, will be using '
                            'hardcoded project name without version number'.format(err))
         self.data.attrs['history'] = hist_str
-
-    def add_title_attr(self):
-        """add global attribute 'title' recombining instrument, station and operator info"""
-        if 'title' in self.data.attrs:
-            return  # do not overwrite a title deliberately set by config
-        # specify global attributes in order they will be used to set the title
-        att_seq = ['instrument_model', 'instrument_generation', 'site_location', 'institution']
-        for att in att_seq:
-            if att not in self.data.attrs:
-                raise MissingConfig("cannot set global attribute 'title' as attribute '{}' was not found in config"
-                                    .format(att))
-        self.data.attrs['title'] = '{} {} MWR at {} ({})'.format(*[self.data.attrs[att] for att in att_seq])
 
     def check_dims(self, var, specs):
         """check dims of var (retain order of config specs, but order of coords returned by xarray Dataset is arbitrary)
