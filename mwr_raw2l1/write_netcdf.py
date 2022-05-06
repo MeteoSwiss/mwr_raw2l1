@@ -47,19 +47,9 @@ class Writer(object):
         self.config_dims = self.conf_nc['dimensions']['unlimited'] + self.conf_nc['dimensions']['fixed']
 
     def run(self):
-        """run writing procedure of class instance by picking the right writer according to the type of data"""
-
-        logger.info('Starting to write to ' + self.filename)
-        if isinstance(self.data, xr.Dataset) or isinstance(self.data, xr.DataArray):
-            self.write_from_xarray()
-        elif isinstance(self.data, dict):
-            self.write_from_dict()
-        else:
-            raise NotImplementedError('no writer for data of type ' + type(self.data))
-
-    def write_from_xarray(self):
         """write Dataset to NetCDF according to the format definition in conf_file by using the :class:`xarray` module
         """
+        logger.info('Starting to write to ' + self.filename)
         self.prepare_datavars()
         self.global_attrs_from_conf(self.conf_nc, attr_key='attributes')
         self.global_attrs_from_conf(self.conf_inst, attr_key='nc_attributes')
