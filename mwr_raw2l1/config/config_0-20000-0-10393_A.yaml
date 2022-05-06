@@ -13,6 +13,7 @@ station_longitude: 14.12
 station_altitude: 98
 
 nc_attributes:
+  # title: do not set 'title' attribute unless you have a very good reason to deviate from the default
   wigos_station_id: 0-20000-0-10393
   instrument_id: A
   site_location: Lindenberg, Germany
