@@ -3,7 +3,7 @@ This document lists the minimal requirements an instrument must have to particip
 General
 -------
 - send all required files with same timing to one directory per station on MetOffice FTP
-- provide all information needed for config_WigosID_InstId.yaml
+- provide all information needed for config_WigosID_InstID.yaml
 - update date of last calibration, changes in calibration method, covariance matrix and date of last covariance matrix
 
 RPG

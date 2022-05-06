@@ -16,12 +16,13 @@ nc_attributes:
   wigos_station_id: 0-20000-0-10393
   instrument_id: A
   site_location: Lindenberg, Germany
-  institution: METEOSWISS Remote Sensing Group
+  institution: Deutscher Wetterdienst (DWD)
   principal_investigator: Remote Sensing Group
   instrument_manufacturer: Radiometrics
-  instrument_model: Radiometrics-MP3000
+  instrument_model: MP3000
   instrument_generation: MP3000
   instrument_hw_id: 3263A
+  instrument_history: to_be_specified
   ir_instrument_manufacturer: to_be_specified
   ir_instrument_model: to_be_specified
   ir_instrument_fabrication_year: to_be_specified
@@ -33,7 +34,6 @@ nc_attributes:
   date_of_last_absolute_calibration: '2021-12-31 23:59:59'  # dates for global attrs need to be specified as str
   date_of_last_covariance_matrix: '2021-12-31 23:59:59'  # dates for global attrs need to be specified as str
   type_of_automatic_calibrations: gain calibration with ambient temperature target and noise diode # TODO: ask Chrisrtine for calib
-  factory_history: to_be_specified
   # TODO: ask Christine what she thinks of using L0 file for date of last calib, etc. File is quite large...
 
 # additional optional fields for nc_attributes

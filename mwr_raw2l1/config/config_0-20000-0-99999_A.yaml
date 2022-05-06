@@ -18,12 +18,13 @@ nc_attributes:
   wigos_station_id: 0-20000-0-99999
   instrument_id: A
   site_location: Padua, Italy
-  institution: ARPA Veneto Remote Sensing Group
+  institution: ARPA Veneto
   principal_investigator: Remote Sensing Group
-  instrument_manufacturer: Attex
-  instrument_model: MTP5-HE
+  instrument_manufacturer: ATTEX
+  instrument_model: MTP5
   instrument_generation: HE
   instrument_hw_id: to_be_specified
+  instrument_history: to_be_specified
   ir_instrument_manufacturer: No IR instrument
   ir_instrument_model: No IR instrument
   ir_instrument_fabrication_year: No IR instrument
@@ -35,7 +36,6 @@ nc_attributes:
   date_of_last_absolute_calibration: '2021-12-31 23:59:59'  # dates for global attrs need to be specified as str
   date_of_last_covariance_matrix: '2021-12-31 23:59:59'  # dates for global attrs need to be specified as str
   type_of_automatic_calibrations: opaque atmosphere at low elevation and internal load
-  factory_history: to_be_specified
 
 
 # additional optional fields for nc_attributes
