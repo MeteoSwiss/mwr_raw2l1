@@ -81,12 +81,11 @@ class Measurement(MeasurementConstructors):
         inttime[self.data['scanflag'] == 0] = inttime_stare
 
         # set dimension 'bnds' and variable 'time_bnds'
-        self.data.assign_coords({'bnds': 2})
+        self.data.assign_coords({'bnds': ['start', 'end']})
         self.data['time_bnds'] = (('time', 'bnds'),
                                   np.full((len(self.data['time']), 2), np.nan, dtype='datetime64[ns]'))
         self.data['time_bnds'][:, 0] = self.data['time'] - inttime
         self.data['time_bnds'][:, 1] = self.data['time']
-        pass
 
     def set_vars(self, varname_data_conf, delta_data_conf, dim='time', primary_src='data'):
         """(re)set variable in self.data from datafile input and instrument configuration file

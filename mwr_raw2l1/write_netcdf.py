@@ -116,22 +116,22 @@ class Writer(object):
         self.data.attrs['history'] = hist_str
 
     def check_dims(self, var, specs):
-        """check dims of var (retain order of config specs, but order of coords returned by xarray Dataset is arbitrary)
+        """check dims of var (retain order of config specs, but order of dims returned by xarray Dataset is arbitrary)
 
         Args:
             var (str): the name of the variable of whom the dimension shall be checked
             specs: specifications for this variable from config. Must contain the key 'dim' with a list of dimensions.
         """
-        if sorted(list(self.data[var].coords)) != sorted(specs['dim']):
+        if sorted(list(self.data[var].dims)) != sorted(specs['dim']):
             # if last dim of specs is missing in data and scalar, add it to data (no need for subsequent check)
-            if sorted(list(self.data[var].coords)) == sorted(specs['dim'][:-1]) \
+            if sorted(list(self.data[var].dims)) == sorted(specs['dim'][:-1]) \
                     and specs['dim'][-1] in self.data and len(self.data[specs['dim'][-1]]) == 1:
                 newdim = specs['dim'][-1]
                 tmp = self.data[var].expand_dims({newdim: 1}, axis=-1)
                 self.data[var] = tmp.assign_coords({newdim: self.data[newdim]})
             else:
                 err_msg = "dimensions in data['{}'] (['{}']) do not match specs for output file (['{}'])".format(
-                    var, "', '".join(list(self.data[var].coords)), "', '".join(specs['dim']))
+                    var, "', '".join(list(self.data[var].dims)), "', '".join(specs['dim']))
                 raise OutputDimensionError(err_msg)
 
     def set_fillvalue(self, var, specs):

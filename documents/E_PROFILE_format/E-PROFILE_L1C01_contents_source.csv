@@ -3,7 +3,6 @@ dimensions,,,,,
 -----------------,,,,,
 time,x,,,x,
 frequency,x,,,x,
-n_sidebands,,x,,,x
 ir_wavelength,x,,,x,
 n_sidebands,,x,,,x
 n_receivers,,x,,,x
