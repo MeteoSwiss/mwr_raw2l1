@@ -21,6 +21,10 @@ from mwr_raw2l1.main import main
 from mwr_raw2l1.utils.config_utils import get_inst_config
 from mwr_raw2l1.utils.file_utils import abs_file_path
 
+
+VARS_TO_IGNORE_GLOBAL = []  # list of variables to ignore in each test
+
+
 # instrument config definition
 orig_inst_conf_file = str(abs_file_path('mwr_raw2l1/config/config_0-20000-0-06610_A.yaml'))
 test_inst_conf_file = str(abs_file_path('tests/config/config_0-20000-0-06610_A.yaml'))
@@ -115,8 +119,10 @@ class TestRPG(unittest.TestCase):
     # --------------
     def single_test_call_series(self, vars_to_ignore=None, check_timeseries_length=True):
         """All steps a normal test should run through, i.e. executing main and checking contents of output NetCDF"""
+
         if vars_to_ignore is None:
             vars_to_ignore = []
+        vars_to_ignore.extend(VARS_TO_IGNORE_GLOBAL)
 
         # subTest
         with self.subTest(operation='run_main'):
