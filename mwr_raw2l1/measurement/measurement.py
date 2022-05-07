@@ -5,7 +5,7 @@ from mwr_raw2l1.errors import MissingConfig, MWRDataError
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement_constructors import MeasurementConstructors
 from mwr_raw2l1.measurement.measurement_qc_helpers import check_rain, check_receiver_sanity, check_sun
-from mwr_raw2l1.utils.num_utils import setbit, unsetbit
+from mwr_raw2l1.utils.num_utils import setbit, unsetbit, timedelta2s
 
 
 class Measurement(MeasurementConstructors):
@@ -14,6 +14,7 @@ class Measurement(MeasurementConstructors):
         """main method of the class"""
         self.set_coords()
         self.set_wavelength()
+        self.set_time_bnds()
         self.apply_quality_control()
 
     def set_coords(self, delta_lat=0.01, delta_lon=0.02, delta_altitude=10, **kwargs):
@@ -59,6 +60,33 @@ class Measurement(MeasurementConstructors):
         varname_data_conf = {varname_wavelength: 'ir_wavelength'}
         delta_data_conf = {varname_wavelength: delta}
         self.set_vars(varname_data_conf, delta_data_conf, dim=varname_wavelength, **kwargs)
+
+    def set_time_bnds(self):
+        """set time bounds from spacing of time vector and scanflag"""
+
+        # infer integration time from data
+        delta_t = np.diff(self.data['time'])
+        scandiff_flag = np.logical_and(self.data['scanflag'][:-1], np.roll(self.data['scanflag'], -1)[:-1])
+        starediff_flag = np.logical_and(self.data['scanflag'][:-1] == 0, np.roll(self.data['scanflag'], -1)[:-1] == 0)
+
+        inttime_scan = np.timedelta64(0, 'ns')  # in case int time cannot be determined, time_bnds = [time, time]
+        inttime_stare = np.timedelta64(0, 'ns')
+        if np.any(scandiff_flag):
+            inttime_scan = np.timedelta64(int(timedelta2s(np.median(delta_t[scandiff_flag]))), 's')  # floor to seconds
+        if np.any(starediff_flag):
+            inttime_stare = np.timedelta64(int(timedelta2s(np.median(delta_t[starediff_flag]))), 's')  # floor to sec
+
+        inttime = np.full(self.data['time'].shape, np.nan, dtype='timedelta64[ns]')
+        inttime[self.data['scanflag'] != 0] = inttime_scan
+        inttime[self.data['scanflag'] == 0] = inttime_stare
+
+        # set dimension 'bnds' and variable 'time_bnds'
+        self.data.assign_coords({'bnds': 2})
+        self.data['time_bnds'] = (('time', 'bnds'),
+                                  np.full((len(self.data['time']), 2), np.nan, dtype='datetime64[ns]'))
+        self.data['time_bnds'][:, 0] = self.data['time'] - inttime
+        self.data['time_bnds'][:, 1] = self.data['time']
+        pass
 
     def set_vars(self, varname_data_conf, delta_data_conf, dim='time', primary_src='data'):
         """(re)set variable in self.data from datafile input and instrument configuration file
