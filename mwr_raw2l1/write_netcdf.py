@@ -149,10 +149,15 @@ class Writer(object):
 
     def prepare_time(self):
         """workaround for correctly setting units and calendar of time variable (use encoding instead of attrs)"""
-        encs = {}
-        for att in ['units', 'calendar']:
-            encs[att] = self.data['time'].attrs.pop(att)
-        self.data['time'].encoding.update(encs)
+        time_vars = ['time']  # 'time' variable assumed to be always present
+        time_vars.extend([s for s in self.data.keys() if 'time_' in s or '_time' in s])  # get also *time_* and *_time*
+        time_vars.extend([var for var in self.data.keys() if 'calendar' in self.data[var].attrs])  # all with calendar
+        for var in time_vars:
+            encs = {}
+            for att in ['units', 'calendar']:
+                if att in self.data[var].attrs:
+                    encs[att] = self.data[var].attrs.pop(att)
+            self.data[var].encoding.update(encs)
 
     def append_qc_thresholds(self):
         """append quality control thresholds to comment attribute of quality_flag if not refused by 'conf_nc'"""
