@@ -141,10 +141,10 @@ class Writer(object):
             var (str): the name of the variable of whom the dimension shall be checked
             specs: specifications for this variable from config. Must contain the key 'dim' with a list of dimensions.
         """
-        if var in self.config_dims:
+        if var in self.config_dims or specs['_FillValue'] is None:  # using None in fillna (else clause) destroys dtype
             self.data[var].encoding.update(_FillValue=ENC_NO_FILLVALUE)
         else:
-            self.data[var] = self.data[var].fillna(specs['_FillValue'])
+            self.data[var] = self.data[var].fillna(specs['_FillValue'])  # don't use with _FillValue=None, dtype problem
             self.data[var].encoding.update(_FillValue=specs['_FillValue'])
 
     def prepare_time(self):
