@@ -43,7 +43,7 @@ variables:
     optional: False
     attributes:
       long_name: Frequency of microwave channels
-      standard_name: sensor_band_spectral_radiation_frequency
+      standard_name: radiation_frequency
       units: GHz
 
   ir_wavelength:
@@ -116,7 +116,7 @@ variables:
     optional: False
     attributes:
       long_name: Sensor elevation angle
-      standard_name: sensor_elevation_angle
+      # standard_name: sensor_elevation_angle is not registered as official standard name
       units: degree
       comment: 0=horizon, 90=zenith
 
@@ -145,7 +145,7 @@ variables:
     attributes:
       long_name: Quality flag
       standard_name: quality_flag
-      flag_masks: 1b, 2b, 4b, 8b, 16b, 32b, 64b, 128b
+      flag_masks: [1, 2, 4, 8, 16, 32, 64, 128]
       flag_meanings: missing_tb tb_below_threshold tb_above_threshold spectral_consistency_above_threshold receiver_sanity_failed rain_detected sun_in_beam tb_offset_above_threshold
       comment: 0 indicates data with good quality according to applied tests. The list of (not) applied tests is encoded in quality_flag_status.
 
@@ -159,7 +159,7 @@ variables:
     optional: False
     attributes:
       long_name: Checks not executed in determination of quality_flag
-      flag_masks: 1b, 2b, 4b, 8b, 16b, 32b, 64b, 128b
+      flag_masks: [1, 2, 4, 8, 16, 32, 64, 128]
       flag_meanings: missing_tb_not_checked tb_lower_threshold_not_checked tb_upper_threshold_not_checked spectral_consistency_not_checked receiver_sanity_not_checked rain_not_checked sun_in_beam_not_checked tb_offset_not_checked
 
   liquid_cloud_flag:
@@ -171,7 +171,7 @@ variables:
     optional: True
     attributes:
       long_name: Presence of liquid clouds in beam
-      flag_values: 0b, 1b, 2b
+      flag_values: [0, 1, 2]
       flag_meanings: no_liquid_cloud liquid_cloud_present undefined
       comment: The way this flag was determined is encoded in liquid_cloud_flag_status
 
@@ -184,7 +184,7 @@ variables:
     optional: True
     attributes:
       long_name: Method for determination of liquid_cloud_flag
-      flag_values: 0b, 1b, 2b
+      flag_values: [0, 1, 2]
       flag_meanings: using_mwr_and_ir using_mwr_only other
 
   scanflag:  # previously used BLscan_active (from RPG's HDF files), now use scanflag determined from filetype or ele
@@ -196,7 +196,7 @@ variables:
     optional: True
     attributes:
       long_name: Flag indicating a single pointing (starring) or multiple pointing (scanning) observation sequence
-      flag_values: 0b, 1b, 2b
+      flag_values: [0, 1, 2]
       flag_meanings: single_pointing multiple_pointing unknown
       comment: Series of multiple-pointing observations (elevation scans) provide more information on boundary layer temperature profiles compared to single pointing observations. If available, it is advised to prefer elevation scans over starring observations for temperature profile retrievals
 
@@ -209,6 +209,7 @@ variables:
     optional: True
     attributes:
       long_name: Native status code of the instrument
+      units: '1'
       comment: Encodes housekeeping data and warnings. Refer to the respective user manual for interpretation.
 
   IRT:
@@ -298,7 +299,7 @@ variables:
 # global attributes common to all instruments. Additional instrument-specific attrs in their config under nc_attributes.
 # If the same fields are present in the instrument-specific config, the general ones from below will be overwritten
 attributes:
-  conventions: CF-1.8
+  Conventions: CF-1.8
   references: E-PROFILE data format description document
   license: Closed-Use Non-Commercial General Licence 1.0 (CUNCGL)
   network_name: E-PROFILE

@@ -63,16 +63,24 @@ class Writer(object):
         self.data.encoding.update(                                   # acts during to_netcdf()
             unlimited_dims=self.conf_nc['dimensions']['unlimited'])  # default is fixed, i.e. only need to set unlimited
         for var, specs in self.conf_nc['variables'].items():
+            # check availability and fill absent variables
             if var not in self.data.keys():
                 if specs['optional']:
                     shape_var = tuple(map(lambda x: len(self.data[x]), specs['dim']))
                     self.data[var] = (specs['dim'], np.full(shape_var, np.nan))
                 else:
                     raise KeyError('Variable {} is a mandatory input but was not found in input dictionary'.format(var))
+
+            # dimensions, fill value and encoding
             self.check_dims(var, specs)
             self.set_fillvalue(var, specs)
             self.data[var].encoding.update(dtype=specs['type'])
+
+            # set attributes and make sure that encoding for flag_values and flag_masks corresponds to data type
             self.data[var].attrs.update(specs['attributes'])
+            for att in ['flag_values', 'flag_masks']:
+                if att in self.data[var].attrs:
+                    self.data[var].attrs[att] = np.array(self.data[var].attrs[att], dtype=specs['type'])
 
         self.prepare_time()
         self.append_qc_thresholds()
