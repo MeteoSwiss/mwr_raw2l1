@@ -66,32 +66,6 @@ class Measurement(MeasurementConstructors):
     def set_sidebands(self):
         pass  # TODO: do sth similar to set wavelength, if possible re-use code
 
-    def set_time_bnds(self):
-        """set time bounds from spacing of time vector and scanflag"""
-
-        # infer integration time from data
-        delta_t = np.diff(self.data['time'])
-        scandiff_flag = np.logical_and(self.data['scanflag'][:-1], np.roll(self.data['scanflag'], -1)[:-1])
-        starediff_flag = np.logical_and(self.data['scanflag'][:-1] == 0, np.roll(self.data['scanflag'], -1)[:-1] == 0)
-
-        inttime_scan = np.timedelta64(0, 'ns')  # in case int time cannot be determined, time_bnds = [time, time]
-        inttime_stare = np.timedelta64(0, 'ns')
-        if np.any(scandiff_flag):
-            inttime_scan = np.timedelta64(int(timedelta2s(np.median(delta_t[scandiff_flag]))), 's')  # floor to seconds
-        if np.any(starediff_flag):
-            inttime_stare = np.timedelta64(int(timedelta2s(np.median(delta_t[starediff_flag]))), 's')  # floor to sec
-
-        inttime = np.full(self.data['time'].shape, np.nan, dtype='timedelta64[ns]')
-        inttime[self.data['scanflag'] != 0] = inttime_scan
-        inttime[self.data['scanflag'] == 0] = inttime_stare
-
-        # set dimension 'bnds' and variable 'time_bnds'
-        self.data.assign_coords({'bnds': ['start', 'end']})
-        self.data['time_bnds'] = (('time', 'bnds'),
-                                  np.full((len(self.data['time']), 2), np.nan, dtype='datetime64[ns]'))
-        self.data['time_bnds'][:, 0] = self.data['time'] - inttime
-        self.data['time_bnds'][:, 1] = self.data['time']
-
     def set_inst_params(self):
         """set instrument dependent parameters which are not dimensions (must be set before)"""
 
@@ -152,6 +126,32 @@ class Measurement(MeasurementConstructors):
                 # keep value from data files
                 else:
                     logger.info("Using '{}' from data files".format(var))
+
+    def set_time_bnds(self):
+        """set time bounds from spacing of time vector and scanflag"""
+
+        # infer integration time from data
+        delta_t = np.diff(self.data['time'])
+        scandiff_flag = np.logical_and(self.data['scanflag'][:-1], np.roll(self.data['scanflag'], -1)[:-1])
+        starediff_flag = np.logical_and(self.data['scanflag'][:-1] == 0, np.roll(self.data['scanflag'], -1)[:-1] == 0)
+
+        inttime_scan = np.timedelta64(0, 'ns')  # in case int time cannot be determined, time_bnds = [time, time]
+        inttime_stare = np.timedelta64(0, 'ns')
+        if np.any(scandiff_flag):
+            inttime_scan = np.timedelta64(int(timedelta2s(np.median(delta_t[scandiff_flag]))), 's')  # floor to seconds
+        if np.any(starediff_flag):
+            inttime_stare = np.timedelta64(int(timedelta2s(np.median(delta_t[starediff_flag]))), 's')  # floor to sec
+
+        inttime = np.full(self.data['time'].shape, np.nan, dtype='timedelta64[ns]')
+        inttime[self.data['scanflag'] != 0] = inttime_scan
+        inttime[self.data['scanflag'] == 0] = inttime_stare
+
+        # set dimension 'bnds' and variable 'time_bnds'
+        self.data.assign_coords({'bnds': ['start', 'end']})
+        self.data['time_bnds'] = (('time', 'bnds'),
+                                  np.full((len(self.data['time']), 2), np.nan, dtype='datetime64[ns]'))
+        self.data['time_bnds'][:, 0] = self.data['time'] - inttime
+        self.data['time_bnds'][:, 1] = self.data['time']
 
     def apply_quality_control(self):
         """set quality_flag and quality_flag_status and qc_thresholds according to quality control"""
