@@ -14,6 +14,8 @@ class Measurement(MeasurementConstructors):
         """main method of the class"""
         self.set_coords()
         self.set_wavelength()
+        self.set_sidebands()
+        self.set_inst_params()
         self.set_time_bnds()
         self.apply_quality_control()
 
@@ -61,6 +63,9 @@ class Measurement(MeasurementConstructors):
         delta_data_conf = {varname_wavelength: delta}
         self.set_vars(varname_data_conf, delta_data_conf, dim=varname_wavelength, **kwargs)
 
+    def set_sidebands(self):
+        pass  # TODO: do sth similar to set wavelength, if possible re-use code
+
     def set_time_bnds(self):
         """set time bounds from spacing of time vector and scanflag"""
 
@@ -86,6 +91,17 @@ class Measurement(MeasurementConstructors):
                                   np.full((len(self.data['time']), 2), np.nan, dtype='datetime64[ns]'))
         self.data['time_bnds'][:, 0] = self.data['time'] - inttime
         self.data['time_bnds'][:, 1] = self.data['time']
+
+    def set_inst_params(self):
+        """set instrument dependent parameters which are not dimensions (must be set before)"""
+
+        freq_vars = {'freq_shift': 'freq_shift', 'bandwidth': 'bandwidth', 'beamwidth': 'beamwidth'}
+        freq_deltas = {'freq_shift': 999, 'bandwidth': 999, 'beamwidth': 999}
+        self.set_vars(freq_vars, freq_deltas, dim='frequency')
+
+        ir_vars = {'ir_bandwidth': 'ir_bandwidth', 'ir_beamwidth': 'ir_beamwidth'}
+        ir_deltas = {'ir_bandwidth': 999, 'ir_beamwidth': 999}
+        self.set_vars(ir_vars, ir_deltas, dim='frequency')
 
     def set_vars(self, varname_data_conf, delta_data_conf, dim='time', primary_src='data'):
         """(re)set variable in self.data from datafile input and instrument configuration file

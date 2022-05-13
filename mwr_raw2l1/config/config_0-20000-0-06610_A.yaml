@@ -1,5 +1,8 @@
 # config file example for a RPG HATPRO in Payerne, Switzerland
 
+
+# mwr_raw2l1 configuration
+# ------------------------
 reader: reader_rpg   # refers to name set at import into main.py near line 10
 meas_constructor: from_rpg  # constructor for Measurement class in measurement.measurement.py
 
@@ -8,10 +11,34 @@ output_directory: data/output/  # use absolute path (or relative to location of 
 base_filename_in: MWR_0-20000-0-06610_A
 base_filename_out: MWR_1C01_0-20000-0-06610_A
 
+
+# station parameters
+# ------------------
 station_latitude: 46.81
 station_longitude: 6.94
 station_altitude: 491
 
+
+# instrument parameters
+# ---------------------
+n_sidebands: 1
+bandwidth: [0.230, 0.230, 0.230, 0.230, 0.230, 0.230, 0.230,  # K-band; in GHz
+            0.230, 0.230, 0.230, 0.230, 0.600, 1.000, 2.000]  # V-band; in GHz
+beamwidth: [.NaN, .NaN, .NaN, .NaN, .NaN, .NaN, .NaN,
+            .NaN, .NaN, .NaN, .NaN, .NaN, .NaN, .NaN]
+ir_bandwidth: .NaN
+ir_beamwidth: .NaN
+# ir_wavelength: # not mandatory to specify if available in data
+
+# the following parameters are potentially varying with time:
+freq_shift:  [0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000,  # K-band; in GHz
+              0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000]  # V-band; in GHz
+channels_ok: [1, 1, 1, 1, 1, 1, 1,  # K-band; 1=ok(unless an issue found in QC), 0=flag as bad
+              1, 1, 1, 1, 1, 1, 1]  # V-band; 1=ok(unless an issue found in QC), 0=flag as bad  # TODO: use this in quality_flag
+
+
+# NetCDF global attributes
+# ------------------------
 nc_attributes:
   # title: do not set 'title' attribute unless you have a very good reason to deviate from the default
   wigos_station_id: 0-20000-0-06610
@@ -30,12 +57,12 @@ nc_attributes:
   met_instrument_manufacturer: to_be_specified
   met_instrument_model: to_be_specified
   met_instrument_fabrication_year: to_be_specified
-  # the following attributes are potentially varying with time:
+#
+# the following attributes are potentially varying with time:
   instrument_calibration_status: calibrated
   date_of_last_absolute_calibration: '2021-12-31 23:59:59'  # dates for global attrs need to be specified as str
   date_of_last_covariance_matrix: '2021-12-31 23:59:59'  # dates for global attrs need to be specified as str
   type_of_automatic_calibrations: gain calibration with ambient temperature target and noise diode
-
 
 # additional optional fields for nc_attributes
   # network: E-PROFILE, ...
