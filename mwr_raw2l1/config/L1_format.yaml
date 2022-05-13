@@ -42,9 +42,10 @@ variables:
     _FillValue: -999.
     optional: False
     attributes:
-      long_name: Frequency of microwave channels
+      long_name: Nominal frequency of microwave channels
       standard_name: radiation_frequency
       units: GHz
+      comment: For more accurate frequency values use frequency+freq_shift. Frequency indication is in signal sideband.
 
   ir_wavelength:
     name: ir_wavelength
