@@ -98,7 +98,7 @@ class Measurement(MeasurementConstructors):
             varname_data_conf: dictionary for matching between variable names in data (keys) and config (values)
             delta_data_conf: dictionary of maximum difference allowed between value in data and config (values) for each
                 variable. Keys are the variable names in data.
-            dim (optional): dimension of the variables to set. Defaults to 'time'
+            dim (optional): dimension of the variables to set. Set to None for dimensionless vars. Defaults to 'time'
             primary_src (optional {'data', 'config', 'conf'}): specifies which source takes precedence. Default: 'data'
         """
 
@@ -128,7 +128,10 @@ class Measurement(MeasurementConstructors):
 
                 # (re)set variable according to conf_inst
                 if primary_src in ['config', 'conf'] or var not in self.data or all(np.isnan(self.data[var])):
-                    self.data[var] = ((dim,), np.full(self.data[dim].shape, self.conf_inst[varname_data_conf[var]]))
+                    if dim is None:
+                        self.data[var] = ((), self.conf_inst[varname_data_conf[var]])
+                    else:
+                        self.data[var] = ((dim,), np.full(self.data[dim].shape, self.conf_inst[varname_data_conf[var]]))
                     logger.info("Using '{}' from config".format(varname_data_conf[var]))
                 # keep value from data files
                 else:
