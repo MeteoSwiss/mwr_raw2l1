@@ -10,14 +10,18 @@ from mwr_raw2l1.utils.num_utils import setbit, unsetbit, timedelta2s
 
 class Measurement(MeasurementConstructors):
 
-    def run(self):
-        """main method of the class"""
+    def run(self, conf_qc):
+        """main method of the class
+
+        Args:
+            conf_qc: configuration dictionary of the quality control. For defaults use mwr_raw2l1/config/qc_config.yaml
+        """
         self.set_coords()
         self.set_wavelength()
         self.set_sidebands()
         self.set_inst_params()
         self.set_time_bnds()
-        self.apply_quality_control()
+        self.apply_quality_control(conf_qc)
 
     def set_coords(self, delta_lat=0.01, delta_lon=0.02, delta_altitude=10, **kwargs):
         """(re)set geographical coordinates (lat, lon, altitude) in self.data accounting for self.conf_inst
@@ -159,22 +163,9 @@ class Measurement(MeasurementConstructors):
         self.data['time_bnds'][:, 0] = self.data['time'] - inttime
         self.data['time_bnds'][:, 1] = self.data['time']
 
-    def apply_quality_control(self):
+    def apply_quality_control(self, conf_qc):
         """set quality_flag and quality_flag_status and qc_thresholds according to quality control"""
 
-        conf_qc = {  # TODO: extract to config file possibly include n_bits
-            'Tb_threshold': [2.7, 330.],  # Threshold for min and max Tb
-            'delta_ele_sun': 7,
-            'delta_azi_sun': 7,
-            'check_missing_Tb': True,
-            'check_min_Tb': True,
-            'check_max_Tb': True,
-            'check_spectral_consistency': False,
-            'check_receiver_sanity': True,
-            'check_rain': True,
-            'check_sun': True,
-            'check_Tb_offset': False,
-        }
         n_bits = 8  # number of bits in quality flag
 
         logger.info('Setting quality_flag and quality_flag_status')
@@ -253,27 +244,29 @@ if __name__ == '__main__':
     from mwr_raw2l1.readers.reader_attex import Reader as ReaderAttex
     from mwr_raw2l1.readers.reader_radiometrics import Reader as ReaderRadiometrics
     from mwr_raw2l1.readers.reader_rpg import read_multiple_files
-    from mwr_raw2l1.utils.config_utils import get_inst_config
+    from mwr_raw2l1.utils.config_utils import get_inst_config, get_qc_config
     from mwr_raw2l1.utils.file_utils import abs_file_path, get_files
+
+    conf_qc = get_qc_config(abs_file_path('mwr_raw2l1/config/qc_config.yaml'))
 
     # RPG
     conf_rpg = get_inst_config(abs_file_path('mwr_raw2l1/config/config_0-20000-0-06610_A.yaml'))
     files = get_files(abs_file_path('mwr_raw2l1/data/rpg/0-20000-0-06610/'), 'MWR_0-20000-0-06610_A')
     all_data = read_multiple_files(files)
     meas = Measurement.from_rpg(all_data, conf_rpg)
-    meas.run()
+    meas.run(conf_qc)
 
     # Radiometrics
     conf_radiometrics = get_inst_config(abs_file_path('mwr_raw2l1/config/config_0-20000-0-10393_A.yaml'))
     rd = ReaderRadiometrics(abs_file_path('mwr_raw2l1/data/radiometrics/orig/2021-01-31_00-04-08_lv1.csv'))
     rd.run()
     meas = Measurement.from_radiometrics(rd, conf_radiometrics)
-    meas.run()
+    meas.run(conf_qc)
 
     # Attex
     conf_attex = get_inst_config(abs_file_path('mwr_raw2l1/config/config_0-20000-0-99999_A.yaml'))
     rd = ReaderAttex(abs_file_path('mwr_raw2l1/data/attex/orig/0mtp20211107.tbr'))
     rd.run()
     meas = Measurement.from_attex(rd, conf_attex)
-    meas.run()
+    meas.run(conf_qc)
     pass

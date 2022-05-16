@@ -6,17 +6,18 @@ from mwr_raw2l1.measurement.measurement import Measurement
 from mwr_raw2l1.readers.reader_attex import read_multiple_files as reader_attex  # noqa: F401
 from mwr_raw2l1.readers.reader_radiometrics import read_multiple_files as reader_radiometrics  # noqa: F401
 from mwr_raw2l1.readers.reader_rpg import read_multiple_files as reader_rpg  # noqa: F401
-from mwr_raw2l1.utils.config_utils import get_inst_config, get_nc_format_config
+from mwr_raw2l1.utils.config_utils import get_inst_config, get_nc_format_config, get_qc_config
 from mwr_raw2l1.utils.file_utils import generate_output_filename, get_files
 from mwr_raw2l1.write_netcdf import Writer
 
 
-def main(inst_config_file, nc_format_config_file, **kwargs):
+def main(inst_config_file, nc_format_config_file, qc_config_file, **kwargs):
     """main function reading in raw files, generating and processing measurement instance and writing output file
 
     Args:
         inst_config_file: yaml configuration file for the instrument to process
         nc_format_config_file: yaml configuration file defining the output NetCDF format
+        qc_config_file: yaml configuration file specifying the quality control parameters
         **kwargs: Keyword arguments passed over to get_files function, typically 'time_start' and 'time_end'
     """
 
@@ -26,6 +27,7 @@ def main(inst_config_file, nc_format_config_file, **kwargs):
     # -------
     conf_inst = get_inst_config(inst_config_file)
     conf_nc = get_nc_format_config(nc_format_config_file)
+    conf_qc = get_qc_config(qc_config_file)
 
     reader = get_reader(conf_inst['reader'])
     meas_constructor = get_meas_constructor(conf_inst['meas_constructor'])
@@ -40,7 +42,7 @@ def main(inst_config_file, nc_format_config_file, **kwargs):
     # -----------------------
     all_data = reader(files)
     meas = meas_constructor(all_data, conf_inst)
-    meas.run()
+    meas.run(conf_qc)
 
     # write output
     # ------------
@@ -79,6 +81,6 @@ def get_meas_constructor(name):
 
 
 if __name__ == '__main__':
-    main('config/config_0-20000-0-99999_A.yaml', 'config/L1_format.yaml')  # Attex
-    main('config/config_0-20000-0-10393_A.yaml', 'config/L1_format.yaml')  # Radiometrics MP3000
-    main('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml')  # RPG HATPRO
+    main('config/config_0-20000-0-99999_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Attex
+    main('config/config_0-20000-0-10393_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Radiometrics
+    main('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # RPG HATPRO
