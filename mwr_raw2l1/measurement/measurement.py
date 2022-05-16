@@ -71,13 +71,13 @@ class Measurement(MeasurementConstructors):
 
         freq_vars = {'freq_shift': 'freq_shift', 'bandwidth': 'bandwidth', 'beamwidth': 'beamwidth'}
         freq_deltas = {'freq_shift': 999, 'bandwidth': 999, 'beamwidth': 999}
-        self.set_vars(freq_vars, freq_deltas, dim='frequency')
+        self.set_vars(freq_vars, freq_deltas, dim='frequency', accept_unset=True)
 
         ir_vars = {'ir_bandwidth': 'ir_bandwidth', 'ir_beamwidth': 'ir_beamwidth'}
         ir_deltas = {'ir_bandwidth': 999, 'ir_beamwidth': 999}
-        self.set_vars(ir_vars, ir_deltas, dim='ir_wavelength')
+        self.set_vars(ir_vars, ir_deltas, dim='ir_wavelength', accept_unset=True)
 
-    def set_vars(self, varname_data_conf, delta_data_conf, dim='time', primary_src='data'):
+    def set_vars(self, varname_data_conf, delta_data_conf, dim='time', primary_src='data', accept_unset=False):
         """(re)set variable in self.data from datafile input and instrument configuration file
 
         If both are available the method checks consistency between coordinates in datafile and configuration.
@@ -90,6 +90,7 @@ class Measurement(MeasurementConstructors):
                 variable. Keys are the variable names in data.
             dim (optional): dimension of the variables to set. Set to None for dimensionless vars. Defaults to 'time'
             primary_src (optional {'data', 'config', 'conf'}): specifies which source takes precedence. Default: 'data'
+            accept_unset (optional): accept unset variables if neither present in data nor conf_inst. Defaults to False
         """
 
         # strategy: do nothing if using variable from data, reset if using variable from config
@@ -100,14 +101,20 @@ class Measurement(MeasurementConstructors):
                 if var not in self.data.keys():
                     raise MWRDataError("Cannot set variables. 'conf_inst' was set to None, but '{}' is missing in data "
                                        'read in from data file'.format(var))
+
         # missing keys in config
         elif not all(var in self.conf_inst for var in varname_data_conf.values()):
             if all(var in self.data for var in varname_data_conf.keys()):
                 logger.info('Using {} from data files without check by config values'
                             .format(list(varname_data_conf.keys())))
             else:
-                raise MissingConfig("'conf_inst' needs to contain all of the following keys as not all are in data: "
-                                    '{}'.format(list(varname_data_conf.values())))
+                base_msg = "'conf_inst' needs to contain all of the following keys as not all are in data: {}.".format(
+                    list(varname_data_conf.values()))
+                if accept_unset:
+                    logger.warning(base_msg + ' Some or all of these variables will be unset')
+                else:
+                    raise MissingConfig(base_msg + ' To allow these to be unset, call method with accept_unset=True')
+
         # necessary values present in config
         else:
             for var, acc in delta_data_conf.items():
@@ -115,7 +122,6 @@ class Measurement(MeasurementConstructors):
                 if var in self.data and not all(np.isnan(self.data[var])):
                     if abs(self.data[var][0] - self.conf_inst[varname_data_conf[var]]) > acc:  # speed: only check [0]
                         raise MWRDataError("'{}' in data and conf differs by more than {}".format(var, acc))
-
                 # (re)set variable according to conf_inst
                 if primary_src in ['config', 'conf'] or var not in self.data or all(np.isnan(self.data[var])):
                     if dim is None:
