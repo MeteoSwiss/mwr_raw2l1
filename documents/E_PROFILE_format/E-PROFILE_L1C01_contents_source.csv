@@ -6,13 +6,13 @@ frequency,x,,,x,
 ir_wavelength,x,,,x,
 n_sidebands,,x,,,x
 n_receivers,,x,,,x
-bnds,x,,,x,
+bnds,x,,,,x
 ,,,,,
 ,,,,,
 variables,,,,,
 -----------------,,,,,
 time,x,,,x,
-time_bnds,x,,,x,
+time_bnds,x,,,,x
 station_latitude,,,,x,
 station_longitude,,,,x,
 station_altitude,,,,x,
@@ -29,8 +29,8 @@ tb_accuracy,,,x,,x
 tb_cov,,,x,,x
 quality_flag,x,,,x,
 quality_flag_status,x,,,x,
-liquid_cloud_flag,x,,,x,
-liquid_cloud_flag_status,x,,,x,
+liquid_cloud_flag,x,,,,x
+liquid_cloud_flag_status,x,,,,x
 pointing_flag,x,,,x,
 t_amb,x,,,x,
 t_rec,x,,,,x

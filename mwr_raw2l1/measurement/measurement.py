@@ -75,7 +75,7 @@ class Measurement(MeasurementConstructors):
 
         ir_vars = {'ir_bandwidth': 'ir_bandwidth', 'ir_beamwidth': 'ir_beamwidth'}
         ir_deltas = {'ir_bandwidth': 999, 'ir_beamwidth': 999}
-        self.set_vars(ir_vars, ir_deltas, dim='frequency')
+        self.set_vars(ir_vars, ir_deltas, dim='ir_wavelength')
 
     def set_vars(self, varname_data_conf, delta_data_conf, dim='time', primary_src='data'):
         """(re)set variable in self.data from datafile input and instrument configuration file

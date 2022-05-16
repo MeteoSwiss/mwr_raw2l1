@@ -35,31 +35,6 @@ variables:
     attributes:
       long_name: Time interval endpoints
 
-  frequency:
-    name: frequency
-    dim:
-      - frequency
-    type: f4
-    _FillValue: -999.
-    optional: False
-    attributes:
-      long_name: Nominal frequency of microwave channels
-      standard_name: radiation_frequency
-      units: GHz
-      comment: For more accurate frequency values use frequency+freq_shift. Frequency indication is in signal sideband.
-
-  ir_wavelength:
-    name: ir_wavelength
-    dim:
-      - ir_wavelength
-    type: f4
-    _FillValue: -999.
-    optional: True
-    attributes:
-      long_name: Wavelength of infrared channels
-      standard_name: sensor_band_central_radiation_wavelength
-      units: um
-
   lat:
     name: station_latitude
     dim:
@@ -96,6 +71,53 @@ variables:
       standard_name: altitude
       units: m
 
+  frequency:
+    name: frequency
+    dim:
+      - frequency
+    type: f4
+    _FillValue: -999.
+    optional: False
+    attributes:
+      long_name: Nominal frequency of microwave channels
+      standard_name: radiation_frequency
+      units: GHz
+      comment: For more accurate frequency values use frequency+freq_shift. Frequency indication is in signal sideband.
+
+  bandwidth:
+    name: bandwidth
+    dim:
+      - frequency
+    type: f4
+    _FillValue: -999.
+    optional: True
+    attributes:
+      long_name: Bandwidth (3 dB) of the microwave channels
+      units: GHz
+
+  beamwidth:
+    name: beamwidth
+    dim:
+      - frequency
+    type: f4
+    _FillValue: -999.
+    optional: True
+    attributes:
+      long_name: Beam width (3 dB) of the microwave radiometer
+      units: degree
+
+  freq_shift:
+    name: freq_shift
+    dim:
+      - frequency
+    type: f4
+    _FillValue: -999.
+    optional: True
+    attributes:
+      long_name: Frequency shift to add to frequency for better accuracy
+      units: GHz
+      comment: For more accurate frequency values use frequency+freq_shift
+
   azi:
     name: azi
     dim:
@@ -104,7 +126,7 @@ variables:
     _FillValue: -999.
     optional: True
     attributes:
-      long_name: Sensor azimuth angle
+      long_name: Microwave sensor azimuth angle
       standard_name: sensor_azimuth_angle
       units: degree
       comment: 0=North, 90=East, 180=South, 270=West
@@ -117,7 +139,7 @@ variables:
     _FillValue: -999.
     optional: False
     attributes:
-      long_name: Sensor elevation angle
+      long_name: Microwave sensor elevation angle
       # standard_name: sensor_elevation_angle is not registered as official standard name
       units: degree
       comment: 0=horizon, 90=zenith
@@ -214,6 +236,51 @@ variables:
       units: '1'
       comment: Encodes housekeeping data and warnings. Refer to the respective user manual for interpretation.
 
+  T_amb:
+    name: t_amb
+    dim:
+      - time
+    type: f4
+    _FillValue: -999.
+    optional: True
+    attributes:
+      long_name: Ambient target temperature
+      units: K
+
+  ir_wavelength:
+    name: ir_wavelength
+    dim:
+      - ir_wavelength
+    type: f4
+    _FillValue: -999.
+    optional: True
+    attributes:
+      long_name: Wavelength of infrared channels
+      standard_name: sensor_band_central_radiation_wavelength
+      units: um
+
+  ir_bandwidth:
+    name: ir_bandwidth
+    dim:
+      - ir_wavelength
+    type: f4
+    _FillValue: -999.
+    optional: True
+    attributes:
+      long_name: Bandwidth (3 dB) of the infrared channels
+      units: um
+
+  ir_beamwidth:
+    name: ir_beamwidth
+    dim:
+      - ir_wavelength
+    type: f4
+    _FillValue: -999.
+    optional: True
+    attributes:
+      long_name: Beam width (3 dB) of the infrared radiometer
+      units: degree
+
   IRT:
     name: irt
     dim:
@@ -224,17 +291,6 @@ variables:
     optional: True
     attributes:
       long_name: Infrared brightness temperatures
-      units: K
-
-  T_amb:
-    name: t_amb
-    dim:
-      - time
-    type: f4
-    _FillValue: -999.
-    optional: True
-    attributes:
-      long_name: Ambient target temperature
       units: K
 
   T:
