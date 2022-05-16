@@ -5,10 +5,21 @@ from mwr_raw2l1.utils.file_utils import abs_file_path
 
 
 def get_conf(file):
-    """conf get dictionary from yaml files. Don't do any checks on contents"""
+    """get conf dictionary from yaml files. Don't do any checks on contents"""
     with open(file) as f:
         conf = yaml.load(f, Loader=yaml.FullLoader)
     return conf
+
+
+def check_conf(conf, mandatory_keys, miss_description):
+    """check for mandatory keys of conf dictionary
+
+    if key is missing raises MissingConfig('xxx is a mandatory key ' + miss_description)
+    """
+    for key in mandatory_keys:
+        if key not in conf:
+            err_msg = ("'{}' is a mandatory key {}".format(key, miss_description))
+            raise MissingConfig(err_msg)
 
 
 def get_inst_config(file):
@@ -24,16 +35,11 @@ def get_inst_config(file):
 
     conf = get_conf(file)
 
-    # verify configuration file is complete
-    for key in mandatory_keys:
-        if key not in conf:
-            err_msg = "'{}' is a mandatory key in instrument config files but is missing in {}".format(key, file)
-            raise MissingConfig(err_msg)
-    for attname in mandatory_ncattrs:
-        if attname not in conf['nc_attributes']:
-            err_msg = ("'{}' is a mandatory global attribute under 'nc_attributes' in instrument config files "
-                       'but is missing in {}'.format(attname, file))
-            raise MissingConfig(err_msg)
+    # verify conf dictionary structure
+    check_conf(conf, mandatory_keys,
+               'of instrument config files but is missing in {}'.format(file))
+    check_conf(conf['nc_attributes'], mandatory_ncattrs,
+               "of 'nc_attributes' in instrument config files but is missing in {}".format(file))
     for attname, attval in conf['nc_attributes'].items():
         if attname[:5].lower() == 'date_' and not isinstance(attval, str):
             raise MWRConfigError('Dates for global attrs must be given as str. Not the case for ' + attname)
@@ -50,23 +56,15 @@ def get_nc_format_config(file):
 
     conf = get_conf(file)
 
-    # verify configuration file is complete
-    for key in mandatory_keys:
-        if key not in conf:
-            err_msg = ("'{}' is a mandatory key in config files defining output NetCDF format "
-                       'but is missing in {}'.format(key, file))
-            raise MissingConfig(err_msg)
-    for dimkey in mandatory_dimension_keys:
-        if dimkey not in conf['dimensions']:
-            err_msg = ("'{}' is a mandatory key to 'dimensions' in config files defining output NetCDF format "
-                       'but is missing in {}'.format(dimkey, file))
-            raise MissingConfig(err_msg)
+    # verify conf dictionary structure
+    check_conf(conf, mandatory_keys,
+               'of config files defining output NetCDF format but is missing in {}'.format(file))
+    check_conf(conf['dimensions'], mandatory_dimension_keys,
+               "of 'dimensions' config files defining output NetCDF format but is missing in {}".format(file))
     for varname, varval in conf['variables'].items():
-        for varkey in mandatory_variable_keys:
-            if varkey not in varval:
-                err_msg = ("'{}' is a mandatory key to each variable in config files defining output NetCDF format "
-                           "but is missing for '{}' in {}".format(varkey, varname, file))
-                raise MissingConfig(err_msg)
+        check_conf(varval, mandatory_variable_keys,
+                   "of each variable in config files defining output NetCDF format but is missing for '{}' in {}"
+                   .format(varname, file))
         if not isinstance(varval['dim'], list):
             raise MWRConfigError("The value attributed to 'dim' in variable '{}' is not a list in {}"
                                  .format(varname, file))

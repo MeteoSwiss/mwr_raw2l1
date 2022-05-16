@@ -1,23 +1,8 @@
-General:
-- check program flow and if it is not too much procedural, functional or unstructured
-
-Specific to programming:
-- having a Measurement class without methods but functions in measurement_helpers
-   - when making these methods of class instance I cannot call them anymore with classmethod
-- idem for scan_to_timeseries. attached to Measurement or as function in measurement_helpers
-- Measurement with derived classes instead of classmethod
-- measurement_helpers.make_dataset: code copy with shape_act = ... and following line (ca 44-45 and 52-53)
-- would it make sense to go make writer classes instead of functions?
-- read_all function besides reader classes for RPG. does this make sense here?
-
-Specific to organisation:
-- why requirements.txt and setup.py along with pyproject.toml (in ELDAmwl)
-- what to do with th following after updating pyproject.toml?
-   - poetry.lock is out of date: Run poetry lock, poetry lock --no-update or poetry update
-
-specific to deployment:
-- MetOffice runs python 3.6. I know it is > EOL, but can take them years to update so should make sure we can run on it
-    - how can we find out which package requirements must be specified in pyproject.toml for this?
-- don't understand what goes wrong when running on python 3.10. try to understand CI log on github
-- how to make package pip installable (PyPi). Can maybe also ask Augustin for this
+- how to make package pip installable (PyPi)
+- add entry point.
+    - use __main__.py with argparse? Where to store __main__.py? in mwr_raw2l1/, i.e. at level of README, LICENSE, etc? or in mwr_raw2l1/mwr_raw2l1/?
+    - use pyproject.toml? But need optional arguments, possible/sensible?
+- dependency resolution with poetry is extremely slow (~15 min) for my pyproject.toml
+    - how to speed this up?
+    - cannot drop python 3.6.8 support
 
