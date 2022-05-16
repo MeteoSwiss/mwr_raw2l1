@@ -281,6 +281,30 @@ variables:
       long_name: Beam width (3 dB) of the infrared radiometer
       units: degree
 
+  azi_irt:
+    name: ir_azi
+    dim:
+      - time
+    type: f4
+    _FillValue: -999.
+    optional: True
+    attributes:
+      long_name: Infrared sensor azimuth angle
+      units: degree
+      comment: 0=North, 90=East, 180=South, 270=West
+
+  ele_irt:
+    name: ir_ele
+    dim:
+      - time
+    type: f4
+    _FillValue: -999.
+    optional: True
+    attributes:
+      long_name: Infrared sensor elevation angle
+      units: degree
+      comment: 0=horizon, 90=zenith
+
   IRT:
     name: irt
     dim:

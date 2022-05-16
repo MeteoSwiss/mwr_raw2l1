@@ -95,7 +95,7 @@ class MeasurementConstructors(object):
                 'hkd': ['time', 'channels']}
         vars = {'brt': ['Tb', 'rainflag', 'ele', 'azi'],
                 'blb': ['Tb', 'T', 'rainflag', 'scan_quadrant'],  # TODO: ask Bernhard: find way to infer 'azi' from blb
-                'irt': ['IRT', 'rainflag', 'ele', 'azi'],
+                'irt': ['IRT', 'rainflag', 'ele', 'azi'],  # ele/azi will become ele_irt/azi_irt as also present in MWR
                 'met': ['p', 'T', 'RH'],
                 'hkd': ['alarm']}
         vars_opt = {'brt': [],
