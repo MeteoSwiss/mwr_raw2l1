@@ -2,7 +2,13 @@
 - add entry point.
     - use __main__.py with argparse? Where to store __main__.py? in mwr_raw2l1/, i.e. at level of README, LICENSE, etc? or in mwr_raw2l1/mwr_raw2l1/?
     - use pyproject.toml? But need optional arguments, possible/sensible?
+- make dependency optional, e.g. colorlog
 - dependency resolution with poetry is extremely slow (~15 min) for my pyproject.toml
     - how to speed this up?
     - cannot drop python 3.6.8 support
+- HUB review RUNNING TESTS/DEPLOYMENT This required installation of another package poetry – which requires a large number of additional packages -
+    so it would be good if this part could be modified so we can use setup.py instead as this would align better with existing test/deployment.
+    - if the package was pip-installable, could this solve the issue for needing poetry
+
+can also add code review by HERMES people
 

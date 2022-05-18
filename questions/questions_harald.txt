@@ -1,0 +1,7 @@
+- check how RPG deals with files from TEMPRO or HUMPRO have different n_freq (in old files n_freq must be assumed before read). Other filecodes?
+- byte order in all RPG files assumed little-endian. Is this true under all circumstances (PC/Unix)
+- coordinates encoding: how to find out which coord version (1 or 2 from below)  is used. In manual 06/2020 version=1 is described
+      version of RPG coordinate encoding:
+            1: latitude or longitude in format (-)DDDMM.mmmm where DDD is degrees, MM is minutes and mmmm is the decimal
+                fraction of MM
+            2: latitude and longitude already in decimal degrees, function does nothing.

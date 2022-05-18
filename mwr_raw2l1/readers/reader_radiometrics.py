@@ -112,7 +112,8 @@ class Reader(object):
     def add_ir_wavelength(self):
         """add the wavelength of IR sensor from config"""
         self.data['aux']['ir_wavelength'] = np.array([10.5])
-        # TODO: ask Christine if right IR wavelength and how to best infer it
+        # TODO: ask Christine if right IR wavelength and how to best infer it.
+        #       Then externalise to config and only set in Measurement
 
 
 def read_multiple_files(files):

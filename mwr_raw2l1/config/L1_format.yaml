@@ -5,8 +5,6 @@ dimensions:
     - frequency
     - ir_wavelength
     - bnds
-# TODO: add all variables from Measuruement.set_inst_params() to output
-# TODO: add ir_ele/ir_azi to output and potentially n_sidbands
 
 variables:
   time:  # variable name in Measurement.data Dataset

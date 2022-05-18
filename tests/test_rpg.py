@@ -99,7 +99,7 @@ class TestRPG(unittest.TestCase):
     @patch('mwr_raw2l1.main.get_files')
     def test_no_blb(self, get_files_mock):
         """Test main function runs ok when BLB files are missing"""
-        vars_to_ignore = ['air_temperature']  # TODO: fix this after found correct way to encode azi in absence of BLB
+        vars_to_ignore = ['air_temperature']  # TODO: fix this after found correct way to encode T in absence of BLB
         get_files_mock.return_value = self.infiles_mock(['.BLB'])
         self.single_test_call_series(vars_to_ignore, check_timeseries_length=False)
         get_files_mock.assert_called()

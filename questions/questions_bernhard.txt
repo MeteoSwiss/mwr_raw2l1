@@ -1,2 +1,6 @@
-- how to use scan_quadrant to determine azimuth. how to determine azi in general
-- in what unit is wind speed encoded in RPG files (assumed m/s)
+- how to use scan_quadrant to determine azimuth. in actris_mwr_pro it is simply set to 0 (hard-coded)
+    - for BRT it is encoded together with elevaiton, but not seen this for BLB
+- in what unit is wind speed encoded in RPG files? assumed m/s, true?
+- how should we implement spectral consistency flag. Seems that actris_mwr_pro does some kind of retrieval with fixed constants.
+    - Can we have a standard atmosphere forward model calculation?
+    - Can we re-use mwr_pro_retrieval_coefficients for other sites? One set of coefficients for whole Europe?

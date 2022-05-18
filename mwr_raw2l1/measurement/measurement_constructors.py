@@ -106,7 +106,6 @@ class MeasurementConstructors(object):
                             'Tstab_kband', 'Tstab_vband', 'flashmemory_remaining', 'BLscan_active',
                             'channel_quality_ok', 'noisediode_ok_kband', 'noisediode_ok_vband',
                             'Tstab_ok_kband', 'Tstab_ok_vband', 'Tstab_ok_amb']}
-        # TODO : introduce a variable 'monitoring' in output L1 (inform task force) to collect relevant variables of HKD
 
         scanflag_values = {'brt': 0, 'blb': 1}  # for generating a scan flag indicating whether scanning or zenith obs
 

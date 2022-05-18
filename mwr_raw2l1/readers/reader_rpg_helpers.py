@@ -71,7 +71,7 @@ def interpret_coord(x, version=2):
     Args:
         x: float encoding latitude of longitude coordinate in RPG binaries
         version: version of RPG coordinate encoding:
-            1: latitude of lognitude in fomrat (-)DDDMM.mmmm where DDD is degrees, MM is minutes and mmmm is the decimal
+            1: latitude or longitude in format (-)DDDMM.mmmm where DDD is degrees, MM is minutes and mmmm is the decimal
                 fraction of MM
             2: latitude and longitude already in decimal degrees, function does nothing.
     Returns:
