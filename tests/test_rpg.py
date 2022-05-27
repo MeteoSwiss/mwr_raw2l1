@@ -130,7 +130,7 @@ class TestRPG(unittest.TestCase):
         # subTest
         with self.subTest(operation='run_main'):
             """Run entire processing chain in main method (read-in > Measurement > write NetCDF)"""
-            main(test_inst_conf_file, nc_format_config_file, qc_config_file)
+            main(test_inst_conf_file, nc_format_config_file, qc_config_file, concat=True)
         with self.subTest(operation='load_ouptut_netcdf'):
             """Load output NetCDF file with xarray. Failed test might indicate a corrupt file"""
             files = glob.glob(os.path.join(path_data_files_out, '*.nc'))

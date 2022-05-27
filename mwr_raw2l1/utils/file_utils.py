@@ -129,14 +129,14 @@ def group_files(files, name_scheme):
         files: list of files
         name_scheme {'attex', 'rpg', 'radiometrics'}: scheme of filename used to set parts to ignore in grouping process
     Returns:
-        list of lists with files for which the parts except 'fileparts_to_ignore' are identical
+        list of lists of files for which all parts except the ignored ones are identical
     """
     if name_scheme in ['attex', 'rpg']:
         pattern_builder = remove_ext
     elif name_scheme == 'radiometrics':
         pattern_builder = remove_suffix
     else:
-        MWRInputError("Known values for 'name_scheme' are 'attex', 'radiometrics' and 'rpg' but found '{}'".
+        MWRInputError("known values for 'name_scheme' are 'attex', 'radiometrics' and 'rpg' but found '{}'".
                       format(name_scheme))
 
     files_sorted = sorted(files, key=pattern_builder)

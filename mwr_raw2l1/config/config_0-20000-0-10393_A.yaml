@@ -2,6 +2,7 @@
 
 reader: reader_radiometrics   # refers to name set at import into main.py near line 10
 meas_constructor: from_radiometrics  # constructor for Measurement class in measurement.measurement.py
+filename_scheme: radiometrics  # allowed: attex, rpg (file type as ext) or radiometrics (file type as suffix after _)
 
 input_directory: data/radiometrics/0-20000-0-10393/  # use absolute path (or relative to location of main.py)
 output_directory: data/output/  # use absolute path (or relative to location of main.py)

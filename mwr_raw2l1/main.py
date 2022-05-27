@@ -7,17 +7,19 @@ from mwr_raw2l1.readers.reader_attex import read_multiple_files as reader_attex 
 from mwr_raw2l1.readers.reader_radiometrics import read_multiple_files as reader_radiometrics  # noqa: F401
 from mwr_raw2l1.readers.reader_rpg import read_multiple_files as reader_rpg  # noqa: F401
 from mwr_raw2l1.utils.config_utils import get_inst_config, get_nc_format_config, get_qc_config
-from mwr_raw2l1.utils.file_utils import generate_output_filename, get_files
+from mwr_raw2l1.utils.file_utils import generate_output_filename, get_files, group_files
 from mwr_raw2l1.write_netcdf import Writer
 
 
-def main(inst_config_file, nc_format_config_file, qc_config_file, **kwargs):
+def main(inst_config_file, nc_format_config_file, qc_config_file, concat=False, **kwargs):
     """main function reading in raw files, generating and processing measurement instance and writing output file
 
     Args:
         inst_config_file: yaml configuration file for the instrument to process
         nc_format_config_file: yaml configuration file defining the output NetCDF format
         qc_config_file: yaml configuration file specifying the quality control parameters
+        concat (optional): concatenate data to single output file instead of generating an output for each timestamp.
+            Defaults to False.
         **kwargs: Keyword arguments passed over to get_files function, typically 'time_start' and 'time_end'
     """
 
@@ -32,24 +34,29 @@ def main(inst_config_file, nc_format_config_file, qc_config_file, **kwargs):
     reader = get_reader(conf_inst['reader'])
     meas_constructor = get_meas_constructor(conf_inst['meas_constructor'])
 
-    files = get_files(conf_inst['input_directory'], conf_inst['base_filename_in'], **kwargs)
-    if not files:
+    all_files = get_files(conf_inst['input_directory'], conf_inst['base_filename_in'], **kwargs)
+    if not all_files:
         logger.info('No files matching pattern {} in {}. Main functions returns without action.'.format(
             conf_inst['base_filename_in'], conf_inst['input_directory']))
         return
+    if concat:
+        file_bunches = [all_files]
+    else:
+        file_bunches = group_files(all_files, conf_inst['filename_scheme'])
 
-    # read and interpret data
-    # -----------------------
-    all_data = reader(files)
-    meas = meas_constructor(all_data, conf_inst)
-    meas.run(conf_qc)
+    for files in file_bunches:
+        # read and interpret data
+        # -----------------------
+        all_data = reader(files)
+        meas = meas_constructor(all_data, conf_inst)
+        meas.run(conf_qc)
 
-    # write output
-    # ------------
-    outfile = generate_output_filename(conf_inst['base_filename_out'], meas.data['time'])
-    outfile_with_path = os.path.join(conf_inst['output_directory'], outfile)
-    nc_writer = Writer(meas.data, outfile_with_path, conf_nc, conf_inst)
-    nc_writer.run()
+        # write output
+        # ------------
+        outfile = generate_output_filename(conf_inst['base_filename_out'], meas.data['time'])
+        outfile_with_path = os.path.join(conf_inst['output_directory'], outfile)
+        nc_writer = Writer(meas.data, outfile_with_path, conf_nc, conf_inst)
+        nc_writer.run()
 
     logger.info('Main function terminated successfully')
 

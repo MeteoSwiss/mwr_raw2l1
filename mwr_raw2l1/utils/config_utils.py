@@ -25,7 +25,7 @@ def check_conf(conf, mandatory_keys, miss_description):
 def get_inst_config(file):
     """get configuration for each instrument and check for completeness of config file"""
 
-    mandatory_keys = ['reader', 'meas_constructor',
+    mandatory_keys = ['reader', 'meas_constructor', 'filename_scheme',
                       'input_directory', 'output_directory', 'base_filename_in', 'base_filename_out',
                       'station_latitude', 'station_longitude', 'station_altitude', 'nc_attributes']
     mandatory_ncattrs = ['wigos_station_id', 'instrument_id', 'site_location', 'institution', 'principal_investigator',
