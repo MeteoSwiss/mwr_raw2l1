@@ -1,6 +1,10 @@
 - how to make package pip installable (PyPi)
-- add entry point.
-    - use __main__.py with argparse? Where to store __main__.py? in mwr_raw2l1/, i.e. at level of README, LICENSE, etc? or in mwr_raw2l1/mwr_raw2l1/?
+- add entry point
+    - use __main__.py with argparse? Where to store __main__.py?
+        - in mwr_raw2l1/, i.e. at level of README, LICENSE, etc
+            didn't work here, probably because there is no __init__.py
+        - or in mwr_raw2l1/mwr_raw2l1/? How is this level called again?
+            works here, but modifies data path w.r.t to running main() in same directory, probably as I am running it from 1 level above. how to best solve
     - use pyproject.toml? But need optional arguments, possible/sensible?
 - make dependency optional, e.g. colorlog
 - dependency resolution with poetry is extremely slow (~15 min) for my pyproject.toml
