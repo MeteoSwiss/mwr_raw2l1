@@ -11,7 +11,7 @@ from mwr_raw2l1.utils.file_utils import generate_output_filename, get_files, gro
 from mwr_raw2l1.write_netcdf import Writer
 
 
-def main(inst_config_file, nc_format_config_file, qc_config_file, concat=False, **kwargs):
+def main(inst_config_file, nc_format_config_file, qc_config_file, concat=False, halt_on_error=True, **kwargs):
     """main function reading in raw files, generating and processing measurement instance and writing output file
 
     Args:
@@ -20,6 +20,8 @@ def main(inst_config_file, nc_format_config_file, qc_config_file, concat=False, 
         qc_config_file: yaml configuration file specifying the quality control parameters
         concat (optional): concatenate data to single output file instead of generating an output for each timestamp.
             Defaults to False.
+        halt_on_error: stop execution if an error is encountered. If False the error will be logged while the function
+            continues with the next bunch of files. Defaults to True.
         **kwargs: Keyword arguments passed over to get_files function, typically 'time_start' and 'time_end'
     """
 
@@ -44,21 +46,44 @@ def main(inst_config_file, nc_format_config_file, qc_config_file, concat=False, 
     else:
         file_bunches = group_files(all_files, conf_inst['filename_scheme'])
 
+    # process
+    # -------
+    error_seen = False
     for files in file_bunches:
-        # read and interpret data
-        # -----------------------
-        all_data = reader(files)
-        meas = meas_constructor(all_data, conf_inst)
-        meas.run(conf_qc)
+        if halt_on_error:
+            process_files(files, reader, meas_constructor, conf_inst, conf_qc, conf_nc)
+        else:
+            try:
+                process_files(files, reader, meas_constructor, conf_inst, conf_qc, conf_nc)
+            except Exception as e:
+                error_seen = True
+                logger.error('Error while processing {}'.format([os.path.basename(f) for f in files]))
+                logger.exception(e)
 
-        # write output
-        # ------------
-        outfile = generate_output_filename(conf_inst['base_filename_out'], meas.data['time'])
-        outfile_with_path = os.path.join(conf_inst['output_directory'], outfile)
-        nc_writer = Writer(meas.data, outfile_with_path, conf_nc, conf_inst)
-        nc_writer.run()
+    if error_seen:
+        logger.error('Main function terminated with errors (see above)')
+    else:
+        logger.info('Main function terminated successfully')
 
-    logger.info('Main function terminated successfully')
+
+def process_files(files, reader, meas_constructor, conf_inst, conf_qc, conf_nc):
+    """process the input files with indicated reader, meas_constructor and conf dictionaries.
+
+    All input files will be concatenated to one output file
+    """
+
+    # read and interpret data
+    # -----------------------
+    all_data = reader(files)
+    meas = meas_constructor(all_data, conf_inst)
+    meas.run(conf_qc)
+
+    # write output
+    # ------------
+    outfile = generate_output_filename(conf_inst['base_filename_out'], meas.data['time'])
+    outfile_with_path = os.path.join(conf_inst['output_directory'], outfile)
+    nc_writer = Writer(meas.data, outfile_with_path, conf_nc, conf_inst)
+    nc_writer.run()
 
 
 def get_reader(name):
