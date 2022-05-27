@@ -52,6 +52,9 @@ class MissingVariable(MWRFileError):
     """Raised if file seems not to contain a mandatory variable. Might be due to a modified header in the input file"""
 
 
+class FilenameError(MWRFileError):
+    """Raised if the filename does not correspond to the expected pattern"""
+
 # --------------------------
 class WrongInputFormat(MWRInputError):
     """Raised if format of input to a function or class does not correspond to expectations"""

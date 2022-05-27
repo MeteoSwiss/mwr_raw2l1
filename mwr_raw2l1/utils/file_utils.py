@@ -5,7 +5,7 @@ from itertools import groupby
 from pathlib import Path
 
 import mwr_raw2l1
-from mwr_raw2l1.errors import MWRInputError
+from mwr_raw2l1.errors import FilenameError, MWRInputError
 
 
 def abs_file_path(*file_path):
@@ -53,11 +53,12 @@ def get_corresponding_pickle(filename_rawdata, path_pickle, legacy_reader=False)
 def get_files(dir_in, basename, time_start=None, time_end=None):
     """get files in dir_in corresponding to basename.
 
-    If time_start and/or time_end are given only files with end time before/after these are returned.
+    If 'time_start' and/or 'time_end' is given only files with timestamp in filename >='time_start' and/or <='time_end'
+    are returned. E.g. time_start=20220101 and time_end=20220101 will return timestamps 20220101 and 202201010000.
 
     Args:
         dir_in: directory where files of the respective instrument are located
-        basename: first part of the filename (usually full identifier including wigos-station-id and inst-id)
+        basename: first part of the filename (usually full identifier combining station-id and instrument-id)
         time_start (optional): string in format 'yyyymmddHHMM', 'yyyymmddHHMMSS', 'yyyymmdd' or any of the similar
         time_end (optional): analogous to time_start
     Returns:
@@ -71,7 +72,11 @@ def get_files(dir_in, basename, time_start=None, time_end=None):
 
     # select only files between time_start and time_end
     for file in files[:]:
-        fn_date = datestr_from_filename(file)
+        try:
+            fn_date = datestr_from_filename(file)
+        except FilenameError:
+            files.remove(file)
+            mwr_raw2l1.log.logger.warning("Cannot process '{}' as filename doesn't match expected pattern".format(file))
         if time_start is not None:
             if int(fn_date)/10**len(fn_date) < int(time_start)/10**len(time_start):
                 files.remove(file)
@@ -84,16 +89,26 @@ def get_files(dir_in, basename, time_start=None, time_end=None):
     return files
 
 
-def datestr_from_filename(filename, datestr_format='yyyymmddHHMM'):
-    """return date string from filename, assuming it consists of the last digits of the filename before the extension
+def datestr_from_filename(filename):
+    """return date string from filename, assuming it to be the last block (separated by _)  of minimum 4 decimal digits
+
+    Accepted dates are in form 'yyyymmddHHMM', 'yyyymmddHHMMSS', 'yyyymmdd', 'yymm' etc. but not separated by -, _ or :
 
     Args:
         filename: filename as str. Can contain path and extension.
-        datestr_format: format of the date string in the filename. Only used for counting length of date string
     Returns:
         string containing the date in same representation as in the filename
     """
-    return os.path.splitext(filename)[0][-len(datestr_format):]
+    min_date_length = 4
+    fn_parts = os.path.splitext(filename)[0].split('_')
+    for block in reversed(fn_parts):  # try to find date str parts of filename, starting at the end
+        if len(block) < min_date_length:
+            continue
+        if block.isdecimal():
+            return block
+        if block[1:].isdecimal() and len(block)-1 >= min_date_length:
+            return block[1:]
+    raise FilenameError("found no date in '{}'".format(filename))
 
 
 def generate_output_filename(basename, time, ext='nc'):
