@@ -27,6 +27,8 @@ def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, conca
     """
 
     logger.info('Running main routine for {}'.format(inst_config_file))
+    if concat:
+        logger.info('Concatenation of multiple timestamps to single output file enabled')
 
     # complete input
     # --------------
@@ -46,8 +48,9 @@ def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, conca
 
     all_files = get_files(abs_file_path(conf_inst['input_directory']), conf_inst['base_filename_in'], **kwargs)
     if not all_files:
-        logger.info('No files matching pattern {} in {}. Main routine returns without action.'.format(
-            conf_inst['base_filename_in'], conf_inst['input_directory']))
+        logger.info('No files matching pattern {} in {} (in the specified time interval).'
+                    ' Main routine returns without action.'.format(
+                        conf_inst['base_filename_in'], conf_inst['input_directory']))
         return
     if concat:
         file_bunches = [all_files]
