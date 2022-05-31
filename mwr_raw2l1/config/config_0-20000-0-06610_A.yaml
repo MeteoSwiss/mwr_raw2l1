@@ -7,8 +7,8 @@ reader: reader_rpg   # refers to name set at import into main.py near line 10
 meas_constructor: from_rpg  # constructor for Measurement class in measurement.measurement.py
 filename_scheme: rpg  # allowed: attex, rpg (file type as ext) or radiometrics (file type as suffix after _)
 
-input_directory: data/rpg/0-20000-0-06610/  # use absolute path (or relative to location of main.py)
-output_directory: data/output/  # use absolute path (or relative to location of main.py)
+input_directory: mwr_raw2l1/data/rpg/0-20000-0-06610/  # use absolute path (or relative to mwr_raw2l1 project dir)
+output_directory: mwr_raw2l1/data/output/  # use absolute path (or relative to mwr_raw2l1 project dir)
 base_filename_in: MWR_0-20000-0-06610_A
 base_filename_out: MWR_1C01_0-20000-0-06610_A
 

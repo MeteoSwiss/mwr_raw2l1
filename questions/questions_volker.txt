@@ -7,6 +7,7 @@
             works here, but modifies data path w.r.t to running main() in same directory, probably as I am running it from 1 level above. how to best solve
     - use pyproject.toml? But need optional arguments, possible/sensible?
 - make dependency optional, e.g. colorlog
+- what do do with log file in logger, and if needed where to put it. For now it is just growing to infinity...
 - dependency resolution with poetry is extremely slow (~15 min) for my pyproject.toml
     - how to speed this up?
     - cannot drop python 3.6.8 support
