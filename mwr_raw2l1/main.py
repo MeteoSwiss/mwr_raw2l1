@@ -7,7 +7,7 @@ from mwr_raw2l1.readers.reader_attex import read_multiple_files as reader_attex 
 from mwr_raw2l1.readers.reader_radiometrics import read_multiple_files as reader_radiometrics  # noqa: F401
 from mwr_raw2l1.readers.reader_rpg import read_multiple_files as reader_rpg  # noqa: F401
 from mwr_raw2l1.utils.config_utils import get_inst_config, get_nc_format_config, get_qc_config
-from mwr_raw2l1.utils.file_utils import generate_output_filename, get_files, group_files, abs_file_path
+from mwr_raw2l1.utils.file_utils import abs_file_path, generate_output_filename, get_files, group_files
 from mwr_raw2l1.write_netcdf import Writer
 
 

@@ -5,7 +5,7 @@ from mwr_raw2l1.errors import MissingConfig, MWRDataError
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement_constructors import MeasurementConstructors
 from mwr_raw2l1.measurement.measurement_qc_helpers import check_rain, check_receiver_sanity, check_sun
-from mwr_raw2l1.utils.num_utils import setbit, unsetbit, timedelta2s
+from mwr_raw2l1.utils.num_utils import setbit, timedelta2s, unsetbit
 
 
 class Measurement(MeasurementConstructors):

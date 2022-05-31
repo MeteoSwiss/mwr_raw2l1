@@ -55,6 +55,7 @@ class MissingVariable(MWRFileError):
 class FilenameError(MWRFileError):
     """Raised if the filename does not correspond to the expected pattern"""
 
+
 # --------------------------
 class WrongInputFormat(MWRInputError):
     """Raised if format of input to a function or class does not correspond to expectations"""
