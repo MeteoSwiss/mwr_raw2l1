@@ -25,7 +25,7 @@ def run(inst_config_file, nc_format_config_file, qc_config_file, concat=False, h
         **kwargs: Keyword arguments passed over to get_files function, typically 'time_start' and 'time_end'
     """
 
-    logger.info('Running main routine for ' + inst_config_file)
+    logger.info('Running main routine for {}'.format(inst_config_file))
 
     # prepare
     # -------
