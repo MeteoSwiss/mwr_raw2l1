@@ -11,21 +11,29 @@ from mwr_raw2l1.utils.file_utils import abs_file_path, generate_output_filename,
 from mwr_raw2l1.write_netcdf import Writer
 
 
-def run(inst_config_file, nc_format_config_file, qc_config_file, concat=False, halt_on_error=True, **kwargs):
+def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, concat=False, halt_on_error=True, **kwargs):
     """main function reading in raw files, generating and processing measurement instance and writing output file
 
     Args:
         inst_config_file: yaml configuration file for the instrument to process
-        nc_format_config_file: yaml configuration file defining the output NetCDF format
-        qc_config_file: yaml configuration file specifying the quality control parameters
+        nc_format_config_file (optional): yaml configuration file defining the output NetCDF format.
+            Defaults to the E-PROFILE file standard defined in mwr_raw2l1/config/L1_format.yaml
+        qc_config_file (optional): yaml configuration file specifying the quality control parameters
         concat (optional): concatenate data to single output file instead of generating an output for each timestamp.
             Defaults to False.
-        halt_on_error: stop execution if an error is encountered. If False the error will be logged while the function
-            continues with the next bunch of files. Defaults to True.
+        halt_on_error (optional): stop execution if an error is encountered. If False the error will be logged while the
+            function continues with the next bunch of files. Defaults to True.
         **kwargs: Keyword arguments passed over to get_files function, typically 'time_start' and 'time_end'
     """
 
     logger.info('Running main routine for {}'.format(inst_config_file))
+
+    # complete input
+    # --------------
+    if nc_format_config_file is None:
+        nc_format_config_file = abs_file_path('mwr_raw2l1/config/L1_format.yaml')
+    if qc_config_file is None:
+        qc_config_file = abs_file_path('mwr_raw2l1/config/qc_config.yaml')
 
     # prepare
     # -------
