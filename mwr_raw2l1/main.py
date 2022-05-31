@@ -11,7 +11,7 @@ from mwr_raw2l1.utils.file_utils import generate_output_filename, get_files, gro
 from mwr_raw2l1.write_netcdf import Writer
 
 
-def main(inst_config_file, nc_format_config_file, qc_config_file, concat=False, halt_on_error=True, **kwargs):
+def run(inst_config_file, nc_format_config_file, qc_config_file, concat=False, halt_on_error=True, **kwargs):
     """main function reading in raw files, generating and processing measurement instance and writing output file
 
     Args:
@@ -25,7 +25,7 @@ def main(inst_config_file, nc_format_config_file, qc_config_file, concat=False, 
         **kwargs: Keyword arguments passed over to get_files function, typically 'time_start' and 'time_end'
     """
 
-    logger.info('Running main function for ' + inst_config_file)
+    logger.info('Running main routine for ' + inst_config_file)
 
     # prepare
     # -------
@@ -38,7 +38,7 @@ def main(inst_config_file, nc_format_config_file, qc_config_file, concat=False, 
 
     all_files = get_files(abs_file_path(conf_inst['input_directory']), conf_inst['base_filename_in'], **kwargs)
     if not all_files:
-        logger.info('No files matching pattern {} in {}. Main functions returns without action.'.format(
+        logger.info('No files matching pattern {} in {}. Main routine returns without action.'.format(
             conf_inst['base_filename_in'], conf_inst['input_directory']))
         return
     if concat:
@@ -61,9 +61,9 @@ def main(inst_config_file, nc_format_config_file, qc_config_file, concat=False, 
                 logger.exception(e)
 
     if error_seen:
-        logger.error('Main function terminated with errors (see above)')
+        logger.error('Main routine terminated with errors (see above)')
     else:
-        logger.info('Main function terminated successfully')
+        logger.info('Main routine terminated successfully')
 
 
 def process_files(files, reader, meas_constructor, conf_inst, conf_qc, conf_nc):
@@ -113,6 +113,6 @@ def get_meas_constructor(name):
 
 
 if __name__ == '__main__':
-    main('config/config_0-20000-0-99999_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Attex
-    main('config/config_0-20000-0-10393_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Radiometrics
-    main('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # RPG HATPRO
+    run('config/config_0-20000-0-99999_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Attex
+    run('config/config_0-20000-0-10393_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Radiometrics
+    run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # RPG HATPRO

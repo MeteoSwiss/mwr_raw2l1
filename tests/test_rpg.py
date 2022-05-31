@@ -17,7 +17,7 @@ import yaml
 
 from mwr_raw2l1.errors import MissingDataSource, MWRTestError
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.main import main
+from mwr_raw2l1.main import run
 from mwr_raw2l1.utils.config_utils import get_inst_config
 from mwr_raw2l1.utils.file_utils import abs_file_path
 
@@ -109,14 +109,14 @@ class TestRPG(unittest.TestCase):
         """Test that an exception is raised if neither of blb or brt files are present (at least on Tb obs required)"""
         get_files_mock.return_value = self.infiles_mock(['.BRT', '.BLB'])
         with self.assertRaises(MissingDataSource):
-            main(test_inst_conf_file, nc_format_config_file, qc_config_file)
+            run(test_inst_conf_file, nc_format_config_file, qc_config_file)
 
     @patch('mwr_raw2l1.main.get_files')
     def test_no_hkd(self, get_files_mock):
         """Test that an exception is raised if no HKD file present as this is required for each instrument"""
         get_files_mock.return_value = self.infiles_mock(['.HKD'])
         with self.assertRaises(MissingDataSource):
-            main(test_inst_conf_file, nc_format_config_file, qc_config_file)
+            run(test_inst_conf_file, nc_format_config_file, qc_config_file)
 
     # Helper methods
     # --------------
@@ -130,7 +130,7 @@ class TestRPG(unittest.TestCase):
         # subTest
         with self.subTest(operation='run_main'):
             """Run entire processing chain in main method (read-in > Measurement > write NetCDF)"""
-            main(test_inst_conf_file, nc_format_config_file, qc_config_file, concat=True)
+            run(test_inst_conf_file, nc_format_config_file, qc_config_file, concat=True)
         with self.subTest(operation='load_ouptut_netcdf'):
             """Load output NetCDF file with xarray. Failed test might indicate a corrupt file"""
             files = glob.glob(os.path.join(path_data_files_out, '*.nc'))
