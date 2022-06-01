@@ -14,7 +14,8 @@ def main():
     # add arguments
     parser.add_argument('conf_inst',
                         help='path to the instrument configuration file'
-                             ' (absolute or relative to mwr_raw2l1 project dir)')
+                             ' (absolute or relative to mwr_raw2l1 project dir'
+                             ' (e.g. mwr_raw2l1/config/config_0-20000-0-06610_A.yaml))')
     parser.add_argument('--conf_nc',
                         help='path to the output NetCDF format configuration file'
                              ' (absolute or relative to mwr_raw2l1 project dir)')

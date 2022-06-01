@@ -11,10 +11,11 @@ Each instrument needs an own config file. Additionally, external config files fo
 can be specified. Default configurations for producing a NetCDF according to the definitions for L1C01 the common 
 E-PROFILE/ACTRIS and defining the quality flag settings are included in the repository. 
 
+After installing the package you get an entry point called `mwr_raw2l1`\
 Basic usage:
-`python3 -m mwr_raw2l1 CONF_INST`\
+`mwr_raw2l1 CONF_INST`\
 For more info on calling options:
-`python3 -m mwr_raw2l1 -h`
+`mwr_raw2l1 -h`
 
 
 The main routine does the following:
