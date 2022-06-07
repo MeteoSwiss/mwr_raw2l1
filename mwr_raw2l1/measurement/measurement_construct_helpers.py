@@ -236,7 +236,15 @@ def merge_brt_blb(all_data):
     if 'blb' in all_data:
         if 'brt' in all_data:
             blb_ts = scan_to_timeseries_from_aux(all_data['blb'], hkd=all_data['hkd'], brt=all_data['brt'])
-            out = out.merge(blb_ts, join='outer')
+            try:
+                out = out.merge(blb_ts, join='outer')
+            except xr.MergeError as e:
+                logger.warning('Skipping xarray merge error: {}'.format(e))
+                out = out.merge(blb_ts, join='outer', compat='override')
+                # TODO: Fix the above issue. Will most probably be related to scan and zenith obs having same time
+                #       Will cause first scan obs to be overwritten by zenith. Happens from time to time for DWD.
+                #       Try to solve for sample files for 20220105 provided by Christine.
+                #       Check if also happens for concat=False
         else:
             out = scan_to_timeseries_from_aux(all_data['blb'], hkd=all_data['hkd'])
 
