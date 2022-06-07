@@ -74,7 +74,6 @@ def get_mwr(data_raw, header, only_observed_freq=True):
     frequency = np.array(freq)
 
     # get brightness temperatures and exclude channels without observations if requested
-    # TODO: ask Christine what she thinks about excluding unused channels. channel reporting temporarily NaN possible?
     tb = data_raw[:, ind_mwr].astype(float)
     if only_observed_freq:
         ind_obs = ~np.all(np.isnan(tb), axis=0)

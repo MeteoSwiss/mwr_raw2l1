@@ -7,7 +7,7 @@ from mwr_raw2l1.log import logger
 from mwr_raw2l1.readers.reader_rpg_helpers import interpret_angle, interpret_coord, interpret_time
 from mwr_raw2l1.utils.file_utils import get_binary
 
-BYTE_ORDER = '<'  # byte order in all RPG files assumed little-endian  #TODO: ask Harald whether this is true (PC/Unix)
+BYTE_ORDER = '<'  # byte order in all RPG files assumed little-endian
 
 FILETYPE_CONFS = {  # assign metadata to each known filecode
     # BRT files

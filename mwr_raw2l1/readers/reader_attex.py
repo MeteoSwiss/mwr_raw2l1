@@ -107,9 +107,7 @@ def read_multiple_files(files):
             reader_inst = Reader(file)
             reader_inst.run()
             all_data.append(reader_inst)
-            # TODO: decide what to do with processed files. Leave where they are, delete or move to other folder
         else:
-            # TODO: decide what to do with unprocessable files. Leave where they are, delete or move to other folder
             logger.warning("Cannot read {} as no reader is specified for files with extension '{}'".format(
                 file, extension))
 

@@ -112,8 +112,7 @@ class Reader(object):
     def add_ir_wavelength(self):
         """add the wavelength of IR sensor from config"""
         self.data['aux']['ir_wavelength'] = np.array([10.5])
-        # TODO: ask Christine if right IR wavelength and how to best infer it.
-        #       Then externalise to config and only set in Measurement
+        # TODO: externalise to config and only set in Measurement
 
 
 def read_multiple_files(files):
@@ -133,9 +132,7 @@ def read_multiple_files(files):
             reader_inst = Reader(file)
             reader_inst.run()
             all_data.append(reader_inst)
-            # TODO: decide what to do with processed files. Leave where they are, delete or move to other folder
         else:
-            # TODO: decide what to do with unprocessable files. Leave where they are, delete or move to other folder
             logger.warning("Cannot read {} as no reader is specified for files with suffix '{}'".format(file, suffix))
 
     return all_data
