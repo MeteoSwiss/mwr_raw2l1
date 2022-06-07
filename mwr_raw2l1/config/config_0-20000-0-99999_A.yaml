@@ -38,7 +38,7 @@ nc_attributes:
   instrument_calibration_status: calibrated
   date_of_last_absolute_calibration: '2021-12-31 23:59:59'  # dates for global attrs need to be specified as str
   date_of_last_covariance_matrix: '2021-12-31 23:59:59'  # dates for global attrs need to be specified as str
-  type_of_automatic_calibrations: opaque atmosphere at low elevation and internal load
+  type_of_automatic_calibrations: calibration with ambient temperature target and quasi-opaque atmosphere at low elevation
 
 
 # additional optional fields for nc_attributes

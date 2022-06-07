@@ -36,8 +36,7 @@ nc_attributes:
   instrument_calibration_status: calibrated
   date_of_last_absolute_calibration: '2021-12-31 23:59:59'  # dates for global attrs need to be specified as str
   date_of_last_covariance_matrix: '2021-12-31 23:59:59'  # dates for global attrs need to be specified as str
-  type_of_automatic_calibrations: gain calibration with ambient temperature target and noise diode # TODO: ask Chrisrtine for calib
-  # TODO: ask Christine what she thinks of using L0 file for date of last calib, etc. File is quite large...
+  type_of_automatic_calibrations: calibration with ambient temperature target and noise diode
 
 # additional optional fields for nc_attributes
   # network: E-PROFILE, ...
