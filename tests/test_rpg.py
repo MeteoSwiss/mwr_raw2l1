@@ -21,8 +21,10 @@ from mwr_raw2l1.main import run
 from mwr_raw2l1.utils.config_utils import get_inst_config
 from mwr_raw2l1.utils.file_utils import abs_file_path
 
-
-VARS_TO_IGNORE_GLOBAL = []  # list of variables to ignore in each test
+# list of variables to ignore in each test
+VARS_TO_IGNORE_GLOBAL = ['quality_flag', 'quality_flag_status', 'ir_azi', 'ir_ele']
+# TODO: worthwhile to check for different behaviours for above vars on missing input files and if this is intended.
+#       If intended, then rather vars_to_ignore in each subtest should be filled instead of keeping it global.
 
 
 # instrument config definition
