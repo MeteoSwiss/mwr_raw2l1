@@ -1,9 +1,10 @@
 import numpy as np
 import xarray as xr
 
-from mwr_raw2l1.errors import MissingConfig, MWRDataError
+from mwr_raw2l1.errors import MissingConfig, MWRDataError, DimensionMismatch
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement_constructors import MeasurementConstructors
+from mwr_raw2l1.measurement.measurement_helpers import channels2receiver, get_receiver_vars
 from mwr_raw2l1.measurement.measurement_qc_helpers import check_rain, check_receiver_sanity, check_sun
 from mwr_raw2l1.utils.num_utils import setbit, timedelta2s, unsetbit
 
@@ -11,14 +12,14 @@ from mwr_raw2l1.utils.num_utils import setbit, timedelta2s, unsetbit
 class Measurement(MeasurementConstructors):
 
     def run(self, conf_qc):
-        """main method of the class
+        """main method of the class completing dimensions and variables and applying quality flags
 
         Args:
             conf_qc: configuration dictionary of the quality control. For defaults use mwr_raw2l1/config/qc_config.yaml
         """
         self.set_coords()
         self.set_wavelength()
-        self.set_sidebands()
+        self.set_receivers()
         self.set_inst_params()
         self.set_time_bnds()
         self.apply_quality_control(conf_qc)
@@ -67,8 +68,23 @@ class Measurement(MeasurementConstructors):
         delta_data_conf = {varname_wavelength: delta}
         self.set_vars(varname_data_conf, delta_data_conf, dim=varname_wavelength, **kwargs)
 
-    def set_sidebands(self):
-        pass  # TODO: do sth similar to set wavelength, if possible re-use code
+    def set_receivers(self):
+        """set receiver dimension and receiver-specific variables"""
+        receiver_dim_name = 'receiver_nb'  # name of the dimension containing the receiver numbers
+
+        # set dimension receiver_dim_name and variable 'receiver'
+        self.data['receiver'] = (('frequency',), channels2receiver(self.data['frequency']))
+        receiver_nbs = np.unique(self.data['receiver'])
+        self.data = self.data.assign_coords({receiver_dim_name: receiver_nbs})
+
+        # set receiver-dependent variables
+        rec_vars = get_receiver_vars(self.data.variables)
+        for outvar, vars in rec_vars.items():
+            if len(vars) != len(self.data[receiver_dim_name]):
+                raise DimensionMismatch("expected to get data from {} receivers when setting '{}', but got from {} ({})"
+                                        .format(len(self.data[receiver_dim_name]), outvar, len(vars), vars))
+            self.data[outvar] = xr.concat([self.data[var] for var in vars], dim=receiver_dim_name)
+        pass
 
     def set_inst_params(self):
         """set instrument dependent parameters which are not dimensions (must be set before)"""

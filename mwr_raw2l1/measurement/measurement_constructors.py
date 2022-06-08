@@ -133,17 +133,15 @@ class MeasurementConstructors(object):
 
         # take mean of ambient temperature load (one load with two temperature sensors (code works with up to 9))
         tamb_vars = [var for var in data.data_vars if var[:-1] == 'T_amb_']
-        data['T_amb'] = data[tamb_vars].to_array(dim='tmpdim').mean(dim='tmpdim', skipna=True)
+        t_amb = data[tamb_vars].to_array(dim='tmpdim').mean(dim='tmpdim', skipna=True)
 
-        # TODO: prepare sensosr-dependent variables here, i.e.
-        #       - in last line: data['T_amb]= --> t_amb=
-        #       - then: data['T_amb_sensor_1'], data['T_amb_sensor_2']= t_amb, t_amb
-        #       - data['T_rec_sensor_1'] = data['T_receiver_kband']  (or rename in read-in script according to sensor nb
-        #       - data['T_rec_sensor_2'] = data['T_receiver_vband']
-        #   - after that def set_receiver_vars() in Measurement class. Will set a dimension and variable receiver_nb.
-        #   - variable receivers with dim frequency attributes a receiver number 1 or 2 (or 3, 4, 5...) to each channel
-        #     according to measurement_helpers.channels2receiver
-        #   - variables T_amb, T_rec are attributed to dimension (time, receiver_nb) from the suffix _1, _2
+        # set receiver-dependent variables (must end with _receiver_n where n=1..9)
+        data['T_amb_receiver_1'] = t_amb
+        data['T_amb_receiver_2'] = t_amb
+        data['T_rec_receiver_1'] = data['T_receiver_kband']
+        data['T_rec_receiver_2'] = data['T_receiver_vband']
+        # data['TN_receiver_1'] =
+        # data['TN_receiver_2'] =
 
         data['mfr'] = 'rpg'  # manufacturer (lowercase)
 

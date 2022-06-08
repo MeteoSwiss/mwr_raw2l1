@@ -5,6 +5,7 @@ dimensions:
     - frequency
     - ir_wavelength
     - bnds
+    - receiver_nb
 
 variables:
   time:  # variable name in Measurement.data Dataset
@@ -81,6 +82,31 @@ variables:
       standard_name: radiation_frequency
       units: GHz
       comment: For more accurate frequency values use frequency+freq_shift. Frequency indication is in signal sideband.
+
+  receiver_nb:
+    name: receiver_nb
+    dim:
+      - receiver_nb
+    type: i1
+    _FillValue: -128
+    optional: False
+    attributes:
+      long_name: Number of the microwave receiver
+      units: '1'
+      comment: Different numbers correspond to distinct receiver boards. The variable receiver indicates which frequency channels correspond to each receiver board.
+
+  receiver:
+    name: receiver
+    dim:
+      - frequency
+    type: i1
+    _FillValue: -128
+    optional: False
+    attributes:
+      long_name: Corresponding microwave receiver for each channel
+      units: '1'
+      comment: Different numbers correspond to distinct receiver boards defined in receiver_nb.
+
 
   bandwidth:
     name: bandwidth
@@ -238,12 +264,38 @@ variables:
     name: t_amb
     dim:
       - time
+      - receiver_nb
     type: f4
     _FillValue: -999.
     optional: True
     attributes:
       long_name: Ambient target temperature
       units: K
+
+  T_rec:
+    name: t_rec
+    dim:
+      - time
+      - receiver_nb
+    type: f4
+    _FillValue: -999.
+    optional: True
+    attributes:
+      long_name: Receiver physical temperature
+      units: K
+
+  TN:
+    name: tn
+    dim:
+      - time
+      - receiver_nb
+    type: f4
+    _FillValue: -999.
+    optional: True
+    attributes:
+      long_name: Receiver noise temperature
+      units: K
+
 
   ir_wavelength:
     name: ir_wavelength

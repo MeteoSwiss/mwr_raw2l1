@@ -82,6 +82,11 @@ class MissingInputArgument(MWRInputError):
 
 
 # --------------------------
+class DimensionMismatch(MWRDataError):
+    """Raised if data dimensions do not match"""
+
+
+# --------------------------
 class OutputDimensionError(MWROutputError):
     """Raised if requested output dimensions do not match data"""
 

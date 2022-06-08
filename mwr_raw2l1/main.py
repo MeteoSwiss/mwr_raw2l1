@@ -127,3 +127,5 @@ if __name__ == '__main__':
     run('config/config_0-20000-0-99999_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Attex
     run('config/config_0-20000-0-10393_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Radiometrics
     run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # RPG HATPRO
+
+    # run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml', concat=True)  # RPG
