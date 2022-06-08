@@ -130,3 +130,7 @@ if __name__ == '__main__':
 
     # For generating reference output file for test_rpg:
     # run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml', concat=True)  # RPG
+
+    # For testing Lindenberg HATPRO:
+    # run('/home/ruefenacht/Desktop/20220105_HatproG5_DWD_error_raw2l1/config_0-20000-0-10393_B.yaml',
+    #     'config/L1_format.yaml', 'config/qc_config.yaml', concat=True)

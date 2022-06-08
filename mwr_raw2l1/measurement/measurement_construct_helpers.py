@@ -238,13 +238,17 @@ def merge_brt_blb(all_data):
             blb_ts = scan_to_timeseries_from_aux(all_data['blb'], hkd=all_data['hkd'], brt=all_data['brt'])
             try:
                 out = out.merge(blb_ts, join='outer')
-            except xr.MergeError as e:
-                logger.warning('Skipping xarray merge error: {}'.format(e))
+            except xr.MergeError as e:  # on rare occasions end times of blb and brt are same (not due to scan tranform)
+                # prepare logger info and override merge problem
+                # logger.warning('Skipping xarray merge error: {}'.format(e))
+                duplicate_times = []
+                for t in blb_ts.time.values:
+                    if t in out.time:
+                        duplicate_times.append(t)
+                logger.warning(
+                    'Skipping {} of {} scanning observations due to identical timestamp with zenith obs for {}'.format(
+                        len(duplicate_times), len(blb_ts.time), duplicate_times))
                 out = out.merge(blb_ts, join='outer', compat='override')
-                # TODO: Fix the above issue. Will most probably be related to scan and zenith obs having same time
-                #       Will cause first scan obs to be overwritten by zenith. Happens from time to time for DWD.
-                #       Try to solve for sample files for 20220105 provided by Christine.
-                #       Check if also happens for concat=False
         else:
             out = scan_to_timeseries_from_aux(all_data['blb'], hkd=all_data['hkd'])
 
