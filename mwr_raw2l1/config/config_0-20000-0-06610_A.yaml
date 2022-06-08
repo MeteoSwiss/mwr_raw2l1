@@ -17,7 +17,7 @@ base_filename_out: MWR_1C01_0-20000-0-06610_A
 # ------------------
 station_latitude: 46.81
 station_longitude: 6.94
-station_altitude: 491
+station_altitude: 491.
 
 
 # instrument parameters

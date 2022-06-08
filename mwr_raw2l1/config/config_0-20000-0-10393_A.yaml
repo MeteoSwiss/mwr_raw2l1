@@ -11,7 +11,7 @@ base_filename_out: MWR_1C01_0-20000-0-10393_A
 
 station_latitude: 52.21
 station_longitude: 14.12
-station_altitude: 98
+station_altitude: 98.
 # TODO: add instrument params as for Payerne
 
 nc_attributes:

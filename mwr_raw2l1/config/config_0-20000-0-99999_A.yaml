@@ -11,7 +11,7 @@ base_filename_out: MWR_1C01_0-20000-0-99999_A
 
 station_latitude: 45.40
 station_longitude: 11.88
-station_altitude: 30
+station_altitude: 30.
 
 ir_wavelength: .NaN  # need to specify as NaN if no IR instrument present
 # TODO: add instrument params as for Payerne
