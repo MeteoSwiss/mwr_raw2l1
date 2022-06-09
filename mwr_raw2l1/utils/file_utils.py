@@ -152,3 +152,19 @@ def remove_suffix(file, sep='_'):
     """remove suffix including extension (all that comes after last 'sep') and return pure filename including path"""
     fn_parts = remove_ext(file).split(sep)
     return sep.join(fn_parts[:-1])
+
+
+def write_file_log(outfile, file_bunches):
+    """write bunches of (un)successfully processed files to an output file.
+
+    Stores each path on one line with empty line between bunches.
+
+    Args:
+        outfile: file where to write in (will be generated/overwritten)
+        file_bunches: list of file bunches i.e. a list of lists of files
+    """
+    with open(outfile, 'w') as f:
+        for bunch in file_bunches:
+            for file in bunch:
+                f.write('{}\n'.format(file))
+            f.write('\n')  # separate bunches by an empty line

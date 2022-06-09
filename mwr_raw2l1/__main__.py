@@ -2,7 +2,7 @@ import argparse
 
 import mwr_raw2l1
 from mwr_raw2l1.main import run
-from mwr_raw2l1.utils.file_utils import abs_file_path
+from mwr_raw2l1.utils.file_utils import abs_file_path, write_file_log
 
 
 def main():
@@ -31,6 +31,15 @@ def main():
     parser.add_argument('--concat', action='store_true',
                         help='concatenate all timestamps in input directory matching search criteria'
                              ' to one single output file. Default is one output file per timestamp')
+    parser.add_argument('--log_files_success',
+                        help='optional path where a list of all successfully processed files will be stored. Bunches'
+                             ' processed together are separated by empty lines. Not necessarily each file in bunch has'
+                             ' been processed (the ones not matching known extensions or suffixes are simply ignored)'
+                             ' but none caused an error.')
+    parser.add_argument('--log_files_fail',
+                        help='optional path where a list of file bunches processed with errors will be stored. Bunches'
+                             ' processed together are separated by empty lines. Often just one or a few files of each'
+                             ' bunch cause an error (see log messages).')
     args = parser.parse_args()
 
     # interpret arguments and run mwr_raw2l1
@@ -46,7 +55,13 @@ def main():
     if args.concat:
         kwargs['concat'] = args.concat
 
-    run(**kwargs, halt_on_error=False)
+    files_success, files_fail = run(**kwargs, halt_on_error=False)
+
+    # write log of processed files if requested
+    if args.log_files_success:
+        write_file_log(args.log_files_success, files_success)
+    if args.log_files_fail:
+        write_file_log(args.log_files_fail, files_fail)
 
 
 if __name__ == '__main__':
