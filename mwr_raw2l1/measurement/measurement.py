@@ -1,10 +1,10 @@
 import numpy as np
 import xarray as xr
 
-from mwr_raw2l1.errors import MissingConfig, MWRDataError, DimensionMismatch
+from mwr_raw2l1.errors import DimensionMismatch, MissingConfig, MWRDataError
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement_constructors import MeasurementConstructors
-from mwr_raw2l1.measurement.measurement_helpers import channels2receiver, get_receiver_vars
+from mwr_raw2l1.measurement.measurement_helpers import channels2receiver, get_receiver_vars, is_var_in_data
 from mwr_raw2l1.measurement.measurement_qc_helpers import check_rain, check_receiver_sanity, check_sun
 from mwr_raw2l1.utils.num_utils import setbit, timedelta2s, unsetbit
 
@@ -124,7 +124,7 @@ class Measurement(MeasurementConstructors):
 
         # missing keys in config
         elif not all(var in self.conf_inst for var in varname_data_conf.values()):
-            if all(var in self.data for var in varname_data_conf.keys()):
+            if all(is_var_in_data(self.data, var) for var in varname_data_conf.keys()):
                 logger.info('Using {} from data files without check by config values'
                             .format(list(varname_data_conf.keys())))
             else:
@@ -139,7 +139,7 @@ class Measurement(MeasurementConstructors):
         else:
             for var, acc in delta_data_conf.items():
                 # check values from config and data do not differ by too much
-                if var in self.data and not all(np.isnan(self.data[var])):
+                if is_var_in_data(self.data, var):
                     if abs(self.data[var][0] - self.conf_inst[varname_data_conf[var]]) > acc:  # speed: only check [0]
                         raise MWRDataError("'{}' in data and conf differs by more than {}".format(var, acc))
                 # (re)set variable according to conf_inst
