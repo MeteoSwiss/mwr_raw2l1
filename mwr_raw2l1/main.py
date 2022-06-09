@@ -24,6 +24,12 @@ def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, conca
         halt_on_error (optional): stop execution if an error is encountered. If False the error will be logged while the
             function continues with the next bunch of files. Defaults to True.
         **kwargs: Keyword arguments passed over to get_files function, typically 'time_start' and 'time_end'
+
+    Returns:
+        files_success: list of file bunches with successful processing. Not necessarily each file in bunch has been
+            processed (the ones not matching known extensions or suffixes are simply ignored) but none caused an error.
+        files_fail: list of file bunches which caused an error in processing. Often just one or a few files of each
+            bunch cause an error (see log messages).
     """
 
     logger.info('Running main routine for {}'.format(inst_config_file))
@@ -46,12 +52,14 @@ def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, conca
     reader = get_reader(conf_inst['reader'])
     meas_constructor = get_meas_constructor(conf_inst['meas_constructor'])
 
+    files_success = []
+    files_fail = []
     all_files = get_files(abs_file_path(conf_inst['input_directory']), conf_inst['base_filename_in'], **kwargs)
     if not all_files:
         logger.info('No files matching pattern {} in {} (in the specified time interval).'
                     ' Main routine returns without action.'.format(
                         conf_inst['base_filename_in'], conf_inst['input_directory']))
-        return
+        return files_success, files_fail
     if concat:
         file_bunches = [all_files]
     else:
@@ -63,18 +71,23 @@ def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, conca
     for files in file_bunches:
         if halt_on_error:
             process_files(files, reader, meas_constructor, conf_inst, conf_qc, conf_nc)
+            files_success.append(files)
         else:
             try:
                 process_files(files, reader, meas_constructor, conf_inst, conf_qc, conf_nc)
+                files_success.append(files)
             except Exception as e:
                 error_seen = True
                 logger.error('Error while processing {}'.format([os.path.basename(f) for f in files]))
                 logger.exception(e)
+                files_fail.append(files)
 
     if error_seen:
         logger.error('Main routine terminated with errors (see above)')
     else:
         logger.info('Main routine terminated successfully')
+
+    return files_success, files_fail
 
 
 def process_files(files, reader, meas_constructor, conf_inst, conf_qc, conf_nc):
@@ -126,7 +139,7 @@ def get_meas_constructor(name):
 if __name__ == '__main__':
     run('config/config_0-20000-0-99999_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Attex
     run('config/config_0-20000-0-10393_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Radiometrics
-    run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # RPG HATPRO
+    fs, ff = run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # RPG HATPRO
 
     # For generating reference output file for test_rpg:
     # run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml', concat=True)  # RPG
@@ -134,3 +147,4 @@ if __name__ == '__main__':
     # For testing Lindenberg HATPRO:
     # run('/home/ruefenacht/Desktop/20220105_HatproG5_DWD_error_raw2l1/config_0-20000-0-10393_B.yaml',
     #     'config/L1_format.yaml', 'config/qc_config.yaml', concat=True)
+    pass
