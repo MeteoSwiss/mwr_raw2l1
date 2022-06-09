@@ -216,7 +216,7 @@ class Measurement(MeasurementConstructors):
                 self._setbits_qc(bit_nb=2, channel=ch, mask_fail=(self.data['Tb'][:, ch] > conf_qc['Tb_threshold'][1]))
             # bit 3
             if conf_qc['check_spectral_consistency']:
-                # TODO: ask Bernhard how to best implement this. important flag, should be done.
+                # TODO: important flag, should be done. development needed. Some possible approaches in Harry's email
                 #       when done set check_spectral_consistency=True in conf_qc
                 raise NotImplementedError('checker for spectral consistency not implemented')
             # bit 4

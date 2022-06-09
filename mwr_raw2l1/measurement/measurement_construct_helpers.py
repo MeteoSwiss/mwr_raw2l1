@@ -238,9 +238,9 @@ def merge_brt_blb(all_data):
             blb_ts = scan_to_timeseries_from_aux(all_data['blb'], hkd=all_data['hkd'], brt=all_data['brt'])
             try:
                 out = out.merge(blb_ts, join='outer')
-            except xr.MergeError as e:  # on rare occasions end times of blb and brt are same (not due to scan tranform)
+            except xr.MergeError:  # on rare occasions end times of blb and brt are same (not due to scan tranform)
                 # prepare logger info and override merge problem
-                # logger.warning('Skipping xarray merge error: {}'.format(e))
+                # logger.warning('Skipping xarray merge error: {}'.format(e)) # would need to except as e above
                 duplicate_times = []
                 for t in blb_ts.time.values:
                     if t in out.time:

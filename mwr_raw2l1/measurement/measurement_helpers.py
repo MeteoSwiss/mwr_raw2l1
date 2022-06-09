@@ -49,7 +49,7 @@ def get_receiver_vars(varnames, search_pattern='receiver', sep='_'):
         a dictionary where the keys correspond to the base variable name and the values contain a list of all receiver-
         specific variables contributing to this base variable name
     """
-    var_basenames, variables, receiver_nbs = [], [], []
+    variables = []
     for var in sorted(varnames):
         var_parts = var.split(sep)
         if len(var_parts) > 2 and var_parts[-2] == search_pattern:
@@ -70,7 +70,7 @@ def split_receiver(varname, sep='_'):
     """split off receiver part (i.e. part after second-last sep) from varname"""
     try:
         basename_parts = varname.split(sep)[:-2]
-    except IndexError as e:
+    except IndexError:
         raise WrongInputFormat("input argument 'varname' does not seem to have a receiver suffix. "
                                "Expected sth like 'xxx_receiver_1'")
     return sep.join(basename_parts)
@@ -78,6 +78,5 @@ def split_receiver(varname, sep='_'):
 
 if __name__ == '__main__':
     out = channels2receiver([22.2, 23.0, 23.8, 25.4, 26.2, 27.8, 31.4, 51.3, 52.3, 53.9, 54.9, 56.7, 57.3, 58.0, 183])
-    print(out)
 
     vars = get_receiver_vars(['T_amb_receiver_1', 'receiver_nb', 'T', 'T_amb_receiver_2'])
