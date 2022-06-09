@@ -56,7 +56,6 @@ class Reader(object):
         data = get_data(self.data_raw[rec_type_nb], self.header['col_headers'][rec_type_nb], no_mwr=True)
         check_vars(data, mandatory_vars)
         self.data['aux'] = data
-        self.add_ir_wavelength()
 
     def _read_header(self, csv_lines):
         """read the header of the csv data (all 10-divisible record type numbers and 99)"""
@@ -108,11 +107,6 @@ class Reader(object):
             self.data_raw[rec_type] = x
         for rec_type in empty_rec:
             del self.data_raw[rec_type]
-
-    def add_ir_wavelength(self):
-        """add the wavelength of IR sensor from config"""
-        self.data['aux']['ir_wavelength'] = np.array([10.5])
-        # TODO: externalise to config and only set in Measurement
 
 
 def read_multiple_files(files):

@@ -29,7 +29,7 @@ beamwidth: [.NaN, .NaN, .NaN, .NaN, .NaN, .NaN, .NaN,
             .NaN, .NaN, .NaN, .NaN, .NaN, .NaN, .NaN]
 ir_bandwidth: .NaN
 ir_beamwidth: .NaN
-# ir_wavelength: # not mandatory to specify if available in data
+# ir_wavelength: # in nm. not mandatory to specify if available in data
 
 # the following parameters are potentially varying with time:
 freq_shift:  [0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000,  # K-band; in GHz

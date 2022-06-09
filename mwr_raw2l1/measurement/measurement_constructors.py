@@ -56,7 +56,7 @@ class MeasurementConstructors(object):
         """
         # dimensions and variable names for usage with make_dataset
         dims = {'mwr': ['time', 'frequency'],
-                'aux': ['time', 'ir_wavelength']}  # TODO: wavelength was added in reader, if from config better here
+                'aux': ['time']}
         vars = {'mwr': ['Tb', 'ele', 'azi', 'quality'],
                 'aux': ['IRT', 'p', 'T', 'RH', 'rainflag', 'quality']}
         vars_opt = {'mwr': [],

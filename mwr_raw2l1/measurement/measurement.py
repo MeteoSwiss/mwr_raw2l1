@@ -46,9 +46,9 @@ class Measurement(MeasurementConstructors):
         self.set_vars(varname_data_conf, delta_data_conf, **kwargs)
 
     def set_wavelength(self, delta=1, **kwargs):
-        """(re)set wavelength of infrared radiometer in self.data accounting for self.conf_inst
+        """(re)set wavelength of infrared radiometer in self.data accounting for self.conf_inst. Also add as dimension.
 
-        If both are available the method checks consistency between wavelength in datafile and configuration.
+        If conf and data are available the method checks consistency between wavelength in datafile and configuration.
         For self.conf_inst to be usable it must contain key ir_wavelength.
         If self.conf_inst is None, variables are taken from datafile without any checks and an error is raised if any
         variable is missing in data.

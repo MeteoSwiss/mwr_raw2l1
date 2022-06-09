@@ -13,6 +13,7 @@ station_latitude: 52.21
 station_longitude: 14.12
 station_altitude: 98.
 # TODO: add instrument params as for Payerne
+ir_wavelength: 10.5  # in nm. not mandatory to specify if available in data
 
 nc_attributes:
   # title: do not set 'title' attribute unless you have a very good reason to deviate from the default
