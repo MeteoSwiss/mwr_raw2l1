@@ -146,8 +146,9 @@ class MeasurementConstructors(object):
             data['azi'] = data['azi'].fillna(azi_med)
 
         # apply scan_quadrant for blb azimuth (azi for scan_quadrant=1 already correct)
-        data['azi'][data['scan_quadrant'] == 2] = np.mod(azi_med + 180, 360)
-        data['azi'][data['scan_quadrant'] == 0] = np.nan
+        if 'scan_quadrant' in data:  # mandatory for BLB, but will not be present for BRT, where azi can be left as is
+            data['azi'][data['scan_quadrant'] == 2] = np.mod(azi_med + 180, 360)
+            data['azi'][data['scan_quadrant'] == 0] = np.nan
 
         # set receiver-dependent variables (must end with _receiver_n where n=1..9)
         data['T_amb_receiver_1'] = t_amb
