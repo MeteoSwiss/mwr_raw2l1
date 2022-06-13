@@ -35,7 +35,7 @@ ir_beamwidth: .NaN
 freq_shift:  [0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000,  # K-band; in GHz
               0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000]  # V-band; in GHz
 channels_ok: [1, 1, 1, 1, 1, 1, 1,  # K-band; 1=ok(unless an issue found in QC), 0=flag as bad
-              1, 1, 1, 1, 1, 1, 1]  # V-band; 1=ok(unless an issue found in QC), 0=flag as bad  # TODO: use this in quality_flag
+              1, 1, 1, 1, 1, 1, 1]  # V-band; 1=ok(unless an issue found in QC), 0=flag as bad
 
 
 # NetCDF global attributes

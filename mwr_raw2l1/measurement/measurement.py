@@ -222,6 +222,9 @@ class Measurement(MeasurementConstructors):
             # bit 4
             if conf_qc['check_receiver_sanity']:
                 mask_fail, check_applied = check_receiver_sanity(self.data, ch)
+                # if channel is described as not ok in config, always set sanity as failing for this channel
+                if 'channels_ok' in self.conf_inst and not self.conf_inst['channels_ok'][ch]:
+                    mask_fail[:] = True
                 if check_applied:
                     self._setbits_qc(bit_nb=4, channel=ch, mask_fail=mask_fail)
                 else:  # if check cannot be applied to one channel, it cannot be applied to any (because a var misses)
