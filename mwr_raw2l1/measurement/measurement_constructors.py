@@ -131,27 +131,32 @@ class MeasurementConstructors(object):
                 flags_here = flagval * np.ones(np.shape(all_data[src].time), dtype=DTYPE_SCANFLAG)
                 all_data[src]['scanflag'] = ('time', flags_here)
         mwr_data = merge_brt_blb(all_data)
+
+        # merge auxiliary data
+        all_data['irt'] = all_data['irt'].rename({'azi': 'azi_irt'})  # otherwise azi_irt set as azi if BRT file absent
         data = merge_aux_data(mwr_data, all_data)
 
         # take mean of ambient temperature load (one load with two temperature sensors (code works with up to 9))
         tamb_vars = [var for var in data.data_vars if var[:-1] == 'T_amb_']
         t_amb = data[tamb_vars].to_array(dim='tmpdim').mean(dim='tmpdim', skipna=True)
 
-        # fix for variables potentially only available in blb or brt
+        # use T_met instead of T from BLB for temperature (T not available in BRT)
         if is_var_in_data(data, 'T_met'):  # assume that if there is one non-NaN in T_met, whole timeseries is there
             # cleanest check but very slow:
             #     is_full_var_in_data(data, 'T_met')
             # much faster check but leading to changing  temperature source (MET or BLB) depending on presence of BRT:
             #     not is_full_var_in_data(data, 'T') and is_var_in_data(data, 'T_met')
             data['T'] = data['T_met']
-        azi_med = data['azi'].median(skipna=True)  # outside if-clause for re-using below
-        if any(data['azi'].isnull()) and (data['azi'].max(skipna=True) - data['azi'].min(skipna=True)) < max_azi_offset:
-            data['azi'] = data['azi'].fillna(azi_med)
 
-        # apply scan_quadrant for blb azimuth (azi for scan_quadrant=1 already correct)
-        if 'scan_quadrant' in data:  # mandatory for BLB, but will not be present for BRT, where azi can be left as is
-            data['azi'][data['scan_quadrant'] == 2] = np.mod(azi_med + 180, 360)
-            data['azi'][data['scan_quadrant'] == 0] = np.nan
+        # if possible re-use azi from BRT and correct with scan_quadrant during scns
+        if 'azi' in data:
+            azi_med = data['azi'].median(skipna=True)  # outside if-clause for re-using below
+            if any(data['azi'].isnull()) and (data['azi'].max(skipna=True) - data['azi'].min(skipna=True)) < max_azi_offset:
+                data['azi'] = data['azi'].fillna(azi_med)
+            # apply scan_quadrant for BLB azimuth (azi for scan_quadrant=1 already correct)
+            if 'scan_quadrant' in data:  # mandatory for BLB, but not be present for BRT, where azi can be left as is
+                data['azi'][data['scan_quadrant'] == 2] = np.mod(azi_med + 180, 360)
+                data['azi'][data['scan_quadrant'] == 0] = np.nan
 
         # set receiver-dependent variables (must end with _receiver_n where n=1..9)
         data['T_amb_receiver_1'] = t_amb
