@@ -138,8 +138,11 @@ class MeasurementConstructors(object):
         t_amb = data[tamb_vars].to_array(dim='tmpdim').mean(dim='tmpdim', skipna=True)
 
         # fix for variables potentially only available in blb or brt
-        if not is_full_var_in_data(data, 'T') and is_var_in_data(data, 'T_met'):
-            # above double check normally much faster than is_full_var_in_data(data, 'T_met')
+        if is_var_in_data(data, 'T_met'):  # assume that if there is one non-NaN in T_met, whole timeseries is there
+            # cleanest check but very slow:
+            #     is_full_var_in_data(data, 'T_met')
+            # much faster check but leading to changing  temperature source (MET or BLB) depending on presence of BRT:
+            #     not is_full_var_in_data(data, 'T') and is_var_in_data(data, 'T_met')
             data['T'] = data['T_met']
         azi_med = data['azi'].median(skipna=True)  # outside if-clause for re-using below
         if any(data['azi'].isnull()) and (data['azi'].max(skipna=True) - data['azi'].min(skipna=True)) < max_azi_offset:
