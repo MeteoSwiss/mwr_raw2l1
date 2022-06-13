@@ -10,6 +10,11 @@ def is_var_in_data(data, var):
     return var in data and not all(np.isnan(data[var]))
 
 
+def is_full_var_in_data(data, var):
+    """Return False if 'var' is not in data or if any value of data['var'] is NaN, otherwise True"""
+    return var in data and not any(np.isnan(data[var]))
+
+
 def channels2receiver(freq, band_limits=None, base=1):
     """attribute receiver numbers (1, 2, ...) to frequency channels according to frequency bands
 

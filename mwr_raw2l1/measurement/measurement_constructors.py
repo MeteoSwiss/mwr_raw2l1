@@ -4,6 +4,7 @@ from mwr_raw2l1.errors import MissingDataSource
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement_construct_helpers import (attex_to_datasets, merge_aux_data, merge_brt_blb,
                                                                   radiometrics_to_datasets, rpg_to_datasets)
+from mwr_raw2l1.measurement.measurement_helpers import is_full_var_in_data, is_var_in_data
 from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries_from_scanonly, scanflag_from_ele
 
 DTYPE_SCANFLAG = 'u1'  # data type used for scanflags set by Measurement class
@@ -94,7 +95,7 @@ class MeasurementConstructors(object):
                 'met': ['time'],
                 'hkd': ['time', 'channels']}
         vars = {'brt': ['Tb', 'rainflag', 'ele', 'azi'],
-                'blb': ['Tb', 'T', 'rainflag', 'scan_quadrant'],  # TODO: ask Bernhard: find way to infer 'azi' from blb
+                'blb': ['Tb', 'T', 'rainflag', 'scan_quadrant'],
                 'irt': ['IRT', 'rainflag', 'ele', 'azi'],  # ele/azi will become ele_irt/azi_irt as also present in MWR
                 'met': ['p', 'T', 'RH'],
                 'hkd': ['alarm']}
@@ -108,6 +109,7 @@ class MeasurementConstructors(object):
                             'Tstab_ok_kband', 'Tstab_ok_vband', 'Tstab_ok_amb']}
 
         scanflag_values = {'brt': 0, 'blb': 1}  # for generating a scan flag indicating whether scanning or zenith obs
+        max_azi_offset = 1  # maximum offset between all values in azimuth vector to be considered identical (degrees)
 
         logger.info('Creating instance of Measurement class from RPG data')
 
@@ -134,6 +136,18 @@ class MeasurementConstructors(object):
         # take mean of ambient temperature load (one load with two temperature sensors (code works with up to 9))
         tamb_vars = [var for var in data.data_vars if var[:-1] == 'T_amb_']
         t_amb = data[tamb_vars].to_array(dim='tmpdim').mean(dim='tmpdim', skipna=True)
+
+        # fix for variables potentially only available in blb or brt
+        if not is_full_var_in_data(data, 'T') and is_var_in_data(data, 'T_met'):
+            # above double check normally much faster than is_full_var_in_data(data, 'T_met')
+            data['T'] = data['T_met']
+        azi_med = data['azi'].median(skipna=True)  # outside if-clause for re-using below
+        if any(data['azi'].isnull()) and (data['azi'].max(skipna=True) - data['azi'].min(skipna=True)) < max_azi_offset:
+            data['azi'] = data['azi'].fillna(azi_med)
+
+        # apply scan_quadrant for blb azimuth (azi for scan_quadrant=1 already correct)
+        data['azi'][data['scan_quadrant'] == 2] = np.mod(azi_med + 180, 360)
+        data['azi'][data['scan_quadrant'] == 0] = np.nan
 
         # set receiver-dependent variables (must end with _receiver_n where n=1..9)
         data['T_amb_receiver_1'] = t_amb

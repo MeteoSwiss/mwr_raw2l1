@@ -137,8 +137,8 @@ def get_meas_constructor(name):
 
 
 if __name__ == '__main__':
-    run('config/config_0-20000-0-99999_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Attex
-    run('config/config_0-20000-0-10393_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Radiometrics
+    #run('config/config_0-20000-0-99999_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Attex
+    #run('config/config_0-20000-0-10393_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Radiometrics
     fs, ff = run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # RPG HATPRO
 
     # For generating reference output file for test_rpg:
