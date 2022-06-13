@@ -66,7 +66,7 @@ class Measurement(MeasurementConstructors):
 
         varname_data_conf = {varname_wavelength: 'ir_wavelength'}
         delta_data_conf = {varname_wavelength: delta}
-        self.set_vars(varname_data_conf, delta_data_conf, dim=varname_wavelength, **kwargs)
+        self.set_vars(varname_data_conf, delta_data_conf, dim=varname_wavelength, accept_unset=True, **kwargs)
 
     def set_receivers(self):
         """set receiver dimension and receiver-specific variables"""
