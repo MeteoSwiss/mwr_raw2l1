@@ -83,7 +83,7 @@ def check_sun(data, delta_ele, delta_azi):
     return mask_fail, check_applied
 
 
-def orbit_position_interp(data, delta_t=300, **kwargs):
+def orbit_position_interp(data, delta_t=600, **kwargs):
     """wrapper to :func:`orbit_position` doing orbit calculations only each 'delta_t' seconds and interpolate to time"""
 
     time_rough = np.append(np.arange(data['time'][0].values, data['time'][-1].values, np.timedelta64(delta_t, 's')),
