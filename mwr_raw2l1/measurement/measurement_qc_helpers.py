@@ -62,18 +62,25 @@ def check_sun(data, delta_ele, delta_azi):
     Returns:
         tuple containing:
             mask_fail: None if check_applied=False, otherwise array of size (time,) set True where sun is in beam
-            check_applied (bool): True if check was applied, False if check could not be applied (no ele/azi in data)
+            check_applied: array True if check was applied, False if check could not be applied (no ele/azi in data)
     """
     if 'azi' not in data or 'ele' not in data:
         logger.warning("Cannot set solar flag as 'azi' or 'ele' is missing in data.")
-        return None, False
-    if data.azi.isnull().any() or data.ele.isnull().any():
-        logger.warning("Cannot set solar flag as NaN was found in 'azi' or 'ele'.")
-        return None, False
+        return None, np.full(np.shape(data.time), False)
 
     ele_sun, azi_sun = orbit_position_interp(data)  # additional keyword arg body='moon' could be used for lunar flag
-    mask = np.logical_and(np.abs(data.ele - ele_sun) < delta_ele, np.abs(data.azi - azi_sun) < delta_azi)
-    return mask, True
+    mask_fail = np.logical_and(np.abs(data.ele - ele_sun) < delta_ele, np.abs(data.azi - azi_sun) < delta_azi)
+    check_applied = np.full(np.shape(data.time), True)
+
+    # handle some missing pointing (indicated as not failing, but not checked)
+    if data.azi.isnull().any() or data.ele.isnull().any():
+        logger.info("Cannot set solar flag for all times as NaN was found in 'azi' or 'ele'."
+                    " Could be due to double-side scan, when azi is not unambiguous")
+        no_pointing = np.logical_or(data.azi.isnull(), data.ele.isnull())
+        mask_fail[no_pointing] = False
+        check_applied[no_pointing] = False
+
+    return mask_fail, check_applied
 
 
 def orbit_position_interp(data, delta_t=300, **kwargs):

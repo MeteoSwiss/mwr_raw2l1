@@ -230,8 +230,8 @@ class Measurement(MeasurementConstructors):
             if conf_qc['check_rain'] and check_rain_applied:
                 self._setbits_qc(bit_nb=5, channel=ch, mask_fail=mask_rain)
             # bit 6
-            if conf_qc['check_sun'] and check_sun_applied:
-                self._setbits_qc(bit_nb=6, channel=ch, mask_fail=mask_sun)
+            if conf_qc['check_sun'] and any(check_sun_applied):
+                self._setbits_qc(bit_nb=6, channel=ch, mask_fail=mask_sun, mask_applied=check_sun_applied)
             # bit 7
             if conf_qc['check_Tb_offset']:
                 NotImplementedError('checker for Tb_offset not implemented')  # not most important, same for ACTRIS
@@ -241,7 +241,7 @@ class Measurement(MeasurementConstructors):
             qc_thresholds += ' Tb_min={},'.format(conf_qc['Tb_threshold'][0])
         if conf_qc['check_max_Tb']:
             qc_thresholds += ' Tb_max={},'.format(conf_qc['Tb_threshold'][1])
-        if conf_qc['check_sun'] and check_sun_applied:
+        if conf_qc['check_sun'] and any(check_sun_applied):
             qc_thresholds += ' delta_ele_sun={},'.format(conf_qc['delta_ele_sun'])
             qc_thresholds += ' delta_azi_sun={},'.format(conf_qc['delta_azi_sun'])
         # remove tailing comma if needed and store to self.data
@@ -249,10 +249,13 @@ class Measurement(MeasurementConstructors):
             qc_thresholds = qc_thresholds[:-1]
         self.data['qc_thresholds'] = qc_thresholds
 
-    def _setbits_qc(self, bit_nb, channel, mask_fail):
+    def _setbits_qc(self, bit_nb, channel, mask_fail, mask_applied=None):
         """set values for quality_flag and quality_flag status for executed checks"""
+        if mask_applied is None:
+            mask_applied = np.full(np.shape(self.data.time), True)
         self.data['quality_flag'][mask_fail, channel] = setbit(self.data['quality_flag'][mask_fail, channel], bit_nb)
-        self.data['quality_flag_status'][:, channel] = unsetbit(self.data['quality_flag_status'][:, channel], bit_nb)
+        self.data['quality_flag_status'][mask_applied, channel] = unsetbit(
+            self.data['quality_flag_status'][mask_applied, channel], bit_nb)
 
 
 if __name__ == '__main__':
