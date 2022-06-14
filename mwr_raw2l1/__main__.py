@@ -31,6 +31,13 @@ def main():
     parser.add_argument('--concat', action='store_true',
                         help='concatenate all timestamps in input directory matching search criteria'
                              ' to one single output file. Default is one output file per timestamp')
+    parser.add_argument('--timestamp_src',
+                        help="source of output file timestamp. Can be 'instamp_min'/'instamp_max' for using"
+                             " smallest/largest timestamp of input filenames or 'time_min'/'time_max' for"
+                             ' smallest/largest time in data.'
+                             " Care for options 'instamp_min' or 'instamp_max': each file matching search pattern and"
+                             ' having a timestamp is subject to provide the output timestamp even if the file is not of'
+                             " a type readable by the package. Defaults to 'instamp_min'.")
     parser.add_argument('--log_files_success',
                         help='optional path where a list of all successfully processed files will be stored. Bunches'
                              ' processed together are separated by empty lines. Not necessarily each file in bunch has'
@@ -54,6 +61,8 @@ def main():
         kwargs['time_end'] = args.time_end
     if args.concat:
         kwargs['concat'] = args.concat
+    if args.timestamp_src:
+        kwargs['timestamp_src'] = args.timestamp_src
 
     files_success, files_fail = run(**kwargs, halt_on_error=False)
 
