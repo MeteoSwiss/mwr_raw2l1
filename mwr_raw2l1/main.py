@@ -12,7 +12,7 @@ from mwr_raw2l1.write_netcdf import Writer
 
 
 def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, concat=False, halt_on_error=True,
-        output_timestamp_style='time_max', **kwargs):
+        output_timestamp_style='instamp_min', **kwargs):
     """main function reading in raw files, generating and processing measurement instance and writing output file
 
     Args:
@@ -26,7 +26,8 @@ def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, conca
             function continues with the next bunch of files. Defaults to True.
         output_timestamp_style (optional): style of output file timestamp. Can be 'instamp_min'/'instamp_max' for using
             smallest/largest timestamp of input filenames or 'time_min'/'time_max' for smallest/largest time in data.
-            Defaults to 'time_max'
+            Care for instamp options: each file matching search pattern and having a timestamp is subject to provide the
+            output timestamp even if the file is not of a type readable by the package. Defaults to 'instamp_min'.
         **kwargs: Keyword arguments passed over to :func:`get_files`, typically 'time_start' and 'time_end'
 
     Returns:
