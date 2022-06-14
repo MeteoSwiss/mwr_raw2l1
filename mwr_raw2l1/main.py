@@ -11,7 +11,8 @@ from mwr_raw2l1.utils.file_utils import abs_file_path, generate_output_filename,
 from mwr_raw2l1.write_netcdf import Writer
 
 
-def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, concat=False, halt_on_error=True, **kwargs):
+def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, concat=False, halt_on_error=True,
+        output_timestamp_style='time_max', **kwargs):
     """main function reading in raw files, generating and processing measurement instance and writing output file
 
     Args:
@@ -23,7 +24,10 @@ def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, conca
             Defaults to False.
         halt_on_error (optional): stop execution if an error is encountered. If False the error will be logged while the
             function continues with the next bunch of files. Defaults to True.
-        **kwargs: Keyword arguments passed over to get_files function, typically 'time_start' and 'time_end'
+        output_timestamp_style (optional): style of output file timestamp. Can be 'instamp_min'/'instamp_max' for using
+            smallest/largest timestamp of input filenames or 'time_min'/'time_max' for smallest/largest time in data.
+            Defaults to 'time_max'
+        **kwargs: Keyword arguments passed over to :func:`get_files`, typically 'time_start' and 'time_end'
 
     Returns:
         files_success: list of file bunches with successful processing. Not necessarily each file in bunch has been
@@ -70,11 +74,11 @@ def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, conca
     error_seen = False
     for files in file_bunches:
         if halt_on_error:
-            process_files(files, reader, meas_constructor, conf_inst, conf_qc, conf_nc)
+            process_files(files, reader, meas_constructor, conf_inst, conf_qc, conf_nc, output_timestamp_style)
             files_success.append(files)
         else:
             try:
-                process_files(files, reader, meas_constructor, conf_inst, conf_qc, conf_nc)
+                process_files(files, reader, meas_constructor, conf_inst, conf_qc, conf_nc, output_timestamp_style)
                 files_success.append(files)
             except Exception as e:
                 error_seen = True
@@ -90,7 +94,7 @@ def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, conca
     return files_success, files_fail
 
 
-def process_files(files, reader, meas_constructor, conf_inst, conf_qc, conf_nc):
+def process_files(files, reader, meas_constructor, conf_inst, conf_qc, conf_nc, output_timestamp_style):
     """process the input files with indicated reader, meas_constructor and conf dictionaries.
 
     All input files will be concatenated to one output file
@@ -104,7 +108,8 @@ def process_files(files, reader, meas_constructor, conf_inst, conf_qc, conf_nc):
 
     # write output
     # ------------
-    outfile = generate_output_filename(conf_inst['base_filename_out'], meas.data['time'])
+    outfile = generate_output_filename(conf_inst['base_filename_out'], output_timestamp_style,
+                                       files_in=files, time=meas.data['time'])
     outfile_with_path = os.path.join(abs_file_path(conf_inst['output_directory']), outfile)
     nc_writer = Writer(meas.data, outfile_with_path, conf_nc, conf_inst)
     nc_writer.run()
@@ -141,7 +146,7 @@ if __name__ == '__main__':
     run('config/config_0-20000-0-10393_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Radiometrics
     fs, ff = run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # RPG HATPRO
 
-    # For generating reference output file for test_rpg:
+    # For generating reference output file for test_rpg and testing concat option:
     # run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml', concat=True)  # RPG
 
     # For testing Lindenberg HATPRO:

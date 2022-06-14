@@ -116,15 +116,43 @@ def timestamp_to_float(timestamp):
     return int(timestamp)/10**len(timestamp)
 
 
-def generate_output_filename(basename, time, ext='nc'):
-    """generate filename from basename, ext and end time inferred from data time vector (basename_yyyymmddHHMM.ext)
+def generate_output_filename(basename, timestamp_style, files_in=None, time=None, ext='nc'):
+    """generate filename in form {basename}{timestamp}.{ext} where timestamp comes from input files or time vector
 
     Args:
         basename: the first part of the filename without the date
+        timestamp_style: style of output file timestamp.
+            Can be 'instamp_min'/'instamp_max' for using smallest/largest timestamp of input filenames (needs 'files_in)
+            or 'time_min'/'time_max' for smallest/largest time in data in format yyyymmddHHMM (needs 'time').
+        files_in: list of input filenames to processing as a basis for timestamp selection
         time: :class:`xarray.DataArray` time vector of the data in :class:`numpy.datetime64` format. Assume to be sorted
         ext (optional): filename extension. Defaults to 'nc'. Empty not permitted.
     """
-    return '{}{}.{}'.format(basename, time[-1].dt.strftime('%Y%m%d%H%M').data, ext)
+    format_stamp = '%Y%m%d%H%M'  # only used for timestamp_style='time_min' or 'time_max'
+
+    # handle input
+    if timestamp_style in ['instamp_min', 'instamp_max']:
+        if files_in is None:
+            raise MWRInputError("if timestamp_style is 'instamp_min' or 'instamp_max' input 'files_in' must be given")
+        timestamps = sorted([datestr_from_filename(f) for f in files_in], key=timestamp_to_float)
+    elif timestamp_style in ['time_min', 'time_max']:
+        if time is None:
+            raise MWRInputError("if timestamp_style is 'time_min' or 'time_max' input 'time' must be given")
+
+    # produce output timestamp
+    if timestamp_style == 'instamp_min':
+        timestamp = timestamps[0]
+    elif timestamp_style == 'instamp_max':
+        timestamp = timestamps[-1]
+    elif timestamp_style == 'time_min':
+        timestamp = time[0].dt.strftime(format_stamp).data
+    elif timestamp_style == 'time_max':
+        timestamp = time[-1].dt.strftime(format_stamp).data
+    else:
+        raise MWRInputError("Known values for 'timestamp_style' are {} but found '{}'".format(
+            "['instamp_min', 'instamp_max', 'time_min', 'time_max']", timestamp_style))
+
+    return '{}{}.{}'.format(basename, timestamp, ext)
 
 
 def group_files(files, name_scheme):
@@ -173,3 +201,9 @@ def write_file_log(outfile, file_bunches):
             for file in bunch:
                 f.write('{}\n'.format(file))
             f.write('\n')  # separate bunches by an empty line
+
+
+if __name__ == '__main__':
+    fn = generate_output_filename('asfd', 'instamp_max', files_in=['lkja_q20220102', 'asdfa_202201020001', 'lkjlj_20220103'])
+    print(fn)
+    pass
