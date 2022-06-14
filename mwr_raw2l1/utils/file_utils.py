@@ -116,41 +116,41 @@ def timestamp_to_float(timestamp):
     return int(timestamp)/10**len(timestamp)
 
 
-def generate_output_filename(basename, timestamp_style, files_in=None, time=None, ext='nc'):
+def generate_output_filename(basename, timestamp_src, files_in=None, time=None, ext='nc'):
     """generate filename in form {basename}{timestamp}.{ext} where timestamp comes from input files or time vector
 
     Args:
         basename: the first part of the filename without the date
-        timestamp_style: style of output file timestamp.
+        timestamp_src: source of output file timestamp.
             Can be 'instamp_min'/'instamp_max' for using smallest/largest timestamp of input filenames (needs 'files_in)
             or 'time_min'/'time_max' for smallest/largest time in data in format yyyymmddHHMM (needs 'time').
         files_in: list of input filenames to processing as a basis for timestamp selection
         time: :class:`xarray.DataArray` time vector of the data in :class:`numpy.datetime64` format. Assume to be sorted
         ext (optional): filename extension. Defaults to 'nc'. Empty not permitted.
     """
-    format_stamp = '%Y%m%d%H%M'  # only used for timestamp_style='time_min' or 'time_max'
+    format_stamp = '%Y%m%d%H%M'  # only used for timestamp_src='time_min' or 'time_max'
 
     # handle input
-    if timestamp_style in ['instamp_min', 'instamp_max']:
+    if timestamp_src in ['instamp_min', 'instamp_max']:
         if files_in is None:
-            raise MWRInputError("if timestamp_style is 'instamp_min' or 'instamp_max' input 'files_in' must be given")
+            raise MWRInputError("if timestamp_src is 'instamp_min' or 'instamp_max' input 'files_in' must be given")
         timestamps = sorted([datestr_from_filename(f) for f in files_in], key=timestamp_to_float)
-    elif timestamp_style in ['time_min', 'time_max']:
+    elif timestamp_src in ['time_min', 'time_max']:
         if time is None:
-            raise MWRInputError("if timestamp_style is 'time_min' or 'time_max' input 'time' must be given")
+            raise MWRInputError("if timestamp_src is 'time_min' or 'time_max' input 'time' must be given")
 
     # produce output timestamp
-    if timestamp_style == 'instamp_min':
+    if timestamp_src == 'instamp_min':
         timestamp = timestamps[0]
-    elif timestamp_style == 'instamp_max':
+    elif timestamp_src == 'instamp_max':
         timestamp = timestamps[-1]
-    elif timestamp_style == 'time_min':
+    elif timestamp_src == 'time_min':
         timestamp = time[0].dt.strftime(format_stamp).data
-    elif timestamp_style == 'time_max':
+    elif timestamp_src == 'time_max':
         timestamp = time[-1].dt.strftime(format_stamp).data
     else:
-        raise MWRInputError("Known values for 'timestamp_style' are {} but found '{}'".format(
-            "['instamp_min', 'instamp_max', 'time_min', 'time_max']", timestamp_style))
+        raise MWRInputError("Known values for 'timestamp_src' are {} but found '{}'".format(
+            "['instamp_min', 'instamp_max', 'time_min', 'time_max']", timestamp_src))
 
     return '{}{}.{}'.format(basename, timestamp, ext)
 
