@@ -21,10 +21,8 @@ from mwr_raw2l1.main import run
 from mwr_raw2l1.utils.config_utils import get_inst_config
 from mwr_raw2l1.utils.file_utils import abs_file_path
 
-# list of variables to ignore in each test
-VARS_TO_IGNORE_GLOBAL = ['quality_flag', 'quality_flag_status', 'ir_azi', 'ir_ele']
-# TODO: worthwhile to check for different behaviours for above vars on missing input files and if this is intended.
-#       If intended, then rather vars_to_ignore in each subtest should be filled instead of keeping it global.
+# list of variables to ignore in each test (best practice: only use for updating tests, otherwise set in sub-tests)
+VARS_TO_IGNORE_GLOBAL = []
 
 
 # instrument config definition
@@ -40,7 +38,7 @@ nc_format_config_file = abs_file_path('mwr_raw2l1/config/L1_format.yaml')
 qc_config_file = abs_file_path('mwr_raw2l1/config/qc_config.yaml')
 
 # reference output file to compare against
-reference_output = str(abs_file_path('tests/data/rpg/reference_output/MWR_1C01_0-20000-0-06610_A201908042359.nc'))
+reference_output = str(abs_file_path('tests/data/rpg/reference_output/MWR_1C01_0-20000-0-06610_A201908040100.nc'))
 
 
 class TestRPG(unittest.TestCase):
@@ -76,7 +74,7 @@ class TestRPG(unittest.TestCase):
     @patch('mwr_raw2l1.main.get_files')
     def test_no_irt(self, get_files_mock):
         """Test main function runs ok when IRT files are missing"""
-        vars_to_ignore = ['irt', 'ir_wavelength']
+        vars_to_ignore = ['irt', 'ir_wavelength', 'ir_azi', 'ir_ele']
         get_files_mock.return_value = self.infiles_mock(['.IRT'])
         self.single_test_call_series(vars_to_ignore)
         get_files_mock.assert_called()
@@ -93,7 +91,7 @@ class TestRPG(unittest.TestCase):
     @patch('mwr_raw2l1.main.get_files')
     def test_no_brt(self, get_files_mock):
         """Test main function runs ok when BRT files are missing"""
-        vars_to_ignore = ['azi']  # TODO: fix this after found correct way to encode azi in the case of BLB is present
+        vars_to_ignore = ['azi', 'quality_flag', 'quality_flag_status']  # azi not encoded in BLB, sun flag needs azi
         get_files_mock.return_value = self.infiles_mock(['.BRT'])
         self.single_test_call_series(vars_to_ignore, check_timeseries_length=False)
         get_files_mock.assert_called()
@@ -101,9 +99,8 @@ class TestRPG(unittest.TestCase):
     @patch('mwr_raw2l1.main.get_files')
     def test_no_blb(self, get_files_mock):
         """Test main function runs ok when BLB files are missing"""
-        vars_to_ignore = ['air_temperature']  # TODO: fix this after found correct way to encode T in absence of BLB
         get_files_mock.return_value = self.infiles_mock(['.BLB'])
-        self.single_test_call_series(vars_to_ignore, check_timeseries_length=False)
+        self.single_test_call_series(check_timeseries_length=False)
         get_files_mock.assert_called()
 
     @patch('mwr_raw2l1.main.get_files')
