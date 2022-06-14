@@ -78,11 +78,11 @@ def get_files(dir_in, basename, time_start=None, time_end=None):
             files.remove(file)
             mwr_raw2l1.log.logger.warning("Cannot process '{}' as filename doesn't match expected pattern".format(file))
         if time_start is not None:
-            if int(fn_date)/10**len(fn_date) < int(time_start)/10**len(time_start):
+            if timestamp_to_float(fn_date) < timestamp_to_float(time_start):
                 files.remove(file)
                 continue
         if time_end is not None:
-            if int(fn_date)/10**len(fn_date) > int(time_end)/10**len(time_end):
+            if timestamp_to_float(fn_date) > timestamp_to_float(time_end):
                 files.remove(file)
                 continue
 
@@ -106,9 +106,14 @@ def datestr_from_filename(filename):
             continue
         if block.isdecimal():
             return block
-        if block[1:].isdecimal() and len(block)-1 >= min_date_length:
+        if block[1:].isdecimal() and len(block)-1 >= min_date_length:  # block has ID at start, e.g. _A202206010000
             return block[1:]
     raise FilenameError("found no date in '{}'".format(filename))
+
+
+def timestamp_to_float(timestamp):
+    """transform timestamp string to a float between 0 and 1 (integer of timestamp normalised by its length)"""
+    return int(timestamp)/10**len(timestamp)
 
 
 def generate_output_filename(basename, time, ext='nc'):
@@ -127,7 +132,7 @@ def group_files(files, name_scheme):
 
     Args:
         files: list of files
-        name_scheme {'attex', 'rpg', 'radiometrics'}: scheme of filename used to set parts to ignore in grouping process
+        name_scheme ({'attex', 'rpg', 'radiometrics'}): scheme of filename used for parts to ignore in grouping process
     Returns:
         list of lists of files for which all parts except the ignored ones are identical
     """
