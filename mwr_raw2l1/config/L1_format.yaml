@@ -78,10 +78,10 @@ variables:
     _FillValue: -999.
     optional: False
     attributes:
-      long_name: Nominal frequency of microwave channels
+      long_name: Nominal centre Frequency of microwave channels
       standard_name: radiation_frequency
       units: GHz
-      comment: For more accurate frequency values use frequency+freq_shift. Frequency indication is in signal sideband.
+      comment: 1) For double-sideband receivers, frequency corresponds to the local oscillator frequency whereas the radio frequency of the upper/lower sideband is frequency+/-sideband_IF_separation. 2) In case of known offset between the real and the nominal frequency of some channels, frequency+freq_shift gives more accurate  values.
 
   receiver_nb:
     name: receiver_nb
@@ -107,7 +107,6 @@ variables:
       units: '1'
       comment: Different numbers correspond to distinct receiver boards defined in receiver_nb.
 
-
   bandwidth:
     name: bandwidth
     dim:
@@ -127,9 +126,11 @@ variables:
     _FillValue: -999.
     optional: True
     attributes:
-      long_name: Beam width (3 dB) of the microwave radiometer
+      long_name: Beam width (FWHM) of the microwave radiometer
       units: degree
 
+  # TODO: add n_sidebands
+  # TODO: add sideband_IF_separation
   freq_shift:
     name: freq_shift
     dim:
@@ -295,6 +296,9 @@ variables:
     attributes:
       long_name: Receiver noise temperature
       units: K
+
+  # TODO: add tb_accuracy
+  # TODO: add tb_cov
 
 
   ir_wavelength:
