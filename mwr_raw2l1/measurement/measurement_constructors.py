@@ -5,7 +5,7 @@ from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement_construct_helpers import (attex_to_datasets, check_temporal_consistency,
                                                                   merge_aux_data, merge_brt_blb,
                                                                   radiometrics_to_datasets, rpg_to_datasets)
-from mwr_raw2l1.measurement.measurement_helpers import is_full_var_in_data, is_var_in_data
+from mwr_raw2l1.measurement.measurement_helpers import is_var_in_data
 from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries_from_scanonly, scanflag_from_ele
 
 DTYPE_SCANFLAG = 'u1'  # data type used for scanflags set by Measurement class
@@ -144,9 +144,10 @@ class MeasurementConstructors(object):
 
         # use T_met instead of T from BLB for temperature (T not available in BRT)
         if is_var_in_data(data, 'T_met'):  # assume that if there is one non-NaN in T_met, whole timeseries is there
-            # cleanest check but very slow:
+            # cleaner but too slow would be to use mwr_raw2l1.measurement.measurement_helpers.is_full_var_in_data, e.g.:
+            # - cleanest check but very slow:
             #     is_full_var_in_data(data, 'T_met')
-            # much faster check but leading to changing temperature source (MET or BLB) depending on presence of BRT:
+            # - much faster check but leading to changing temperature source (MET or BLB) depending on presence of BRT:
             #     not is_full_var_in_data(data, 'T') and is_var_in_data(data, 'T_met')
             data['T'] = data['T_met']
 

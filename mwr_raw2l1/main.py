@@ -81,7 +81,7 @@ def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, conca
             try:
                 process_files(files, reader, meas_constructor, conf_inst, conf_qc, conf_nc, timestamp_src)
                 files_success.append(files)
-            except Exception as e:
+            except Exception as e:  # noqa B902
                 error_seen = True
                 logger.error('Error while processing {}'.format([os.path.basename(f) for f in files]))
                 logger.exception(e)

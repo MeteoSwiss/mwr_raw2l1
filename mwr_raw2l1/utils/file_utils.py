@@ -204,6 +204,6 @@ def write_file_log(outfile, file_bunches):
 
 
 if __name__ == '__main__':
-    fn = generate_output_filename('asfd', 'instamp_max', files_in=['lkja_q20220102', 'asdfa_202201020001', 'lkjlj_20220103'])
-    print(fn)
+    fn = generate_output_filename('asfd', 'instamp_max',
+                                  files_in=['lkja_q20220102', 'asdfa_202201020001', 'lkjlj_20220103'])
     pass

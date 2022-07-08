@@ -1,3 +1,3 @@
-from . import reader_attex
-from . import reader_radiometrics
-from . import reader_rpg
+from . import reader_attex, reader_radiometrics, reader_rpg
+
+__all__ = ['reader_attex', 'reader_radiometrics', 'reader_rpg']
