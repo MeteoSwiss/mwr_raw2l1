@@ -1,7 +1,7 @@
 import numpy as np
 import xarray as xr
 
-from mwr_raw2l1.errors import DimensionError, MissingInputArgument
+from mwr_raw2l1.errors import DimensionError, MissingInputArgument, TimeMismatch
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries_from_aux
 
@@ -253,3 +253,18 @@ def merge_brt_blb(all_data):
             out = scan_to_timeseries_from_aux(all_data['blb'], hkd=all_data['hkd'])
 
     return out
+
+
+def check_temporal_consistency(all_data, tolerance=15):
+    """check that data of all file types fall into the time covered by HKD for RPG observations
+
+    Args:
+        all_data: dictionary with a :class:`xarray.Dataset` attached to each key (output of :func:`rpg_to_datasets`)
+        tolerance: time interval in seconds up to which other data sources are allowed to extend beyond HKD times
+    """
+    min_limit = all_data['hkd'].time.min() - np.timedelta64(tolerance, 's')
+    max_limit = all_data['hkd'].time.max() + np.timedelta64(tolerance, 's')
+    for src, dat in all_data.items():
+        if dat.time.min() < min_limit or dat.time.max() > max_limit:
+            raise TimeMismatch("time period of '{}' data extends beyond time period covered by 'hkd' which is an error"
+                               .format(src))

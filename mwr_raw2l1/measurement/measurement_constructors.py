@@ -2,7 +2,8 @@ import numpy as np
 
 from mwr_raw2l1.errors import MissingDataSource
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.measurement.measurement_construct_helpers import (attex_to_datasets, merge_aux_data, merge_brt_blb,
+from mwr_raw2l1.measurement.measurement_construct_helpers import (attex_to_datasets, check_temporal_consistency,
+                                                                  merge_aux_data, merge_brt_blb,
                                                                   radiometrics_to_datasets, rpg_to_datasets)
 from mwr_raw2l1.measurement.measurement_helpers import is_full_var_in_data, is_var_in_data
 from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries_from_scanonly, scanflag_from_ele
@@ -120,8 +121,9 @@ class MeasurementConstructors(object):
         if 'hkd' not in readin_data or not readin_data['hkd']:
             raise MissingDataSource('The housekeeping file (hkd) must be present')
 
-        # construct datasets
+        # construct datasets and check they cover same time period
         all_data = rpg_to_datasets(readin_data, dims, vars, vars_opt)
+        check_temporal_consistency(all_data)
 
         # infer MWR data sources (BRT and/or BLB) and add scanflag
         mwr_sources_present = []
@@ -144,14 +146,15 @@ class MeasurementConstructors(object):
         if is_var_in_data(data, 'T_met'):  # assume that if there is one non-NaN in T_met, whole timeseries is there
             # cleanest check but very slow:
             #     is_full_var_in_data(data, 'T_met')
-            # much faster check but leading to changing  temperature source (MET or BLB) depending on presence of BRT:
+            # much faster check but leading to changing temperature source (MET or BLB) depending on presence of BRT:
             #     not is_full_var_in_data(data, 'T') and is_var_in_data(data, 'T_met')
             data['T'] = data['T_met']
 
         # if possible re-use azi from BRT and correct with scan_quadrant during scns
         if 'azi' in data:
             azi_med = data['azi'].median(skipna=True)  # outside if-clause for re-using below
-            if any(data['azi'].isnull()) and (data['azi'].max(skipna=True) - data['azi'].min(skipna=True)) < max_azi_offset:
+            if any(data['azi'].isnull()) and \
+                    (data['azi'].max(skipna=True) - data['azi'].min(skipna=True)) < max_azi_offset:
                 data['azi'] = data['azi'].fillna(azi_med)
             # apply scan_quadrant for BLB azimuth (azi for scan_quadrant=1 already correct)
             if 'scan_quadrant' in data:  # mandatory for BLB, but not be present for BRT, where azi can be left as is

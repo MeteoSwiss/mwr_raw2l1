@@ -86,6 +86,10 @@ class DimensionMismatch(MWRDataError):
     """Raised if data dimensions do not match"""
 
 
+class TimeMismatch(MWRDataError):
+    """Raised if time period covered by different data sources does not match"""
+
+
 # --------------------------
 class OutputDimensionError(MWROutputError):
     """Raised if requested output dimensions do not match data"""
