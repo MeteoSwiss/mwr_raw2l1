@@ -5,26 +5,23 @@ description = ""  # TODO: add description
 authors = ["rruefenacht <rruefenacht@users.noreply.github.com>"]
 
 [tool.poetry.dependencies]
-python = ">=3.6.8,<3.11"  # for scipy
-netCDF4 = [
-    {version = "^1.5.8", python = "3.6"},
-    {version = "^1.5.8", python = ">=3.7"}
-    ]
+python = ">=3.8,<3.11"  # for scipy
+netCDF4 = "^1.5.8"
 PyYAML = "^6"
-numpy = [
-    {version = "=1.21", python = "3.6"},
-    {version = "^1.21", python = ">=3.7"}
-    ]
-scipy = [  # needed for xarray.Dataset.interp
-    {version = "=1.5.4", python = "3.6"},
-    {version = '^1.7.3', python = ">=3.7"}
-    ]
-xarray = [
-    {version = "=0.16.2", python = "3.6"},
-    {version = "^0.20.2", python = ">=3.7"}
-    ]
+numpy = "^1.21"
+scipy = "^1.7.3"
+xarray = "^0.20.2"
 ephem = "^4.1"  # used for setting sun-in-beam flag in quality_flag
 colorlog = {version = "^6.6", optional = true}
+
+[tool.poetry.dev-dependencies]
+matplotlib = "^3.5.2"
+flake8 = "^4.0.1"
+isort = "^5.10.1"
+Sphinx = "^5.0.2"
+sphinx-rtd-theme = "^1.0.0"
+sphinxcontrib-napoleon = "^0.7"
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
