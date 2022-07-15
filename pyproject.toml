@@ -1,8 +1,10 @@
+# when editing this file, please make sure to run utils/pyproject_to_pyver.py afterwards
+
 [tool.poetry]
 name = "mwr_raw2l1"
 version = "0.1.3"
-description = ""  # TODO: add description
-authors = ["rruefenacht <rruefenacht@users.noreply.github.com>"]
+description = "This project provides readers for the data files of the the most prominent types of operational ground-based K- and V-band microwave radiometers and a writer for NetCDF files according to E-PROFILE/ACTRIS standards."
+authors = ["Rolf Rüfenacht (MeteoSwiss, rruefenacht <rruefenacht@users.noreply.github.com>)"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"  # for scipy
