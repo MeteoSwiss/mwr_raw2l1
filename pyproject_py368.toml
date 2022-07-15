@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 name = "mwr_raw2l1"
 version = "0.1.3"
 description = "This project provides readers for the data files of the the most prominent types of operational ground-based K- and V-band microwave radiometers and a writer for NetCDF files according to E-PROFILE/ACTRIS standards."
-authors = [ "Rolf Rüfenacht (MeteoSwiss, rruefenacht <rruefenacht@users.noreply.github.com>)",]
+authors = [ "Rolf Rüfenacht <rruefenacht@users.noreply.github.com>",]
 
 [tool.isort]
 line_length = 120
