@@ -3,8 +3,9 @@
 [tool.poetry]
 name = "mwr_raw2l1"
 version = "0.1.3"
-description = "This project provides readers for the data files of the the most prominent types of operational ground-based K- and V-band microwave radiometers and a writer for NetCDF files according to E-PROFILE/ACTRIS standards."
+description = "Readers for the most prominent types of operational ground-based K- and V-band microwave radiometers and a writer for NetCDF files according to E-PROFILE/ACTRIS standards."
 authors = ["Rolf Rüfenacht <rruefenacht@users.noreply.github.com>"]
+license = "BSD 3-Clause"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"  # for scipy
