@@ -72,4 +72,4 @@ html_show_sourcelink = True
 # html_static_path = ['_static']
 html_static_path = []
 
-add_module_names = False
+add_module_names = True
