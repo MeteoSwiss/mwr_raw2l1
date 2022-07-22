@@ -6,6 +6,7 @@ poetry.lock
 .~lock.*
 
 dist/
+docs/_build/*
 mwr_raw2l1/data/output/*
 mwr_raw2l1/logs/log*
 tests/data/output/*.nc
