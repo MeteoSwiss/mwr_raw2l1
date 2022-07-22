@@ -11,9 +11,9 @@ It is the code operationally run for the processing of MWR data in `E-PROFILE <h
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contents:
 
-   modules
+   installation
+   api
 
 
 

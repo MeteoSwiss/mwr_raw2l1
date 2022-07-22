@@ -34,9 +34,9 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">mwr_raw2l1</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
 </ul>
 
         </div>
@@ -80,7 +80,7 @@
 <span class="kn">from</span> <span class="nn">mwr_raw2l1.utils.config_utils</span> <span class="kn">import</span> <span class="n">get_inst_config</span><span class="p">,</span> <span class="n">get_nc_format_config</span>
 
 
-<div class="viewcode-block" id="write"><a class="viewcode-back" href="../../mwr_raw2l1.html#mwr_raw2l1.write_netcdf.write">[docs]</a><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">nc_conf_file</span><span class="p">,</span> <span class="n">inst_conf_file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="write"><a class="viewcode-back" href="../../api/write_netcdf.html#mwr_raw2l1.write_netcdf.write">[docs]</a><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">nc_conf_file</span><span class="p">,</span> <span class="n">inst_conf_file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;wrapper picking the right writer according to the type of data&quot;&quot;&quot;</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Starting writing to &#39;</span> <span class="o">+</span> <span class="n">filename</span><span class="p">)</span>
@@ -92,7 +92,7 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;no writer for data of type &#39;</span> <span class="o">+</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="write_from_xarray"><a class="viewcode-back" href="../../mwr_raw2l1.html#mwr_raw2l1.write_netcdf.write_from_xarray">[docs]</a><span class="k">def</span> <span class="nf">write_from_xarray</span><span class="p">(</span><span class="n">data_in</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">conf_nc</span><span class="p">,</span> <span class="n">conf_inst</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;NETCDF4&#39;</span><span class="p">,</span> <span class="n">copy_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="write_from_xarray"><a class="viewcode-back" href="../../api/write_netcdf.html#mwr_raw2l1.write_netcdf.write_from_xarray">[docs]</a><span class="k">def</span> <span class="nf">write_from_xarray</span><span class="p">(</span><span class="n">data_in</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">conf_nc</span><span class="p">,</span> <span class="n">conf_inst</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;NETCDF4&#39;</span><span class="p">,</span> <span class="n">copy_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;write data (Dataset) to NetCDF according to the format definition in conf_file by using the :class:`xarray` module</span>
 
 <span class="sd">    Args:</span>
@@ -126,7 +126,7 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Data written to &#39;</span> <span class="o">+</span> <span class="n">filename</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="prepare_datavars"><a class="viewcode-back" href="../../mwr_raw2l1.html#mwr_raw2l1.write_netcdf.prepare_datavars">[docs]</a><span class="k">def</span> <span class="nf">prepare_datavars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">conf</span><span class="p">):</span>
+<div class="viewcode-block" id="prepare_datavars"><a class="viewcode-back" href="../../api/write_netcdf.html#mwr_raw2l1.write_netcdf.prepare_datavars">[docs]</a><span class="k">def</span> <span class="nf">prepare_datavars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">conf</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;prepare data variables :class:`xarray.Dataset` for writing to file standard specified in &#39;conf&#39;&quot;&quot;&quot;</span>
 
     <span class="c1"># value for _FillValue attribute of variables encoding field to have unset _FillValue in NetCDF</span>
@@ -143,11 +143,11 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Variable </span><span class="si">{}</span><span class="s1"> is a mandatory input but was not found in input dictionary&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="p">))</span>
 
-        <span class="c1"># check dimensions (including order)</span>
-        <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">!=</span> <span class="n">specs</span><span class="p">[</span><span class="s1">&#39;dim&#39;</span><span class="p">]:</span>
-            <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">==</span> <span class="n">specs</span><span class="p">[</span><span class="s1">&#39;dim&#39;</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> \
+        <span class="c1"># check dimensions (retain order of config specs, but order of coords returned by xarray Dataset is arbitrary)</span>
+        <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">specs</span><span class="p">[</span><span class="s1">&#39;dim&#39;</span><span class="p">]):</span>
+            <span class="c1"># if last dim of specs is missing in data and scalar, add it to data (no need for subsequent check)</span>
+            <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">))</span> <span class="o">==</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">specs</span><span class="p">[</span><span class="s1">&#39;dim&#39;</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> \
                     <span class="ow">and</span> <span class="n">specs</span><span class="p">[</span><span class="s1">&#39;dim&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">specs</span><span class="p">[</span><span class="s1">&#39;dim&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="c1"># if last dimension is missing and scalar, it can be added to the data (no need for subsequent check)</span>
                 <span class="n">newdim</span> <span class="o">=</span> <span class="n">specs</span><span class="p">[</span><span class="s1">&#39;dim&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
                 <span class="n">tmp</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">({</span><span class="n">newdim</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
                 <span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">({</span><span class="n">newdim</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="n">newdim</span><span class="p">]})</span>
@@ -194,7 +194,7 @@
     <span class="k">return</span> <span class="n">data</span></div>
 
 
-<div class="viewcode-block" id="prepare_global_attrs"><a class="viewcode-back" href="../../mwr_raw2l1.html#mwr_raw2l1.write_netcdf.prepare_global_attrs">[docs]</a><span class="k">def</span> <span class="nf">prepare_global_attrs</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">conf</span><span class="p">,</span> <span class="n">attr_key</span><span class="p">,</span> <span class="n">set_history</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="prepare_global_attrs"><a class="viewcode-back" href="../../api/write_netcdf.html#mwr_raw2l1.write_netcdf.prepare_global_attrs">[docs]</a><span class="k">def</span> <span class="nf">prepare_global_attrs</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">conf</span><span class="p">,</span> <span class="n">attr_key</span><span class="p">,</span> <span class="n">set_history</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;add global attributes from configuration dictionary</span>
 
 <span class="sd">    Args:</span>
@@ -213,14 +213,14 @@
     <span class="k">return</span> <span class="n">data</span></div>
 
 
-<div class="viewcode-block" id="generate_history_str"><a class="viewcode-back" href="../../mwr_raw2l1.html#mwr_raw2l1.write_netcdf.generate_history_str">[docs]</a><span class="k">def</span> <span class="nf">generate_history_str</span><span class="p">():</span>
+<div class="viewcode-block" id="generate_history_str"><a class="viewcode-back" href="../../api/write_netcdf.html#mwr_raw2l1.write_netcdf.generate_history_str">[docs]</a><span class="k">def</span> <span class="nf">generate_history_str</span><span class="p">():</span>
     <span class="n">current_time</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
     <span class="n">proj_dir</span> <span class="o">=</span> <span class="n">mwr_raw2l1</span><span class="o">.</span><span class="vm">__file__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
     <span class="n">proj_dist</span> <span class="o">=</span> <span class="n">get_distribution</span><span class="p">(</span><span class="n">proj_dir</span><span class="p">)</span>
     <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1"> (</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">current_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">),</span> <span class="n">proj_dist</span><span class="o">.</span><span class="n">project_name</span><span class="p">,</span> <span class="n">proj_dist</span><span class="o">.</span><span class="n">version</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="write_from_dict"><a class="viewcode-back" href="../../mwr_raw2l1.html#mwr_raw2l1.write_netcdf.write_from_dict">[docs]</a><span class="k">def</span> <span class="nf">write_from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">nc_conf_file</span><span class="p">,</span> <span class="n">inst_conf_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;NETCDF4&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="write_from_dict"><a class="viewcode-back" href="../../api/write_netcdf.html#mwr_raw2l1.write_netcdf.write_from_dict">[docs]</a><span class="k">def</span> <span class="nf">write_from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">nc_conf_file</span><span class="p">,</span> <span class="n">inst_conf_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;NETCDF4&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;write data dictionary to NetCDF according to the format definition in conf_file by using the netCDF4 module</span>
 
 <span class="sd">    CARE: This is a legacy function here for completeness but not maintained any further.</span>
@@ -275,7 +275,13 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>  
+
+  <style>
+         .wy-nav-content { max-width: none; }
+  </style>
+
+
 
 </body>
 </html>

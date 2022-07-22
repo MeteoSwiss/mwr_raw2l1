@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Utils &mdash; mwr_raw2l1  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Errors" href="errors.html" />
+    <link rel="prev" title="Readers" href="readers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> mwr_raw2l1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="measurement.html">Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.html">Readers</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-mwr_raw2l1.utils.config_utils">mwr_raw2l1.utils.config_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-mwr_raw2l1.utils.file_utils">mwr_raw2l1.utils.file_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-mwr_raw2l1.utils.transformations">mwr_raw2l1.utils.transformations module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="errors.html">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logs.html">Logs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="write_netcdf.html">Write NetCDF</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">mwr_raw2l1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">API</a> &raquo;</li>
+      <li>Utils</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="utils">
+<h1>Utils<a class="headerlink" href="#utils" title="Permalink to this headline"></a></h1>
+<section id="module-mwr_raw2l1.utils.config_utils">
+<span id="mwr-raw2l1-utils-config-utils-module"></span><h2>mwr_raw2l1.utils.config_utils module<a class="headerlink" href="#module-mwr_raw2l1.utils.config_utils" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.utils.config_utils.get_conf">
+<span class="sig-name descname"><span class="pre">get_conf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mwr_raw2l1/utils/config_utils.html#get_conf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.utils.config_utils.get_conf" title="Permalink to this definition"></a></dt>
+<dd><p>conf get dictionary from yaml files. Don’t do any checks on contents</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.utils.config_utils.get_inst_config">
+<span class="sig-name descname"><span class="pre">get_inst_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mwr_raw2l1/utils/config_utils.html#get_inst_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.utils.config_utils.get_inst_config" title="Permalink to this definition"></a></dt>
+<dd><p>get configuration for each instrument and check for completeness of config file</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.utils.config_utils.get_nc_format_config">
+<span class="sig-name descname"><span class="pre">get_nc_format_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mwr_raw2l1/utils/config_utils.html#get_nc_format_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.utils.config_utils.get_nc_format_config" title="Permalink to this definition"></a></dt>
+<dd><p>get configuration for output NetCDF format and check for completeness of config file</p>
+</dd></dl>
+
+</section>
+<section id="module-mwr_raw2l1.utils.file_utils">
+<span id="mwr-raw2l1-utils-file-utils-module"></span><h2>mwr_raw2l1.utils.file_utils module<a class="headerlink" href="#module-mwr_raw2l1.utils.file_utils" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.utils.file_utils.abs_file_path">
+<span class="sig-name descname"><span class="pre">abs_file_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mwr_raw2l1/utils/file_utils.html#abs_file_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.utils.file_utils.abs_file_path" title="Permalink to this definition"></a></dt>
+<dd><p>Make a relative file_path absolute in respect to the mwr_raw2l1 project directory.
+Absolute paths wil not be changed</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.utils.file_utils.datestr_from_filename">
+<span class="sig-name descname"><span class="pre">datestr_from_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datestr_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'yyyymmddHHMM'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mwr_raw2l1/utils/file_utils.html#datestr_from_filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.utils.file_utils.datestr_from_filename" title="Permalink to this definition"></a></dt>
+<dd><p>return date string from filename, assuming it consists of the last digits of the filename before the extension</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – filename as str. Can contain path and extension.</p></li>
+<li><p><strong>datestr_format</strong> – format of the date string in the filename. Only used for counting length of date string</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>string containing the date in same representation as in the filename</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.utils.file_utils.generate_output_filename">
+<span class="sig-name descname"><span class="pre">generate_output_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">basename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nc'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mwr_raw2l1/utils/file_utils.html#generate_output_filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.utils.file_utils.generate_output_filename" title="Permalink to this definition"></a></dt>
+<dd><p>generate filename from basename, ext and end time inferred from data time vector (basename_yyyymmddHHMM.ext)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>basename</strong> – the first part of the filename without the date</p></li>
+<li><p><strong>time</strong> – <a class="reference external" href="https://xarray.pydata.org/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v0.20.2.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a> time vector of the data in <a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.datetime64" title="(in NumPy v1.22)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.datetime64</span></code></a> format. Assume to be sorted</p></li>
+<li><p><strong>ext</strong> (<em>optional</em>) – filename extension. Defaults to ‘nc’. Empty not permitted.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.utils.file_utils.get_binary">
+<span class="sig-name descname"><span class="pre">get_binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mwr_raw2l1/utils/file_utils.html#get_binary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.utils.file_utils.get_binary" title="Permalink to this definition"></a></dt>
+<dd><p>return the entire content of the binary file as binary stream</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.utils.file_utils.get_corresponding_pickle">
+<span class="sig-name descname"><span class="pre">get_corresponding_pickle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_rawdata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_pickle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legacy_reader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mwr_raw2l1/utils/file_utils.html#get_corresponding_pickle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.utils.file_utils.get_corresponding_pickle" title="Permalink to this definition"></a></dt>
+<dd><p>get pickled file from previous read-in corresponding to raw data file</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.utils.file_utils.get_files">
+<span class="sig-name descname"><span class="pre">get_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mwr_raw2l1/utils/file_utils.html#get_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.utils.file_utils.get_files" title="Permalink to this definition"></a></dt>
+<dd><p>get files in dir_in corresponding to basename.</p>
+<p>If time_start and/or time_end are given only files with end time before/after these are returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dir_in</strong> – directory where files of the respective instrument are located</p></li>
+<li><p><strong>basename</strong> – first part of the filename (usually full identifier including wigos-station-id and inst-id)</p></li>
+<li><p><strong>time_start</strong> (<em>optional</em>) – string in format ‘yyyymmddHHMM’, ‘yyyymmddHHMMSS’, ‘yyyymmdd’ or any of the similar</p></li>
+<li><p><strong>time_end</strong> (<em>optional</em>) – analogous to time_start</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of files in dictionary corresponding to basename and time criteria</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.utils.file_utils.pickle_dump">
+<span class="sig-name descname"><span class="pre">pickle_dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mwr_raw2l1/utils/file_utils.html#pickle_dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.utils.file_utils.pickle_dump" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.utils.file_utils.pickle_load">
+<span class="sig-name descname"><span class="pre">pickle_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mwr_raw2l1/utils/file_utils.html#pickle_load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.utils.file_utils.pickle_load" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-mwr_raw2l1.utils.transformations">
+<span id="mwr-raw2l1-utils-transformations-module"></span><h2>mwr_raw2l1.utils.transformations module<a class="headerlink" href="#module-mwr_raw2l1.utils.transformations" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mwr_raw2l1.utils.transformations.timedelta2s">
+<span class="sig-name descname"><span class="pre">timedelta2s</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_diff</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mwr_raw2l1/utils/transformations.html#timedelta2s"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mwr_raw2l1.utils.transformations.timedelta2s" title="Permalink to this definition"></a></dt>
+<dd><p>return number of seconds from <a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.timedelta64" title="(in NumPy v1.22)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.timedelta64</span></code></a> object
+:param t_diff: time difference as <a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.timedelta64" title="(in NumPy v1.22)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.timedelta64</span></code></a> object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>scalar corresponding to number of seconds</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="readers.html" class="btn btn-neutral float-left" title="Readers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="errors.html" class="btn btn-neutral float-right" title="Errors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rolf Rüfenacht.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+         .wy-nav-content { max-width: none; }
+  </style>
+
+
+
+</body>
+</html>

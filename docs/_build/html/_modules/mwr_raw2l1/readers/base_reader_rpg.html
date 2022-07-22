@@ -34,9 +34,9 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">mwr_raw2l1</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
 </ul>
 
         </div>
@@ -96,7 +96,7 @@
 <span class="p">}</span>
 
 
-<div class="viewcode-block" id="BaseReader"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader">[docs]</a><span class="k">class</span> <span class="nc">BaseReader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseReader"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader">[docs]</a><span class="k">class</span> <span class="nc">BaseReader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">accept_localtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">accept_localtime</span> <span class="o">=</span> <span class="n">accept_localtime</span>
@@ -106,7 +106,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">filecode</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="BaseReader.run"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseReader.run"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;do whole read-in from files and interpretation and checking of data&quot;&quot;&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Reading data from &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_bin</span> <span class="o">=</span> <span class="n">get_binary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
@@ -115,7 +115,7 @@
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_bin</span>  <span class="c1"># after read() all contents of data_bin have been interpreted to data</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">byte_offset</span>  <span class="c1"># after read() has checked that all data have been read, this quantity is useless</span></div>
 
-<div class="viewcode-block" id="BaseReader.read"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseReader.read"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;read and interpret all data in self.data_bin&quot;&quot;&quot;</span>
 
         <span class="c1"># sequence must be preserved as self.byte_offset is increased by each method, hence they are all semi-private</span>
@@ -129,7 +129,7 @@
             <span class="k">raise</span> <span class="n">FileTooLong</span><span class="p">(</span><span class="s1">&#39;Not all bytes consumed. Interpreted </span><span class="si">{}</span><span class="s1"> bytes during read-in but </span><span class="si">{}</span><span class="s1"> contains </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">byte_offset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_bin</span><span class="p">)))</span></div>
 
-<div class="viewcode-block" id="BaseReader.decode_binary"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.decode_binary">[docs]</a>    <span class="k">def</span> <span class="nf">decode_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoding_pattern</span><span class="p">,</span> <span class="n">byte_order</span><span class="o">=</span><span class="n">BYTE_ORDER</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseReader.decode_binary"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.decode_binary">[docs]</a>    <span class="k">def</span> <span class="nf">decode_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoding_pattern</span><span class="p">,</span> <span class="n">byte_order</span><span class="o">=</span><span class="n">BYTE_ORDER</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;decode next variables from binary stream and write to dict self.data + augment self.byte_offset</span>
 
 <span class="sd">        Args:</span>
@@ -146,7 +146,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">enc</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">out</span></div>
 
-<div class="viewcode-block" id="BaseReader.decode_binary_np"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.decode_binary_np">[docs]</a>    <span class="k">def</span> <span class="nf">decode_binary_np</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoding_pattern</span><span class="p">,</span> <span class="n">n_entries</span><span class="p">,</span> <span class="n">byte_order</span><span class="o">=</span><span class="n">BYTE_ORDER</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseReader.decode_binary_np"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.decode_binary_np">[docs]</a>    <span class="k">def</span> <span class="nf">decode_binary_np</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoding_pattern</span><span class="p">,</span> <span class="n">n_entries</span><span class="p">,</span> <span class="n">byte_order</span><span class="o">=</span><span class="n">BYTE_ORDER</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;decode from binary stream via :class:`numpy.ndarray` to write to dict self.data + augment self.byte_offset</span>
 
 <span class="sd">        Args:</span>
@@ -172,7 +172,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="BaseReader.interpret_filecode"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseReader.interpret_filecode"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.interpret_filecode">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_filecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;assign configuration for read in of file with corresponding file code&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">filestruct</span> <span class="o">=</span> <span class="n">FILETYPE_CONFS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">filecode</span><span class="p">]</span>
@@ -180,14 +180,14 @@
             <span class="k">raise</span> <span class="n">UnknownFileType</span><span class="p">(</span><span class="s1">&#39;reader not specified for files with filecode </span><span class="si">{:d}</span><span class="s1"> as used in </span><span class="si">{:s}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                                   <span class="bp">self</span><span class="o">.</span><span class="n">filecode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="BaseReader.interpret_header"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.interpret_header">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseReader.interpret_header"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.interpret_header">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;interpret data read in with _read_header&quot;&quot;&quot;</span>
         <span class="c1"># transform frequency and ir_wavelength to 1D-numpy array for later import to xarray in Measurement class</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;frequency&#39;</span><span class="p">,</span> <span class="s1">&#39;ir_wavelength&#39;</span><span class="p">,</span> <span class="s1">&#39;scan_ele&#39;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">])</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="BaseReader.interpret_raw_data"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.interpret_raw_data">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseReader.interpret_raw_data"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.interpret_raw_data">[docs]</a>    <span class="k">def</span> <span class="nf">interpret_raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;interpret data read in with _read_meas (e.g. get ele/azi from pointing code or datetime from timecode)&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>  <span class="c1"># assume data-dict in all subclasses contains time</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpret_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;time_raw&#39;</span><span class="p">])</span>
@@ -199,7 +199,7 @@
             <span class="k">if</span> <span class="n">coord</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]]</span> <span class="o">=</span> <span class="n">interpret_coord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">coord</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="BaseReader.check_data"><a class="viewcode-back" href="../../../mwr_raw2l1.readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.check_data">[docs]</a>    <span class="k">def</span> <span class="nf">check_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseReader.check_data"><a class="viewcode-back" href="../../../api/readers.html#mwr_raw2l1.readers.base_reader_rpg.BaseReader.check_data">[docs]</a>    <span class="k">def</span> <span class="nf">check_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;general checks for the consistency of the data which can be applied to all file type readers&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">accept_localtime</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;timeref&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TimerefError</span><span class="p">(</span><span class="s1">&#39;Time encoded in local time but UTC required by &quot;accept_localtime&quot;&#39;</span><span class="p">)</span></div>
@@ -242,7 +242,13 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>  
+
+  <style>
+         .wy-nav-content { max-width: none; }
+  </style>
+
+
 
 </body>
 </html>
