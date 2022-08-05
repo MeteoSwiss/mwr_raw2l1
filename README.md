@@ -21,9 +21,9 @@ ground-based microwave radiometers.
 
     pip install mwr_raw2l1
 
-for more colorful logging you may want to do
+for more colorful logging you may instead want to do
 
-    pip install -e colorlog mwr_raw2l1
+    pip install mwr_raw2l1[colorlog]
 
 ### from *git*
 To install *mwr_raw2l1* from the source code do the following
@@ -34,11 +34,20 @@ To install *mwr_raw2l1* from the source code do the following
 2. go into the package directory and install
     - with *pip* (21.3)
    
-        `pip install .`
+        - `pip install .`
+   
+        - or for including the colorful logging
+   
+          `pip install .[colorlog]`
    
     - with *poetry*
    
-        `poetry install`
+        - `poetry install`
+   
+        - or for including the colorful logging
+      
+          `poetry install -E colorlog`
+          
     
 
 ## Basic usage

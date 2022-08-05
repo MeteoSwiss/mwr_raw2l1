@@ -10,3 +10,5 @@ docs/_build/*
 mwr_raw2l1/data/output/*
 mwr_raw2l1/logs/log*
 tests/data/output/*.nc
+
+# TODO: binaraies in dist and docs/_build do not seem to be ignored. Imperatively fix this. Maybe needs abs path.

@@ -15,7 +15,7 @@ for more colorful logging you may want to do
 
 .. code-block::
 
-    pip install -e colorlog mwr_raw2l1
+    pip install mwr_raw2l1[colorlog]
 
 from *git*
 ^^^^^^^^^^
@@ -32,12 +32,24 @@ To install *mwr_raw2l1* from the source code do the following
     - with *pip* (21.3)
 
 
-    .. code-block::
+      .. code-block::
 
-        pip install .
+          pip install .
+
+      or
+
+      .. code-block::
+
+          pip install .[colorlog]
 
     - with *poetry*
 
-    .. code-block::
+      .. code-block::
 
-        poetry install
+          poetry install
+
+      or
+
+      .. code-block::
+
+          poetry install -E colorlog
