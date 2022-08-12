@@ -45,7 +45,7 @@ class MeasurementConstructors(object):
 
     @classmethod
     def from_radiometrics(cls, readin_data, conf_inst=None):
-        """constructor for data read in from RPG instruments.
+        """constructor for data read in from Radiometrics instruments.
 
         Auxiliary data are merged to time grid of MWR data.
 
@@ -158,7 +158,7 @@ class MeasurementConstructors(object):
                     (data['azi'].max(skipna=True) - data['azi'].min(skipna=True)) < max_azi_offset:
                 data['azi'] = data['azi'].fillna(azi_med)
             # apply scan_quadrant for BLB azimuth (azi for scan_quadrant=1 already correct)
-            if 'scan_quadrant' in data:  # mandatory for BLB, but not be present for BRT, where azi can be left as is
+            if 'scan_quadrant' in data:  # mandatory for BLB, but not present for BRT where azi can be left as is
                 data['azi'][data['scan_quadrant'] == 2] = np.mod(azi_med + 180, 360)
                 data['azi'][data['scan_quadrant'] == 0] = np.nan
 
