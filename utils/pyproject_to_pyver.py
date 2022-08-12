@@ -49,7 +49,7 @@ def main(deps_out_file, file_in=None, file_out=None):
             elif 'version' in info:
                 x['tool']['poetry'][deptype][dep]['version'] = deps_out[dep]
             else:
-                raise ValueError("unexpected format of dependency '{}' in ''".format(dep, file_in))
+                raise ValueError("unexpected format of dependency '{}' in '{}'".format(dep, file_in))
 
     # output updated x to file_out
     with open(file_out, 'w') as f:
