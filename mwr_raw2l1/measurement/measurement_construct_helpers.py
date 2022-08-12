@@ -97,6 +97,22 @@ def rpg_to_datasets(data, dims, vars, vars_opt):
     return out
 
 
+def rpg_to_si(all_data):
+    """transform non-SI units to SI units for RPG datasets (e.g. km/h to m/s for windspeed
+
+    Args:
+        all_data: dictionary with a :class:`xarray.Dataset` attached to each key (output of :func:`rpg_to_datasets`)
+    Returns:
+        all_data with but with values corresponding to SI units
+    """
+    try:
+        all_data['met']['windspeed'] = all_data['met']['windspeed'] / 3.6  # km/h -> m/s
+    except KeyError:  # KeyError will only occur if quantity not in data, what can well happen. Do nothing in this case
+        pass
+
+    return all_data
+
+
 def make_dataset(data, dims, vars, vars_opt=None, multidim_vars=None, time_vector=None):
     """generate a :class:`xarray.Dataset` from 'data' dictionary using the dimensions and variables specified
 

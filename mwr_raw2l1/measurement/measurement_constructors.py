@@ -4,7 +4,7 @@ from mwr_raw2l1.errors import MissingDataSource
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement_construct_helpers import (attex_to_datasets, check_temporal_consistency,
                                                                   merge_aux_data, merge_brt_blb,
-                                                                  radiometrics_to_datasets, rpg_to_datasets)
+                                                                  radiometrics_to_datasets, rpg_to_datasets, rpg_to_si)
 from mwr_raw2l1.measurement.measurement_helpers import is_var_in_data
 from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries_from_scanonly, scanflag_from_ele
 
@@ -123,6 +123,7 @@ class MeasurementConstructors(object):
 
         # construct datasets and check they cover same time period
         all_data = rpg_to_datasets(readin_data, dims, vars, vars_opt)
+        all_data = rpg_to_si(all_data)
         check_temporal_consistency(all_data)
 
         # infer MWR data sources (BRT and/or BLB) and add scanflag
