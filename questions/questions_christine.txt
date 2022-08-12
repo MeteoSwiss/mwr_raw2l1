@@ -1,7 +1,0 @@
-- type_of_automatic_calibrations: gain calibration with ambient temperature target and noise diode. Does this describe Radiometrics well?
-- L0 file is very large. Would propose not to use it and send over date of last calib manually. Any other usages of  L0 file?
-- how should we implement spectral consistency flag. Seems that actris_mwr_pro does some kind of retrieval with fixed constants.
-    - Can we have a standard atmosphere forward model calculation?
-    - Can we re-use mwr_pro_retrieval_coefficients for other sites? One set of coefficients for whole Europe?
-- IR wavelength. Assumed 10.5 um, correct? Take this from config or is it possible to infer it from a data file?
-- unused channels. Radiometrics csv contains many empty channels. I propose to exclude unused channels from output, agree?
