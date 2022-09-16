@@ -81,7 +81,7 @@ variables:
       long_name: Nominal centre Frequency of microwave channels
       standard_name: radiation_frequency
       units: GHz
-      comment: 1) For double-sideband receivers, frequency corresponds to the local oscillator frequency whereas the radio frequency of the upper/lower sideband is frequency+/-sideband_IF_separation. 2) In case of known offset between the real and the nominal frequency of some channels, frequency+freq_shift gives more accurate  values.
+      comment: 1) For double-sideband receivers, frequency corresponds to the local oscillator frequency whereas the radio frequency of the upper/lower sideband is frequency+/-sideband_IF_separation. 2) In case of known offset between the real and the nominal frequency of some channels, frequency+freq_shift gives more accurate values.
 
   receiver_nb:
     name: receiver_nb
@@ -431,6 +431,9 @@ variables:
       long_name: Wind speed
       standard_name: wind_speed
       units: m/s
+
+  # met_quality_flag will not be set by E-PROFILE
+  # met_quality_flag_status will not be set by E-PROFILE
 
 # global attributes common to all instruments. Additional instrument-specific attrs in their config under nc_attributes.
 # If the same fields are present in the instrument-specific config, the general ones from below will be overwritten
