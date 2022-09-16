@@ -72,6 +72,9 @@ class Reader(object):
                 self.header['n_lines'] = n
                 break
 
+        if not self.header['col_headers']:
+            raise MissingHeader('No column header has been found')
+
     def _read_data(self, csv_lines):
         """read data section of the csv data and relate to header. Assume header has been read before"""
 

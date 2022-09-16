@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-from mwr_raw2l1.errors import MissingVariable
+from mwr_raw2l1.errors import MissingHeader, MissingVariable
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.readers.reader_helpers import check_input_filelist, get_time
 from mwr_raw2l1.utils.file_utils import abs_file_path
@@ -41,6 +41,9 @@ class Reader(object):
                 self.header['n_lines'] = n
                 break
             self.header['cfg_info'].append(line)
+
+        if not self.header['col_header']:
+            raise MissingHeader('No column header has been found')
 
     def _read_data(self, csv_lines):
         for line in csv_lines:
