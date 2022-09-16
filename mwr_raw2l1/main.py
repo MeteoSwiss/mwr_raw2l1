@@ -1,4 +1,5 @@
 import os.path
+import warnings
 
 from mwr_raw2l1.errors import MWRConfigError
 from mwr_raw2l1.log import logger
@@ -9,6 +10,10 @@ from mwr_raw2l1.readers.reader_rpg import read_multiple_files as reader_rpg  # n
 from mwr_raw2l1.utils.config_utils import get_inst_config, get_nc_format_config, get_qc_config
 from mwr_raw2l1.utils.file_utils import abs_file_path, generate_output_filename, get_files, group_files
 from mwr_raw2l1.write_netcdf import Writer
+
+
+# omit FutureWarnings from xarray (these can be caused xarray-internal implementations on py 3.9)
+warnings.filterwarnings(action='ignore', category=FutureWarning, module='xarray')
 
 
 def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, concat=False, halt_on_error=True,
