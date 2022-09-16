@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-from mwr_raw2l1.errors import UnknownRecordType
+from mwr_raw2l1.errors import MissingHeader, UnknownRecordType
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.readers.reader_helpers import check_input_filelist, check_vars
 from mwr_raw2l1.readers.reader_radiometrics_helpers import get_data
@@ -80,7 +80,10 @@ class Reader(object):
             self.data_raw[rec_type_nb] = []
 
         # continue iterating over csv_lines assuming header has already been read (incl. first data line)
-        self.sort_data_line(self.header['first_line_data'])
+        try:
+            self.sort_data_line(self.header['first_line_data'])
+        except UnknownRecordType:
+            logger.warning('first line after header is ignored as it does not correspond to expected format of data')
         for line in csv_lines:
             self.sort_data_line(line)
 

@@ -48,6 +48,10 @@ class UnknownRecordType(MWRFileError):
     """Raised if Radiometrics file contains a record type number that is not known, e.g. can't be matched with header"""
 
 
+class MissingHeader(MWRFileError):
+    """Raised if a required header or column header has not been found an ASCII input file"""
+
+
 class MissingVariable(MWRFileError):
     """Raised if file seems not to contain a mandatory variable. Might be due to a modified header in the input file"""
 

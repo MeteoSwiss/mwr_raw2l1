@@ -150,9 +150,9 @@ if __name__ == '__main__':
     # For generating reference output file for test_rpg and testing concat option:
     # run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml', concat=True)  # RPG
 
-    # For testing Lindenberg HATPRO:
-    # run('/home/ruefenacht/Desktop/20220105_HatproG5_DWD_error_raw2l1/config_0-20000-0-10393_B.yaml',
-    #     'config/L1_format.yaml', 'config/qc_config.yaml', concat=True)
+    # For testing Lindenberg Radiometerics:
+    # run('/home/ruf/Desktop/lindenberg_mwr_raw2l1_problem/config_lin.yaml',
+    #     'config/L1_format.yaml', 'config/qc_config.yaml', time_start='20220913', time_end='20220914')
 
     # For testing Payerne HATPRO scantime isue:
     # run('/home/ruefenacht/Desktop/mwr_raw2l1_scantime_issue/config_0-20000-0-06610_A.yaml',
