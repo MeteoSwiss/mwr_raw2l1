@@ -1,12 +1,14 @@
-"""integration tests for read-in and writing for RPG files"""
+"""integration tests for read-in and writing for RPG files
 
+Features tested:
+- run main and compare key data in generated NetCDF with reference NetCDF file (test with concat option)
+- check run for missing brt or blb file
+- check run for missing irt file
+- check run for missing met file
+- check exception is raised if no brightness temperature files are available (brt or blb)
+- check exception is raised if no housekeeping data (hkd) file is available
+"""
 
-# - compare key data in generated NetCDF with reference NetCDF file
-# - check run for missing brt or blb file
-# - check run for missing irt file
-# - check run for missing met file
-#
-# - additionally test if all works when removing BL_scan active from HKD
 import glob
 import os
 import unittest

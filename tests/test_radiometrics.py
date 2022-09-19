@@ -1,12 +1,12 @@
-"""integration tests for read-in and writing for RPG files"""
+"""integration tests for read-in and writing for Radiometrics files
 
+Features tested:
+- run main and compare key data in generated NetCDF with reference NetCDF file
+- check main runs error-free for extra line (to be ignored) after header in data file
+- check exception is raised if no header is present in data file
+- check exception is raised if data file does not contain column header info for one record type in the data file
+"""
 
-# - compare key data in generated NetCDF with reference NetCDF file
-# - check run for missing brt or blb file
-# - check run for missing irt file
-# - check run for missing met file
-#
-# - additionally test if all works when removing BL_scan active from HKD
 import glob
 import os
 import unittest
