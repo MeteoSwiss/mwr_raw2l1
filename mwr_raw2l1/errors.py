@@ -64,6 +64,10 @@ class FilenameError(MWRFileError):
     """Raised if the filename does not correspond to the expected pattern"""
 
 
+class FileFormatError(MWRFileError):
+    """Raised if the data in the input file do not correspond to the expected format"""
+
+
 # --------------------------
 class WrongInputFormat(MWRInputError):
     """Raised if format of input to a function or class does not correspond to expectations"""

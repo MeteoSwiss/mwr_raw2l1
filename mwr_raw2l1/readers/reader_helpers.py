@@ -30,6 +30,7 @@ def get_column_ind(header, column_title):
     Returns:
         the index of the column corresponding to column_title
     """
+
     for ind, hd in enumerate(header):
         if simplify_header(hd) == simplify_header(column_title):
             return ind

@@ -3,9 +3,9 @@ import os
 
 import numpy as np
 
-from mwr_raw2l1.errors import MissingHeader, MissingData, MissingVariable
+from mwr_raw2l1.errors import FileFormatError, MissingHeader, MissingData, MissingVariable
 from mwr_raw2l1.log import logger
-from mwr_raw2l1.readers.reader_helpers import check_input_filelist, get_time
+from mwr_raw2l1.readers.reader_helpers import check_input_filelist, get_column_ind, get_time
 from mwr_raw2l1.utils.file_utils import abs_file_path
 
 
@@ -63,15 +63,25 @@ class Reader(object):
     def interpret_data(self):
         """fill up self.data using self.data_raw and self.header"""
         time_header = 'data time'
-        time_format = '%d/%m/%Y %H:%M:%S'
         temperature_header = 'OutsideTemperature'
 
+        time_format = self.get_time_format(time_header)
         self.data['time'] = get_time(self.data_raw, self.header['col_header'], time_header, time_format)
         self.data['frequency'] = self.get_freq()
         self.data['scan_ele'], cols_tb = self.get_ele()
         self.data['Tb'] = self.data_raw[:, cols_tb].astype(float)
         col_temperature = self.header['col_header'].index(temperature_header)
         self.data['T'] = self.data_raw[:, col_temperature].astype(float)
+
+    def get_time_format(self, time_header):
+        ind = get_column_ind(self.header['col_header'], time_header)
+        if self.data_raw[0, ind][-3] == ':':
+            return '%d/%m/%Y %H:%M:%S'
+        elif self.data_raw[0, ind][-3] == '.':
+            return '%d/%m/%Y %H:%M.%S'
+        else:
+            raise FileFormatError('Time format {} does not correspond to expected pattern '
+                                  "('%d/%m/%Y %H:%M:%S' or '%d/%m/%Y %H:%M.%S')".format(self.data_raw[0, ind]))
 
     def get_freq(self):
         """get frequency from header info"""
