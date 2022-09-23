@@ -148,9 +148,9 @@ def get_meas_constructor(name):
 
 
 if __name__ == '__main__':
-    run('config/config_0-20000-0-99999_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Attex
-    run('config/config_0-20000-0-10393_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Radiometrics
-    fs, ff = run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # RPG HATPRO
+    #run('config/config_0-20000-0-99999_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Attex
+    # run('config/config_0-20000-0-10393_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Radiometrics
+    # fs, ff = run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # RPG HATPRO
 
     # For generating reference output file for test_rpg and testing concat option:
     # run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml', concat=True)  # RPG
@@ -162,4 +162,7 @@ if __name__ == '__main__':
     # For testing Payerne HATPRO scantime isue:
     # run('/home/ruefenacht/Desktop/mwr_raw2l1_scantime_issue/config_0-20000-0-06610_A.yaml',
     #     'config/L1_format.yaml', 'config/qc_config.yaml')
+
+    # For testing Attex dimension problem
+    run('../offline/attex_dimension/config_fel.yaml')
     pass

@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-from mwr_raw2l1.errors import MissingHeader, MissingVariable
+from mwr_raw2l1.errors import MissingHeader, MissingData, MissingVariable
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.readers.reader_helpers import check_input_filelist, get_time
 from mwr_raw2l1.utils.file_utils import abs_file_path
@@ -49,8 +49,15 @@ class Reader(object):
         for line in csv_lines:
             self.data_raw.append(line)
 
+        # remove final line if not printable, e.g. end of file character. (make sure data_raw is not already empty)
+        if self.data_raw and not self.data_raw[-1][0].isprintable():
+            del self.data_raw[-1]
+
+        if not self.data_raw:
+            raise MissingData('Data section in input file is empty')
+
     def data_raw_to_np(self):  # trivial for Attex but keep function for analogy to Radiometrcs
-        """in-place replacement for """
+        """in-place replacement for self.data_raw to a numpy array"""
         self.data_raw = np.array(self.data_raw)
 
     def interpret_data(self):

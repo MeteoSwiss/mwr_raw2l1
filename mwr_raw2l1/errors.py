@@ -52,6 +52,10 @@ class MissingHeader(MWRFileError):
     """Raised if a required header or column header has not been found an ASCII input file"""
 
 
+class MissingData(MWRFileError):
+    """Raised if no observation data is found in file"""
+
+
 class MissingVariable(MWRFileError):
     """Raised if file seems not to contain a mandatory variable. Might be due to a modified header in the input file"""
 
