@@ -93,8 +93,13 @@ class TestAttex(unittest.TestCase):
 
     # Helper methods
     # --------------
-    def single_test_call_series(self, vars_to_ignore=None, check_timeseries_length=True):
+    def single_test_call_series(self, vars_to_ignore=None, check_timeseries_length=True, ref_file=None):
         """All steps a normal test should run through, i.e. executing main and checking contents of output NetCDF"""
+
+        if ref_file is None:
+            ds_ref_here = self.ds_ref
+        else:
+            ds_ref_here = xr.load_dataset(reference_output)
 
         if vars_to_ignore is None:
             vars_to_ignore = []
@@ -113,7 +118,7 @@ class TestAttex(unittest.TestCase):
             self.ds = xr.load_dataset(files[0])
         with self.subTest(operation='check_output_vars'):
             """compare variables with sample NetCDF file"""
-            ds_ref_sel = self.ds_ref.sel(time=self.ds.time)  # only time period of ds_ref that has also data in ds
+            ds_ref_sel = ds_ref_here.sel(time=self.ds.time)  # only time period of ds_ref that has also data in ds
             ds_ref_sel = ds_ref_sel.drop_vars(vars_to_ignore, errors='ignore')  # no error if var to ignore is missing
             ds_sel = self.ds.drop_vars(vars_to_ignore, errors='ignore')
             vars_not_in_ref = [var for var in list(ds_sel.keys()) if var not in list(ds_ref_sel.keys())]
