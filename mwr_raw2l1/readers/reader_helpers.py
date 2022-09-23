@@ -17,12 +17,22 @@ def get_time(data_raw, header, header_time, date_format):
         a :class:`numpy.ndarray` of :class:`datetime.datetime` objects
     """
 
-    for ind, hd in enumerate(header):
-        if simplify_header(hd) == simplify_header(header_time):
-            t_raw = data_raw[:, ind]
-            break
+    ind = get_column_ind(header, header_time)
+    return np.array([dt.datetime.strptime(tt, date_format) for tt in data_raw[:, ind]])
 
-    return np.array([dt.datetime.strptime(tt, date_format) for tt in t_raw])
+
+def get_column_ind(header, column_title):
+    """get the zero-based column index corresponding to the column title
+
+    Args:
+        header: list of all column headers
+        column_title: column title to search for in the header
+    Returns:
+        the index of the column corresponding to column_title
+    """
+    for ind, hd in enumerate(header):
+        if simplify_header(hd) == simplify_header(column_title):
+            return ind
 
 
 def check_vars(data, mandatory_vars):
@@ -32,11 +42,12 @@ def check_vars(data, mandatory_vars):
             raise MissingVariable("Mandatory variable '{}' was not found in data".format(var))
 
 
-def check_input_filelist(files):
-    if isinstance(files, str):
-        raise WrongInputFormat('input needs to be a list of files but got a string')
-
-
 def simplify_header(str_in):
     """simplify strings to match col headers more robustly. Use on both sides of the '==' operator"""
     return str_in.lower().replace(' ', '').replace('[', '(').replace(']', ')')
+
+
+def check_input_filelist(files):
+    """check that input files are given as a list and not as a single string"""
+    if isinstance(files, str):
+        raise WrongInputFormat('input needs to be a list of files but got a string')
