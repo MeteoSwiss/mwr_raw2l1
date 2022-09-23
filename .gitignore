@@ -5,6 +5,7 @@ poetry.lock
 .idea/
 .~lock.*
 
+offline/
 dist/
 docs/_build/*
 mwr_raw2l1/data/output/*
