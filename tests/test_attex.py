@@ -74,7 +74,7 @@ class TestAttex(unittest.TestCase):
         self.single_test_call_series()
 
     def test_missing_header(self):
-        """Test that an exception is raised if no header is present in data file (saw this for some DWD files)"""
+        """Test that an exception is raised if no header is present in data file"""
         infile_path_here = os.path.join(path_data_files_in, 'missing_header/')
         inst_conf_file_here = add_suffix(test_inst_conf_file, '_missing_header')
         make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path=infile_path_here)
@@ -83,7 +83,7 @@ class TestAttex(unittest.TestCase):
             run(inst_conf_file_here, nc_format_config_file, qc_config_file)
 
     def test_missing_colheader(self):
-        """Test that an exception is raised if no header is present in data file (saw this for some DWD files)"""
+        """Test that an exception is raised if no column header is present in data file"""
         infile_path_here = os.path.join(path_data_files_in, 'missing_colhead/')
         inst_conf_file_here = add_suffix(test_inst_conf_file, '_missing_colhead')
         make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path=infile_path_here)
@@ -91,15 +91,26 @@ class TestAttex(unittest.TestCase):
         with self.assertRaises(MissingHeader):
             run(inst_conf_file_here, nc_format_config_file, qc_config_file)
 
+    def test_alternative_file_format(self):
+        """Test main function runs ok for file with dateformat %d/%m/%Y %H:%M.%S and with substitute character at EOF"""
+        infile_path_here = os.path.join(path_data_files_in, 'alternative_format/')
+        inst_conf_file_here = add_suffix(test_inst_conf_file, '_alternative_format')
+        reference_output_here = str(
+            abs_file_path('tests/data/attex/reference_output/MWR_1C01_0-20000-0-99999_A202209220000.nc'))
+        make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path=infile_path_here)
+
+        self.single_test_call_series(inst_config_file=inst_conf_file_here, ref_file=reference_output_here)
+
     # Helper methods
     # --------------
-    def single_test_call_series(self, vars_to_ignore=None, check_timeseries_length=True, ref_file=None):
+    def single_test_call_series(self, vars_to_ignore=None, check_timeseries_length=True,
+                                inst_config_file=test_inst_conf_file, ref_file=None):
         """All steps a normal test should run through, i.e. executing main and checking contents of output NetCDF"""
 
         if ref_file is None:
             ds_ref_here = self.ds_ref
         else:
-            ds_ref_here = xr.load_dataset(reference_output)
+            ds_ref_here = xr.load_dataset(ref_file)
 
         if vars_to_ignore is None:
             vars_to_ignore = []
@@ -108,7 +119,7 @@ class TestAttex(unittest.TestCase):
         # subTest
         with self.subTest(operation='run_main'):
             """Run entire processing chain in main method (read-in > Measurement > write NetCDF)"""
-            run(test_inst_conf_file, nc_format_config_file, qc_config_file)
+            run(inst_config_file, nc_format_config_file, qc_config_file)
         with self.subTest(operation='load_ouptut_netcdf'):
             """Load output NetCDF file with xarray. Failed test might indicate a corrupt file"""
             files = glob.glob(os.path.join(path_data_files_out, '*.nc'))
@@ -130,7 +141,7 @@ class TestAttex(unittest.TestCase):
         if check_timeseries_length:
             with self.subTest(operation='check_whole_timeseries_in_nc'):
                 """compare length of time vector with reference. Not detected due to selection in check_output_vars"""
-                self.assertEqual(len(self.ds.time), len(self.ds_ref.time))
+                self.assertEqual(len(self.ds.time), len(ds_ref_here.time))
         with self.subTest(operation='check_output_att'):
             """check global attributes of output correspond to instrument config and that key attrs are present"""
             for attname, attval in self.conf_inst['nc_attributes'].items():
