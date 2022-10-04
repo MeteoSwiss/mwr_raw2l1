@@ -14,7 +14,7 @@ import unittest
 import xarray as xr
 import yaml
 
-from mwr_raw2l1.errors import MissingHeader, MWRTestError, UnknownRecordType
+from mwr_raw2l1.errors import MissingData, MissingHeader, MWRTestError, UnknownRecordType
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.main import run
 from mwr_raw2l1.utils.config_utils import get_inst_config
@@ -83,6 +83,15 @@ class TestRadiometrics(unittest.TestCase):
 
         run(inst_conf_file_here, nc_format_config_file, qc_config_file, concat=True)
 
+    def test_empty_lines(self):
+        """Test main function runs through when data file contains extra empty lines"""
+        # no need to test again that values are seen ok, just see that main method runs without errors
+        infile_path_here = os.path.join(path_data_files_in, 'empty_lines/')
+        inst_conf_file_here = add_suffix(test_inst_conf_file, '_empty_lines')
+        make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path=infile_path_here)
+
+        run(inst_conf_file_here, nc_format_config_file, qc_config_file, concat=True)
+
     def test_missing_header(self):
         """Test that an exception is raised if no header is present in data file (saw this for some DWD files)"""
         infile_path_here = os.path.join(path_data_files_in, 'missing_header/')
@@ -99,6 +108,15 @@ class TestRadiometrics(unittest.TestCase):
         make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path=infile_path_here)
 
         with self.assertRaises(UnknownRecordType):
+            run(inst_conf_file_here, nc_format_config_file, qc_config_file, concat=True)
+
+    def test_missing_data(self):
+        """Test that an exception is raised if file contains no data section"""
+        infile_path_here = os.path.join(path_data_files_in, 'missing_data/')
+        inst_conf_file_here = add_suffix(test_inst_conf_file, '_missing_data')
+        make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path=infile_path_here)
+
+        with self.assertRaises(MissingData):
             run(inst_conf_file_here, nc_format_config_file, qc_config_file, concat=True)
 
     # Helper methods
