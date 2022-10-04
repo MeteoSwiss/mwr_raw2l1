@@ -3,13 +3,11 @@ import os
 
 import numpy as np
 
-from mwr_raw2l1.errors import MissingData, MissingHeader, UnknownRecordType
+from mwr_raw2l1.errors import EmptyLineError, MissingData, MissingHeader, UnknownRecordType
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.readers.reader_helpers import check_input_filelist, check_vars
-from mwr_raw2l1.readers.reader_radiometrics_helpers import get_data
+from mwr_raw2l1.readers.reader_radiometrics_helpers import get_data, get_record_type
 from mwr_raw2l1.utils.file_utils import abs_file_path
-
-IND_RECORD_TYPE = 2  # third element in line of csv file refers to record type
 
 
 class Reader(object):
@@ -71,7 +69,11 @@ class Reader(object):
                     raise MissingData('Data section in input file is empty')
 
             line = [ll.strip() for ll in line]  # strip as ugly csv formatting leaves white spaces with headers
-            rec_type_nb = int(line[IND_RECORD_TYPE])  # assume header contains no empty lines and each has a rec_type
+            try:
+                rec_type_nb = get_record_type(line)
+            except EmptyLineError:
+                continue  # ignore empty lines and continue with next
+
             if (rec_type_nb % 10) == 0:  # 10-divisible: different column headers (expected as single line)
                 self.header['col_headers'][rec_type_nb] = line
             elif rec_type_nb == 99:  # 99: cp of config (can contain multiple lines)
@@ -91,17 +93,23 @@ class Reader(object):
         for rec_type_nb in self.header['col_headers'].keys():
             self.data_raw[rec_type_nb] = []
 
-        # continue iterating over csv_lines assuming header has already been read (incl. first data line)
+        # iterate over csv_lines assuming header has already been read (incl. first data line)
         try:
             self.sort_data_line(self.header['first_line_data'])
         except UnknownRecordType:
             logger.warning('first line after header is ignored as it does not correspond to expected format of data')
+        except EmptyLineError:
+            pass  # silently ignore empty line after header
+
         for line in csv_lines:
-            self.sort_data_line(line)
+            try:
+                self.sort_data_line(line)
+            except EmptyLineError:
+                continue  # ignore empty lines and continue with next
 
     def sort_data_line(self, line):
         """attribute a csv line of the data section to the correct header reference"""
-        rec_type_nb = int(line[IND_RECORD_TYPE])
+        rec_type_nb = get_record_type(line)
         # corresponding header rec type nb is always 1 lower e.g. 50 is header for data with nb 51
         rec_type_nb_header = (rec_type_nb - 1)
         if rec_type_nb_header in self.data_raw:

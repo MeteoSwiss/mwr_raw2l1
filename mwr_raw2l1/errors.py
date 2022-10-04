@@ -94,6 +94,11 @@ class MissingInputArgument(MWRInputError):
 
 
 # --------------------------
+class EmptyLineError(WrongInputFormat):
+    """Raised if trying to do operations on an empty csv line"""
+
+
+# --------------------------
 class DimensionMismatch(MWRDataError):
     """Raised if data dimensions do not match"""
 
