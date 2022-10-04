@@ -45,7 +45,7 @@ class FileTooShort(MWRFileError):
 
 
 class UnknownRecordType(MWRFileError):
-    """Raised if Radiometrics file contains a record type number that is not known, e.g. can't be matched with header"""
+    """Raised if Radiometrics file contains a record type number that is not known, i.e. can't be matched with header"""
 
 
 class MissingHeader(MWRFileError):

@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-from mwr_raw2l1.errors import MissingHeader, UnknownRecordType
+from mwr_raw2l1.errors import MissingData, MissingHeader, UnknownRecordType
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.readers.reader_helpers import check_input_filelist, check_vars
 from mwr_raw2l1.readers.reader_radiometrics_helpers import get_data
@@ -60,16 +60,25 @@ class Reader(object):
     def _read_header(self, csv_lines):
         """read the header of the csv data (all 10-divisible record type numbers and 99)"""
 
-        for n, line in enumerate(csv_lines):
+        while True:
+            try:
+                line = next(csv_lines)
+            except StopIteration:
+                # usual way of leaving loop is through break when record_type_nb does not correspond to header anymore
+                if csv_lines.line_num == 0:
+                    raise MissingData('Input file is empty')
+                else:
+                    raise MissingData('Data section in input file is empty')
+
             line = [ll.strip() for ll in line]  # strip as ugly csv formatting leaves white spaces with headers
-            rec_type_nb = int(line[IND_RECORD_TYPE])
+            rec_type_nb = int(line[IND_RECORD_TYPE])  # assume header contains no empty lines and each has a rec_type
             if (rec_type_nb % 10) == 0:  # 10-divisible: different column headers (expected as single line)
                 self.header['col_headers'][rec_type_nb] = line
             elif rec_type_nb == 99:  # 99: cp of config (can contain multiple lines)
                 self.header['cfg_info'].append(line)
             else:  # header seems consumed as none of the known record type numbers for header info follows
                 self.header['first_line_data'] = line
-                self.header['n_lines'] = n
+                self.header['n_lines'] = csv_lines.line_num - 1
                 break
 
         if not self.header['col_headers']:
