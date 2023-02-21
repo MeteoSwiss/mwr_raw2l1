@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-from mwr_raw2l1.errors import EmptyLineError, MissingData, MissingHeader, UnknownRecordType
+from mwr_raw2l1.errors import EmptyLineError, MissingData, MissingHeader, UnknownRecordType, CorruptRectype
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.readers.reader_helpers import check_input_filelist, check_vars
 from mwr_raw2l1.readers.reader_radiometrics_helpers import get_data, get_record_type
@@ -101,11 +101,18 @@ class Reader(object):
         except EmptyLineError:
             pass  # silently ignore empty line after header
 
+        # ct_corrupt_lines = 0
         for line in csv_lines:
             try:
                 self.sort_data_line(line)
             except EmptyLineError:
                 continue  # ignore empty lines and continue with next
+        # if rectype is corrupt also previous line is likely to be corrupt, hence do not escape this situation
+        #     except CorruptRectype:
+        #         ct_corrupt_lines += 1
+        #         continue
+        # if ct_corrupt_lines > 0:
+        #     logger.warning('Ignored {} corrupt lines in {}'.format(ct_corrupt_lines, self.filename))
 
     def sort_data_line(self, line):
         """attribute a csv line of the data section to the correct header reference"""
