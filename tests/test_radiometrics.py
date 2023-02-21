@@ -14,7 +14,7 @@ import unittest
 import xarray as xr
 import yaml
 
-from mwr_raw2l1.errors import MissingData, MissingHeader, MWRTestError, UnknownRecordType
+from mwr_raw2l1.errors import CorruptRectype, MissingData, MissingHeader, MWRTestError, UnknownRecordType
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.main import run
 from mwr_raw2l1.utils.config_utils import get_inst_config
@@ -117,6 +117,15 @@ class TestRadiometrics(unittest.TestCase):
         make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path=infile_path_here)
 
         with self.assertRaises(MissingData):
+            run(inst_conf_file_here, nc_format_config_file, qc_config_file, concat=True)
+
+    def test_corrupt_rectype(self):
+        """Test that an exception is raised if file is corrupt and record type cannot be converted to int"""
+        infile_path_here = os.path.join(path_data_files_in, 'corrupt_rectype/')
+        inst_conf_file_here = add_suffix(test_inst_conf_file, '_corrupt_rectype')
+        make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path=infile_path_here)
+
+        with self.assertRaises(CorruptRectype):
             run(inst_conf_file_here, nc_format_config_file, qc_config_file, concat=True)
 
     # Helper methods
