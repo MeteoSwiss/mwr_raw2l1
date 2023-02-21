@@ -1,6 +1,6 @@
 import numpy as np
 
-from mwr_raw2l1.errors import EmptyLineError
+from mwr_raw2l1.errors import CorruptRectype, EmptyLineError
 from mwr_raw2l1.readers.reader_helpers import get_time, simplify_header
 
 
@@ -87,9 +87,15 @@ def get_mwr(data_raw, header, only_observed_freq=True):
 def get_record_type(line, ind=2):
     """get record type number in csv line and return as int. By default, the third element (ind=2) in line is used."""
     try:
-        return int(line[ind])
+        rec_type_raw = line[ind]
     except IndexError as err:
         if not line:
             raise EmptyLineError('Cannot find record type of empty lines')
         else:
             raise err
+
+    try:
+        return int(rec_type_raw)
+    except ValueError:
+        raise CorruptRectype('Record type {} (element at position {} of csv line) cannot be transformed to int'.format(
+                             rec_type_raw, ind))

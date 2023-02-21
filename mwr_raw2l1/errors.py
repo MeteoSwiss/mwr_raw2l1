@@ -98,6 +98,10 @@ class EmptyLineError(WrongInputFormat):
     """Raised if trying to do operations on an empty csv line"""
 
 
+class CorruptRectype(WrongInputFormat):
+    """Raised if record type cannot be interpreted, e.g. if not integer"""
+
+
 # --------------------------
 class DimensionMismatch(MWRDataError):
     """Raised if data dimensions do not match"""
