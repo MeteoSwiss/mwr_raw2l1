@@ -79,9 +79,26 @@ def get_qc_config(file):
                       'check_missing_Tb', 'check_min_Tb', 'check_max_Tb',
                       'check_spectral_consistency', 'check_receiver_sanity',
                       'check_rain', 'check_sun', 'check_Tb_offset']
+
     conf = get_conf(file)
     check_conf(conf, mandatory_keys,
                'of quality control config files but is missing in {}'.format(file))
+
+    return conf
+
+
+def get_log_config(file):
+    """get configuration for logger and check for completeness of config file"""
+
+    mandatory_keys = ['logger_name', 'loglevel_stdout', 'write_logfile']
+    mandatory_keys_file = ['logfile_path', 'logfile_basename', 'logfile_timestamp_format', 'loglevel_file']
+
+    conf = get_conf(file)
+    check_conf(conf, mandatory_keys,
+               'of log config files but is missing in {}'.format(file))
+    if conf['write_logfile']:
+        check_conf(conf, mandatory_keys_file,
+                   "of log config files if 'write_logfile' is True, but is missing in {}".format(file))
 
     return conf
 
@@ -90,3 +107,4 @@ if __name__ == '__main__':
     get_inst_config(abs_file_path('mwr_raw2l1/config/config_0-20000-0-06610_A.yaml'))
     get_nc_format_config(abs_file_path('mwr_raw2l1/config/L1_format.yaml'))
     get_qc_config(abs_file_path('mwr_raw2l1/config/qc_config.yaml'))
+    get_log_config(abs_file_path('mwr_raw2l1/config/log_config.yaml'))
