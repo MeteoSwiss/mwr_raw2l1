@@ -1,3 +1,4 @@
+import logging
 import yaml
 
 from mwr_raw2l1.errors import MissingConfig, MWRConfigError
@@ -100,6 +101,22 @@ def get_log_config(file):
     if conf['write_logfile']:
         check_conf(conf, mandatory_keys_file,
                    "of log config files if 'write_logfile' is True, but is missing in {}".format(file))
+
+    conf = interpret_loglevel(conf)
+
+    return conf
+
+def interpret_loglevel(conf):
+    """helper function to replace log level strings in log level of logging library"""
+
+    pattern = 'loglevel'
+
+    level_keys = [s for s in conf.keys() if pattern in s]
+    for level_key in level_keys:
+        conf[level_key] = getattr(logging, conf[level_key].upper(), None)
+        if not isinstance(conf[level_key], int):
+            raise MWRConfigError("value of '{}' in log config does not correspond to any known log level of logging"
+                                 .format(level_key))
 
     return conf
 
