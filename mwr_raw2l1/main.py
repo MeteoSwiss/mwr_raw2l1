@@ -157,5 +157,9 @@ if __name__ == '__main__':
 
     # For testing with offline data
     # run('../offline/radiometrics_lin_nodata_csv/config_lin.yaml')
+    # run('../offline/radiometrics_lin_scan/config_lin.yaml')
+    # run('../offline/radiometrics_lin_nonint_rectype/config_lin.yaml', halt_on_error=False)
+    # run('../offline/rpg_lhumpro/config_izo.yaml')
+    # run('../offline/inoe/config_inoe.yaml')
 
     pass

@@ -1,4 +1,5 @@
-# config file example for a Attex MTP5-HE in Padua, Italy
+# config file example for an Attex MTP5-HE in Padua, Italy #
+############################################################
 
 reader: reader_attex   # refers to name set at import into main.py near line 10
 meas_constructor: from_attex  # constructor for Measurement class in measurement.measurement.py

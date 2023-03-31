@@ -1,4 +1,5 @@
-# config file example for a Radiometrics MP3000 in Lindenberg, Germany
+# config file example for a Radiometrics MP3000 in Lindenberg, Germany #
+########################################################################
 
 reader: reader_radiometrics   # refers to name set at import into main.py near line 10
 meas_constructor: from_radiometrics  # constructor for Measurement class in measurement.measurement.py

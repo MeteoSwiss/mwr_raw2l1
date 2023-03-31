@@ -1,5 +1,5 @@
-# config file for setting log destination and level
-###################################################
+# config file for setting log destination and level #
+#####################################################
 
 logger_name: 'mwr_raw2l1'
 
