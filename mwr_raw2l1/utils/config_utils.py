@@ -91,7 +91,8 @@ def get_log_config(file):
     """get configuration for logger and check for completeness of config file"""
 
     mandatory_keys = ['logger_name', 'loglevel_stdout', 'write_logfile']
-    mandatory_keys_file = ['logfile_path', 'logfile_basename', 'logfile_timestamp_format', 'loglevel_file']
+    mandatory_keys_file = ['logfile_path', 'logfile_basename', 'logfile_ext', 'logfile_timestamp_format',
+                           'loglevel_file']
 
     conf = get_conf(file)
     check_conf(conf, mandatory_keys,

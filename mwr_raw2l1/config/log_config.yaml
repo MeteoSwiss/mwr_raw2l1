@@ -13,6 +13,7 @@ loglevel_stdout: INFO  # level specification acceptable for logging module
 # ----------------------------------------------------------------------------------------------------
 write_logfile: True
 logfile_path: mwr_raw2l1/logs/  # absolute or relative to project dir
-logfile_basename: log_  # full filename will be logfile_basename + timestamp
+logfile_basename: log_  # full filename will be logfile_basename + timestamp + logfile_ext
+logfile_ext: .txt  # file extension for log files
 logfile_timestamp_format: '%Y%m%d%H%M%S'  # valid format for datetime's strftime()
 loglevel_file: INFO  # level specification acceptable for logging module
