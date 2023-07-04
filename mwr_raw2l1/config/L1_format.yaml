@@ -398,6 +398,18 @@ variables:
       standard_name: air_pressure
       units: hPa
 
+  RH:
+    name: relative_humidity
+    dim:
+      - time
+    type: f4
+    _FillValue: -999.
+    optional: True
+    attributes:
+      long_name: Relative humidity
+      standard_name: relative_humidity
+      units: '%'
+
   rainrate:
     name: rain_rate
     dim:
