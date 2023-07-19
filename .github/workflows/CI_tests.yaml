@@ -35,7 +35,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
       - name: Install package
-        run: poetry install --no-dev
+        run: poetry install --only main
       - name: Display installed packages
         run: |
           poetry env list
