@@ -19,7 +19,7 @@ for more colorful logging you may want to do
 
 from *git*
 ^^^^^^^^^^
-To install *mwr_raw2l1* from the source code do the following
+To install *mwr_raw2l1* with it's newest developments perform an installation from the source code like follows:
 
 1. clone this repository
 
@@ -29,7 +29,7 @@ To install *mwr_raw2l1* from the source code do the following
 
 2. go into the package directory and install
 
-    - with *pip* (21.3)
+    - with *pip* (>=21.3)
 
 
       .. code-block::
