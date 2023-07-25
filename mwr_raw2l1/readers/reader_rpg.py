@@ -278,11 +278,11 @@ class HKD(BaseReader):
         if self.data['has_T']:
             encodings_bin.append(dict(name='T_amb_1', type='f', shape=(1,)))
             encodings_bin.append(dict(name='T_amb_2', type='f', shape=(1,)))
-            encodings_bin.append(dict(name='T_receiver_kband', type='f', shape=(1,)))
-            encodings_bin.append(dict(name='T_receiver_vband', type='f', shape=(1,)))
+            encodings_bin.append(dict(name='T_receiver_hum', type='f', shape=(1,)))
+            encodings_bin.append(dict(name='T_receiver_temp', type='f', shape=(1,)))
         if self.data['has_stability']:
-            encodings_bin.append(dict(name='Tstab_kband', type='f', shape=(1,)))
-            encodings_bin.append(dict(name='Tstab_vband', type='f', shape=(1,)))
+            encodings_bin.append(dict(name='Tstab_hum', type='f', shape=(1,)))
+            encodings_bin.append(dict(name='Tstab_temp', type='f', shape=(1,)))
         if self.data['has_flashmemoryinfo']:
             encodings_bin.append(dict(name='flashmemory_remaining', type='i', shape=(1,)))
         if self.data['has_qualityflag']:

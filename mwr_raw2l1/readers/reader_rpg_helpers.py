@@ -124,19 +124,19 @@ def interpret_hkd_contents_code(contents_code_integer):
 def interpret_statusflag(flag_integer):
     """interpret the statusflag from HKD files and return a dict of status variables (input time series or scalar)"""
 
-    n_freq_kband = 7  # number of frequency channels in K-band receiver
-    n_freq_vband = 7  # number of frequency channels in V-band receiver
-    ind_start_vband = 8  # index of start of frequency channel quality flag for V-band
+    n_freq_hum = 7  # number of frequency channels in K-band receiver
+    n_freq_temp = 7  # number of frequency channels in V-band receiver
+    ind_start_temp = 8  # index of start of frequency channel quality flag for V-band
 
     statusflagbits = flag_int2bits(flag_integer)
 
     # interpret the different bits according to the manual
-    tstabflag_kband = statusflagbits[:, 24] + 2 * statusflagbits[:, 25]
-    tstabflag_vband = statusflagbits[:, 26] + 2 * statusflagbits[:, 27]
+    tstabflag_hum = statusflagbits[:, 24] + 2 * statusflagbits[:, 25]
+    tstabflag_temp = statusflagbits[:, 26] + 2 * statusflagbits[:, 27]
     out = {
-        'channels': np.arange(n_freq_kband + n_freq_vband),  # needed as dim for channel_quality_ok
-        'channel_quality_ok': np.concatenate([statusflagbits[:, 0:n_freq_kband],
-                                              statusflagbits[:, ind_start_vband:(ind_start_vband + n_freq_vband)]],
+        'channels': np.arange(n_freq_hum + n_freq_temp),  # needed as dim for channel_quality_ok
+        'channel_quality_ok': np.concatenate([statusflagbits[:, 0:n_freq_hum],
+                                              statusflagbits[:, ind_start_temp:(ind_start_temp + n_freq_temp)]],
                                              axis=1),
         'rainflag': statusflagbits[:, 16],
         'blowerspeed_status': statusflagbits[:, 17],
@@ -144,10 +144,10 @@ def interpret_statusflag(flag_integer):
         'tipcal_active': statusflagbits[:, 19],
         'gaincal_active': statusflagbits[:, 20],
         'noisecal_active': statusflagbits[:, 21],
-        'noisediode_ok_kband': statusflagbits[:, 22],
-        'noisediode_ok_vband': statusflagbits[:, 23],
-        'Tstab_ok_kband': interpret_tstab_flag(tstabflag_kband),
-        'Tstab_ok_vband': interpret_tstab_flag(tstabflag_vband),
+        'noisediode_ok_hum': statusflagbits[:, 22],
+        'noisediode_ok_temp': statusflagbits[:, 23],
+        'Tstab_ok_hum': interpret_tstab_flag(tstabflag_hum),
+        'Tstab_ok_temp': interpret_tstab_flag(tstabflag_temp),
         'recent_powerfailure': statusflagbits[:, 28],
         'Tstab_ok_amb': interpret_tstab_flag(statusflagbits[:, 29]),
         'noisediode_on': statusflagbits[:, 30]}

@@ -104,10 +104,10 @@ class MeasurementConstructors(object):
                     'blb': [],
                     'irt': [],
                     'met': ['windspeed', 'winddir', 'rainrate'],
-                    'hkd': ['lat', 'lon', 'T_amb_1', 'T_amb_2', 'T_receiver_kband', 'T_receiver_vband', 'statusflag',
-                            'Tstab_kband', 'Tstab_vband', 'flashmemory_remaining', 'BLscan_active',
-                            'channel_quality_ok', 'noisediode_ok_kband', 'noisediode_ok_vband',
-                            'Tstab_ok_kband', 'Tstab_ok_vband', 'Tstab_ok_amb']}
+                    'hkd': ['lat', 'lon', 'T_amb_1', 'T_amb_2', 'T_receiver_hum', 'T_receiver_temp', 'statusflag',
+                            'Tstab_hum', 'Tstab_temp', 'flashmemory_remaining', 'BLscan_active',
+                            'channel_quality_ok', 'noisediode_ok_hum', 'noisediode_ok_temp',
+                            'Tstab_ok_hum', 'Tstab_ok_temp', 'Tstab_ok_amb']}
 
         scanflag_values = {'brt': 0, 'blb': 1}  # for generating a scan flag indicating whether scanning or zenith obs
         max_azi_offset = 1  # maximum offset between all values in azimuth vector to be considered identical (degrees)
@@ -166,8 +166,8 @@ class MeasurementConstructors(object):
         # set receiver-dependent variables (must end with _receiver_n where n=1..9)
         data['T_amb_receiver_1'] = t_amb
         data['T_amb_receiver_2'] = t_amb
-        data['T_rec_receiver_1'] = data['T_receiver_kband']
-        data['T_rec_receiver_2'] = data['T_receiver_vband']
+        data['T_rec_receiver_1'] = data['T_receiver_hum']
+        data['T_rec_receiver_2'] = data['T_receiver_temp']
         # data['TN_receiver_1'] =
         # data['TN_receiver_2'] =
 
