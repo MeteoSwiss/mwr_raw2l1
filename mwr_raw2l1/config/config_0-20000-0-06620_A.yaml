@@ -1,0 +1,74 @@
+# config file example for a RPG TEMPRO in Schaffhausen, Switzerland #
+#####################################################################
+
+# mwr_raw2l1 configuration
+# ------------------------
+reader: reader_rpg   # refers to name set at import into main.py near line 10
+meas_constructor: from_rpg  # constructor for Measurement class in measurement.measurement.py
+filename_scheme: rpg  # allowed: attex, rpg (file type as ext) or radiometrics (file type as suffix after _)
+
+input_directory: mwr_raw2l1/data/rpg/0-20000-0-06620/  # use absolute path (or relative to mwr_raw2l1 project dir)
+output_directory: mwr_raw2l1/data/output/  # use absolute path (or relative to mwr_raw2l1 project dir)
+base_filename_in: MWR_0-20000-0-06620_A
+base_filename_out: MWR_1C01_0-20000-0-06620_A
+
+
+# station parameters
+# ------------------
+station_latitude: 47.69
+station_longitude: 8.62
+station_altitude: 438.
+
+
+# instrument parameters
+# ---------------------
+n_sidebands: 1
+bandwidth: [0.230, 0.230, 0.230, 0.230, 0.600, 1.000, 2.000]  # V-band; in GHz
+beamwidth: [.NaN, .NaN, .NaN, .NaN, .NaN, .NaN, .NaN]
+ir_bandwidth: .NaN
+ir_beamwidth: .NaN
+# ir_wavelength: # in nm. not mandatory to specify if available in data
+
+# the following parameters are potentially varying with time:
+freq_shift:  [0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000]  # V-band; in GHz
+channels_ok: [1, 1, 1, 1, 1, 1, 1]  # V-band; 1=ok(unless an issue found in QC), 0=flag as bad
+
+
+# NetCDF global attributes
+# ------------------------
+nc_attributes:
+  # title: do not set 'title' attribute unless you have a very good reason to deviate from the default
+  wigos_station_id: 0-20000-0-06620
+  instrument_id: A
+  site_location: Schaffhausen, Switzerland
+  institution: MeteoSwiss
+  principal_investigator: Remote Sensing Group
+  instrument_manufacturer: Radiometer Physics (RPG)
+  instrument_model: TEMPRO
+  instrument_generation: G2
+  instrument_hw_id: R-TPRO-07/003
+  instrument_history: to_be_specified
+  ir_instrument_manufacturer: to_be_specified
+  ir_instrument_model: to_be_specified
+  ir_instrument_fabrication_year: to_be_specified
+  met_instrument_manufacturer: to_be_specified
+  met_instrument_model: to_be_specified
+  met_instrument_fabrication_year: to_be_specified
+#
+# the following attributes are potentially varying with time:
+  instrument_calibration_status: calibrated
+  date_of_last_absolute_calibration: '2021-12-31 23:59:59'  # dates for global attrs need to be specified as str
+  date_of_last_covariance_matrix: '2021-12-31 23:59:59'  # dates for global attrs need to be specified as str
+  type_of_automatic_calibrations: calibration with ambient temperature target and noise diode
+
+# additional optional fields for nc_attributes
+  # network: E-PROFILE, ...
+  # campaign_name: ...
+  # comment: ...
+  # license: ...
+  # air_temperature_accuracy: ...
+  # relative_humidity_accuracy: ...
+  # air_pressure_accuracy: ...
+  # rain_rate_accuracy: ...
+  # wind_direction_accuracy: ...
+  # wind_speed_accuracy: ...

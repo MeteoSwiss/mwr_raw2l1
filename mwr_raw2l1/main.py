@@ -152,8 +152,11 @@ if __name__ == '__main__':
     run('config/config_0-20000-0-10393_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # Radiometrics
     fs, ff = run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # RPG HATPRO
 
+    run('config/config_0-20000-0-06620_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # RPG TEMPRO
+
     # For generating reference output file for test_rpg and testing concat option:
     # run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml', concat=True)  # RPG
+    # run('config/config_0-20000-0-06620_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml', concat=True)  # RPG
 
     # For testing with offline data
     # run('../offline/radiometrics_lin_nodata_csv/config_lin.yaml')
