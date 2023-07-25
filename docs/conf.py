@@ -43,7 +43,7 @@ intersphinx_mapping = {
     'xarray': ("http://xarray.pydata.org/en/stable/", None),
     'pandas': ("https://pandas.pydata.org/docs/", None),
     'numpy': ("https://numpy.org/doc/stable/", None),
-    'scipy': ("https://docs.scipy.org/doc/scipy/reference/", None),
+    'scipy': ("https://docs.scipy.org/doc/scipy/", None),
     'ephem': ("https://pypi.org/project/ephem/", None),
 }
 
