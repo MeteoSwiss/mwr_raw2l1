@@ -52,12 +52,7 @@ class TestRPG(unittest.TestCase):
     @classmethod
     def setUpClass(cls):  # this is only executed once at init of class
         """Set up test class by generating test configuration from sample file"""
-        nc_files_in_outdir = glob.glob(os.path.join(path_data_files_out, '*.nc'))
-        if nc_files_in_outdir:
-            err_msg = ("path_data_files_out ('{}') already contains NetCDF files. Refuse to run tests with output to "
-                       'this directory as all NetCDF files in this directory would be removed after each test. Verify '
-                       'path_data_files_out and remove files manually if needed'.format(path_data_files_out))
-            raise MWRTestError(err_msg)
+        check_outdir_empty(path_data_files_out)
         cls.path_data_files_in = path_data_files_in
         cls.conf_inst = make_test_config(orig_inst_conf_file, test_inst_conf_file,
                                          cls.path_data_files_in, path_data_files_out)
@@ -191,12 +186,7 @@ class TestRPGSingleObs(TestRPG):
     @classmethod
     def setUpClass(cls):  # this is only executed once at init of class
         """Set up test class by generating test configuration from sample file"""
-        nc_files_in_outdir = glob.glob(os.path.join(path_data_files_out, '*.nc'))
-        if nc_files_in_outdir:
-            err_msg = ("path_data_files_out ('{}') already contains NetCDF files. Refuse to run tests with output to "
-                       'this directory as all NetCDF files in this directory would be removed after each test. Verify '
-                       'path_data_files_out and remove files manually if needed'.format(path_data_files_out))
-            raise MWRTestError(err_msg)
+        check_outdir_empty(path_data_files_out)
         cls.path_data_files_in = path_data_files_in_single_obs
         cls.conf_inst = make_test_config(orig_inst_conf_file, test_inst_conf_file,
                                          cls.path_data_files_in, path_data_files_out)
@@ -221,3 +211,13 @@ def make_test_config(orig_config_file, test_config_file, path_data_in, path_data
     yaml.dump(conf_inst, f)
     f.close()
     return conf_inst
+
+
+def check_outdir_empty(path_files_out, search_pattern='*.nc'):
+    """check that no files matching search pattern are found in path_files_out"""
+    nc_files_in_outdir = glob.glob(os.path.join(path_files_out, search_pattern))
+    if nc_files_in_outdir:
+        err_msg = ("path_data_files_out ('{}') already contains NetCDF files. Refuse to run tests with output to "
+                   'this directory as all NetCDF files in this directory would be removed after each test. Verify '
+                   'path_data_files_out and remove files manually if needed'.format(path_files_out))
+        raise MWRTestError(err_msg)
