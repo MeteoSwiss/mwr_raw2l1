@@ -32,7 +32,7 @@ To install *mwr_raw2l1* from the source code do the following
     `git clone https://github.com/MeteoSwiss/mwr_raw2l1.git`
 
 2. go into the package directory and install
-    - with *pip* (21.3)
+    - with *pip* (>=21.3)
    
         - `pip install .`
    
@@ -76,5 +76,5 @@ For a general overview, here is what the main routine does:
 ## Documentation
 The official documentation is available [here](https://mwr-raw2l1.readthedocs.io)
 
-## Licnese
+## License
 [BSD 3-Clause](LICENSE)

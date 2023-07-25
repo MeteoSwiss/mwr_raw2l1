@@ -231,14 +231,16 @@ def interpret_bit_order(bit_order):
 
 def flag_int2bits(flag_integer):
     """transform an integer value to bits. Input can be time series or scalars"""
-    # format input
+    # format input to a 2d numpy array with all data along first dim
     if len(np.shape(flag_integer)) == 0:  # input is scalar
         flag_integer = np.array([[flag_integer]])
     elif not isinstance(flag_integer, np.ndarray):
         raise WrongInputFormat('input must either be a numpy array or a scalar')
     elif np.ndim(np.squeeze(flag_integer)) > 1:
         raise WrongInputFormat('input can only be vector or scalar but not matrix')
-    else:  # input is vector
+    elif len(flag_integer) == 1:  # input is numpy array with just one input (will be made scalar by numpy squeeze)
+        flag_integer = np.squeeze(flag_integer)[np.newaxis, np.newaxis]
+    else:  # input is column or row vector
         flag_integer = np.squeeze(flag_integer)[:, np.newaxis]
 
     # transform integer (time series) to flag bits
