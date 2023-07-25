@@ -53,7 +53,8 @@ class TestRPG(unittest.TestCase):
                        'this directory as all NetCDF files in this directory would be removed after each test. Verify '
                        'path_data_files_out and remove files manually if needed'.format(path_data_files_out))
             raise MWRTestError(err_msg)
-        cls.conf_inst = make_test_config(orig_inst_conf_file, test_inst_conf_file)
+        cls.path_data_files_in = path_data_files_in
+        cls.conf_inst = make_test_config(orig_inst_conf_file, test_inst_conf_file, path_data_files_in, path_data_files_out)
         cls.ds_ref = xr.load_dataset(reference_output)
 
     @classmethod
@@ -169,27 +170,29 @@ class TestRPG(unittest.TestCase):
          Args:
              ext_to_exclude: list of extensions to exclude from file list. Extensions must contain dot as first digit'
          Returns:
-            all files in path_data_files_in except the ones with an extension specified in ext_to_exclude
+            all files in self.path_data_in except the ones with an extension specified in ext_to_exclude
         """
-        infiles_for_test = glob.glob(os.path.join(path_data_files_in, self.conf_inst['base_filename_in'] + '*'))
+        infiles_for_test = glob.glob(os.path.join(self.path_data_files_in, self.conf_inst['base_filename_in'] + '*'))
         for file in infiles_for_test.copy():
             if os.path.splitext(file)[-1].upper() in ext_to_exclude:
                 infiles_for_test.remove(file)
         return infiles_for_test
 
 
-def make_test_config(orig_config_file, test_config_file):
+def make_test_config(orig_config_file, test_config_file, path_data_in, path_data_out):
     """get sample config file and modify and save as test config file and return test config dictionary
 
     Args:
         orig_config_file: path to sample config file
         test_config_file: path where to store modified config file for testing
+        path_data_in: path where to look for input observation files for testing
+        path_data_out: path where to store output file during testing
     Returns:
         configuration dict of test config
     """
     conf_inst = get_inst_config(orig_config_file)
-    conf_inst['input_directory'] = path_data_files_in
-    conf_inst['output_directory'] = path_data_files_out
+    conf_inst['input_directory'] = path_data_in
+    conf_inst['output_directory'] = path_data_out
     f = open(test_config_file, 'w')  # with open... does not work here for some reason
     yaml.dump(conf_inst, f)
     f.close()
