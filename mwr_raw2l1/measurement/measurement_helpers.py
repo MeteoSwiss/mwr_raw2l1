@@ -41,6 +41,48 @@ def channels2receiver(freq, band_limits=None, base=1):
     return rec_nb_0 + base
 
 
+def channels2quantity(freq, name_humidity='hum', name_temperature='temp', **kwargs):
+    """attribute retrieved quantities to receivers matching frequency channels according to :func:`channels2receiver`
+
+    Currently, the only quantities that can be discriminated are temperature and humidity
+
+    Args:
+        freq: frequency vector in GHz as :class:`xarray.DataArray`
+        name_humidity (optional): name assigned to retrieved quantity 'humidity'
+        name_temperature (optional): name assigned to retrieved quantity 'temperatre'
+        **kwargs: keyword arguments passed on to :func:`channels2receiver`
+
+    Returns:
+        a dictionary with the receiver numbers as keys and the retrieved quantities as values
+    """
+
+    bands_hum = [[12, 40], [160, 210]]  # frequency limits [GHz] of bands for humidity retrievals
+    bands_temp = [[45, 75], [110, 130]]  # frequency limits [GHz] of bands for temperature retrievals
+
+    receiver = channels2receiver(freq, **kwargs)
+    receiver_nbs = np.unique(receiver)
+    receiver_quantity_match = dict()
+    for rec_nb in receiver_nbs:
+        rec_central_freq = freq.where(receiver == rec_nb).mean(skipna=True)
+
+        quantity_found = False
+        for bnd in bands_hum:
+            if bnd[0] < rec_central_freq < bnd[1]:
+                receiver_quantity_match[rec_nb] = name_humidity
+                quantity_found = True
+                break
+        for bnd in bands_temp:
+            if bnd[0] < rec_central_freq < bnd[1]:
+                receiver_quantity_match[rec_nb] = name_temperature
+                quantity_found = True
+                break
+        if not quantity_found:
+            raise ValueError('central frequency of receiver {} does not correspond to any pre-defined band for the '
+                         'retrieval of a specific atmospheric quantity'.format(rec_nb))
+
+    return receiver_quantity_match
+
+
 def get_receiver_vars(varnames, search_pattern='receiver', sep='_'):
     """find receiver-specific variable names
 
