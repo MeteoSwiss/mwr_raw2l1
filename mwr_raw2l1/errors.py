@@ -111,6 +111,10 @@ class TimeMismatch(MWRDataError):
     """Raised if time period covered by different data sources does not match"""
 
 
+class UnknownFrequencyBand(MWRDataError):
+    """Raised if the frequencies of the data cannot be attributed to a band expected for the retrieval of T or q"""
+
+
 # --------------------------
 class OutputDimensionError(MWROutputError):
     """Raised if requested output dimensions do not match data"""

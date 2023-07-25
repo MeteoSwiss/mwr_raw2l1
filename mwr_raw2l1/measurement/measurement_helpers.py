@@ -2,7 +2,7 @@ from itertools import groupby
 
 import numpy as np
 
-from mwr_raw2l1.errors import WrongInputFormat
+from mwr_raw2l1.errors import UnknownFrequencyBand, WrongInputFormat
 
 
 def is_var_in_data(data, var):
@@ -77,8 +77,8 @@ def channels2quantity(freq, name_humidity='hum', name_temperature='temp', **kwar
                 quantity_found = True
                 break
         if not quantity_found:
-            raise ValueError('central frequency of receiver {} does not correspond to any pre-defined band for the '
-                         'retrieval of a specific atmospheric quantity'.format(rec_nb))
+            raise UnknownFrequencyBand('central frequency of receiver {} does not correspond to any pre-defined band '
+                                       'for the retrieval of a specific atmospheric quantity'.format(rec_nb))
 
     return receiver_quantity_match
 
