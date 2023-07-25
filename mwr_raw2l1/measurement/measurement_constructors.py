@@ -5,7 +5,7 @@ from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement_construct_helpers import (attex_to_datasets, check_temporal_consistency,
                                                                   merge_aux_data, merge_brt_blb,
                                                                   radiometrics_to_datasets, rpg_to_datasets, rpg_to_si)
-from mwr_raw2l1.measurement.measurement_helpers import is_var_in_data
+from mwr_raw2l1.measurement.measurement_helpers import channels2quantity, is_var_in_data
 from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries_from_scanonly, scanflag_from_ele
 
 DTYPE_SCANFLAG = 'u1'  # data type used for scanflags set by Measurement class
@@ -163,13 +163,17 @@ class MeasurementConstructors(object):
                 data['azi'][data['scan_quadrant'] == 2] = np.mod(azi_med + 180, 360)
                 data['azi'][data['scan_quadrant'] == 0] = np.nan
 
-        # set receiver-dependent variables (must end with _receiver_n where n=1..9)
-        data['T_amb_receiver_1'] = t_amb
-        data['T_amb_receiver_2'] = t_amb
-        data['T_rec_receiver_1'] = data['T_receiver_hum']
-        data['T_rec_receiver_2'] = data['T_receiver_temp']
-        # data['TN_receiver_1'] =
-        # data['TN_receiver_2'] =
+        # set receiver-dependent variables (attribute _receiver_hum and _receiver_temp to _receiver_n )
+        vars_in_out = {'T': 'T_rec',
+                      'T_amb': 'T_amb'}
+        data['T_amb_receiver_hum'] = t_amb  # need to attribute common T_amb to both receivers
+        data['T_amb_receiver_temp'] = t_amb  # need to attribute common T_amb to both receivers
+        rec_quant_match = channels2quantity(data['frequency'])
+        for var_in, var_out in vars_in_out.items():
+            for rec_nb, rec_quant in rec_quant_match.items():
+                varname_in = '{}_receiver_{}'.format(var_in, rec_quant)
+                varname_out = '{}_receiver_{}'.format(var_out, rec_nb)
+                data[varname_out] = data[varname_in]
 
         data['mfr'] = 'rpg'  # manufacturer (lowercase)
 
