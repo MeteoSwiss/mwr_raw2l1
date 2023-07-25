@@ -31,6 +31,7 @@ VARS_TO_IGNORE_GLOBAL = []
 orig_inst_conf_file = str(abs_file_path('mwr_raw2l1/config/config_0-20000-0-06610_A.yaml'))
 test_inst_conf_file = str(abs_file_path('tests/config/config_0-20000-0-06610_A.yaml'))
 path_data_files_in = str(abs_file_path('tests/data/rpg/0-20000-0-06610/'))
+path_data_files_in_single_obs = str(abs_file_path('tests/data/rpg/0-20000-0-06610_single_obs/'))
 path_data_files_out = str(abs_file_path('tests/data/output/'))  # all nc files will be removed from this directory
 
 # NetCDF format definition
@@ -41,9 +42,13 @@ qc_config_file = abs_file_path('mwr_raw2l1/config/qc_config.yaml')
 
 # reference output file to compare against
 reference_output = str(abs_file_path('tests/data/rpg/reference_output/MWR_1C01_0-20000-0-06610_A201908040100.nc'))
+reference_output_single_obs = str(abs_file_path(
+    'tests/data/rpg/reference_output/MWR_1C01_0-20000-0-06610_A202305190603_single_obs.nc'))
 
 
 class TestRPG(unittest.TestCase):
+    """Run RPG tests for standard data with checks for missing data files"""
+
     @classmethod
     def setUpClass(cls):  # this is only executed once at init of class
         """Set up test class by generating test configuration from sample file"""
@@ -54,7 +59,8 @@ class TestRPG(unittest.TestCase):
                        'path_data_files_out and remove files manually if needed'.format(path_data_files_out))
             raise MWRTestError(err_msg)
         cls.path_data_files_in = path_data_files_in
-        cls.conf_inst = make_test_config(orig_inst_conf_file, test_inst_conf_file, path_data_files_in, path_data_files_out)
+        cls.conf_inst = make_test_config(orig_inst_conf_file, test_inst_conf_file,
+                                         cls.path_data_files_in, path_data_files_out)
         cls.ds_ref = xr.load_dataset(reference_output)
 
     @classmethod
@@ -177,6 +183,24 @@ class TestRPG(unittest.TestCase):
             if os.path.splitext(file)[-1].upper() in ext_to_exclude:
                 infiles_for_test.remove(file)
         return infiles_for_test
+
+
+class TestRPGSingleObs(TestRPG):
+    """Re-run RPG tests but for data with a single-observation in BLB file"""
+
+    @classmethod
+    def setUpClass(cls):  # this is only executed once at init of class
+        """Set up test class by generating test configuration from sample file"""
+        nc_files_in_outdir = glob.glob(os.path.join(path_data_files_out, '*.nc'))
+        if nc_files_in_outdir:
+            err_msg = ("path_data_files_out ('{}') already contains NetCDF files. Refuse to run tests with output to "
+                       'this directory as all NetCDF files in this directory would be removed after each test. Verify '
+                       'path_data_files_out and remove files manually if needed'.format(path_data_files_out))
+            raise MWRTestError(err_msg)
+        cls.path_data_files_in = path_data_files_in_single_obs
+        cls.conf_inst = make_test_config(orig_inst_conf_file, test_inst_conf_file,
+                                         cls.path_data_files_in, path_data_files_out)
+        cls.ds_ref = xr.load_dataset(reference_output_single_obs)
 
 
 def make_test_config(orig_config_file, test_config_file, path_data_in, path_data_out):
