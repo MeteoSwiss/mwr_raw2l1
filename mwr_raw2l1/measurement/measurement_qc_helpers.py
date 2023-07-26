@@ -64,7 +64,8 @@ def check_sun(data, delta_ele, delta_azi):
 
     Args:
         data: :class:`xarray.Dataset`, commonly Measurement.data
-        delta_ele:
+        delta_ele: elevation offset in degrees from radiometer pointing until which sun is considered to be in the beam
+        delta_azi: azimuth offset in degrees from radiometer pointing until which sun is considered to be in the beam
     Returns:
         tuple containing:
             mask_fail: None if check_applied=False, otherwise array of size (time,) set True where sun is in beam
