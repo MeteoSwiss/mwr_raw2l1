@@ -26,7 +26,7 @@ def check_receiver_sanity(data, channel):
         masks_and_checks = []  # collect all output tuples from flag_check here
         masks_and_checks.append(flag_check(data, 'channel_quality_ok', 0, channel))
         masks_and_checks.append(flag_check(data, 'alarm', 1, channel=None))
-        # could add checks for noisediode_ok_hum, noisediode_ok_temp, Tstab_ok_hum, Tstab_ok_temp, Tstab_ok_amb
+        # TODO: could add checks for noisediode_ok_hum, noisediode_ok_temp, Tstab_ok_hum, Tstab_ok_temp, Tstab_ok_amb
         check_applied_all = [m[1] for m in masks_and_checks]
         if any(check_applied_all):
             mask_fail_all = np.stack([m[0] for m in masks_and_checks if m[1]], axis=1)

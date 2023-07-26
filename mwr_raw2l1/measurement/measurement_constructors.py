@@ -1,11 +1,12 @@
 import numpy as np
+import xarray as xr
 
 from mwr_raw2l1.errors import MissingDataSource
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement_construct_helpers import (attex_to_datasets, check_temporal_consistency,
                                                                   merge_aux_data, merge_brt_blb,
                                                                   radiometrics_to_datasets, rpg_to_datasets, rpg_to_si)
-from mwr_raw2l1.measurement.measurement_helpers import channels2quantity, is_var_in_data
+from mwr_raw2l1.measurement.measurement_helpers import channels2quantity, is_var_in_data, channels2receiver
 from mwr_raw2l1.measurement.scan_transform import scan_to_timeseries_from_scanonly, scanflag_from_ele
 
 DTYPE_SCANFLAG = 'u1'  # data type used for scanflags set by Measurement class
@@ -94,7 +95,7 @@ class MeasurementConstructors(object):
                 'blb': ['time', 'frequency', 'scan_ele'],
                 'irt': ['time', 'ir_wavelength'],
                 'met': ['time'],
-                'hkd': ['time', 'channels']}
+                'hkd': ['time', 'channels_rec']}
         vars = {'brt': ['Tb', 'rainflag', 'ele', 'azi'],
                 'blb': ['Tb', 'T', 'rainflag', 'scan_quadrant'],
                 'irt': ['IRT', 'rainflag', 'ele', 'azi'],  # ele/azi will become ele_irt/azi_irt as also present in MWR
@@ -106,7 +107,8 @@ class MeasurementConstructors(object):
                     'met': ['windspeed', 'winddir', 'rainrate'],
                     'hkd': ['lat', 'lon', 'T_amb_1', 'T_amb_2', 'T_receiver_hum', 'T_receiver_temp', 'statusflag',
                             'Tstab_hum', 'Tstab_temp', 'flashmemory_remaining', 'BLscan_active',
-                            'channel_quality_ok', 'noisediode_ok_hum', 'noisediode_ok_temp',
+                            'channel_quality_ok_hum', 'channel_quality_ok_temp',
+                            'noisediode_ok_hum', 'noisediode_ok_temp',
                             'Tstab_ok_hum', 'Tstab_ok_temp', 'Tstab_ok_amb']}
 
         scanflag_values = {'brt': 0, 'blb': 1}  # for generating a scan flag indicating whether scanning or zenith obs
@@ -163,17 +165,30 @@ class MeasurementConstructors(object):
                 data['azi'][data['scan_quadrant'] == 2] = np.mod(azi_med + 180, 360)
                 data['azi'][data['scan_quadrant'] == 0] = np.nan
 
+        # find out retrieval boards and quantities
+        rec_quant_match = channels2quantity(data['frequency'])
+        receiver = channels2receiver(data['frequency'])
+
         # set receiver-dependent variables (attribute _receiver_hum and _receiver_temp to _receiver_n )
         vars_in_out = {'T': 'T_rec',
                       'T_amb': 'T_amb'}
         data['T_amb_receiver_hum'] = t_amb  # need to attribute common T_amb to both receivers
         data['T_amb_receiver_temp'] = t_amb  # need to attribute common T_amb to both receivers
-        rec_quant_match = channels2quantity(data['frequency'])
         for var_in, var_out in vars_in_out.items():
             for rec_nb, rec_quant in rec_quant_match.items():
                 varname_in = '{}_receiver_{}'.format(var_in, rec_quant)
                 varname_out = '{}_receiver_{}'.format(var_out, rec_nb)
                 data[varname_out] = data[varname_in]
+
+        # combine quality flags of different receiver boards
+        data['channel_quality_ok'] = xr.DataArray(data=np.full([len(data.time), len(data.frequency)], np.nan),
+                                                  dims=['time', 'frequency'])
+        counters = {'hum': 0, 'temp': 0}
+        for n, _ in enumerate(data['frequency']):
+            quant = rec_quant_match[receiver[n]]
+            ind = counters[quant]
+            data['channel_quality_ok'][:, n] = data['channel_quality_ok_'+quant][:, ind]
+            counters[quant] += 1
 
         data['mfr'] = 'rpg'  # manufacturer (lowercase)
 

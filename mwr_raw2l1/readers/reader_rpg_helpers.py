@@ -124,9 +124,11 @@ def interpret_hkd_contents_code(contents_code_integer):
 def interpret_statusflag(flag_integer):
     """interpret the statusflag from HKD files and return a dict of status variables (input time series or scalar)"""
 
-    n_freq_hum = 7  # number of frequency channels in K-band receiver
-    n_freq_temp = 7  # number of frequency channels in V-band receiver
-    ind_start_temp = 8  # index of start of frequency channel quality flag for V-band
+    # order of channel-dependent quantities in HKD. All RPG instruments have the same HKD file format, independent of
+    # the actual number of channels of the instrument receivers really have
+    n_channels_rec = 7  # number of frequency channels per receiver. Assume all rec have same number of ch in datafile
+    ind_start_qc_hum = 0  # index of start of frequency channel quality flag for humidity receiver
+    ind_start_qc_temp = 8  # index of start of frequency channel quality flag for temperature receiver
 
     statusflagbits = flag_int2bits(flag_integer)
 
@@ -134,10 +136,9 @@ def interpret_statusflag(flag_integer):
     tstabflag_hum = statusflagbits[:, 24] + 2 * statusflagbits[:, 25]
     tstabflag_temp = statusflagbits[:, 26] + 2 * statusflagbits[:, 27]
     out = {
-        'channels': np.arange(n_freq_hum + n_freq_temp),  # needed as dim for channel_quality_ok
-        'channel_quality_ok': np.concatenate([statusflagbits[:, 0:n_freq_hum],
-                                              statusflagbits[:, ind_start_temp:(ind_start_temp + n_freq_temp)]],
-                                             axis=1),
+        'channels_rec': np.arange(n_channels_rec),  # needed as dim for channel_quality_ok_hum and channel_quality_ok_temp
+        'channel_quality_ok_hum': statusflagbits[:, ind_start_qc_hum:(ind_start_qc_hum + n_channels_rec)],
+        'channel_quality_ok_temp': statusflagbits[:, ind_start_qc_temp:(ind_start_qc_temp + n_channels_rec)],
         'rainflag': statusflagbits[:, 16],
         'blowerspeed_status': statusflagbits[:, 17],
         'BLscan_active': statusflagbits[:, 18],
