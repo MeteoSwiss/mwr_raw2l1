@@ -153,6 +153,7 @@ if __name__ == '__main__':
     fs, ff = run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # RPG HATPRO
 
     run('config/config_0-20000-0-06620_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # RPG TEMPRO
+    run('config/config_0-20008-0-IZO_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml')  # RPG LHATPRO
 
     # For generating reference output file for test_rpg and testing concat option:
     # run('config/config_0-20000-0-06610_A.yaml', 'config/L1_format.yaml', 'config/qc_config.yaml', concat=True)  # RPG
@@ -162,7 +163,7 @@ if __name__ == '__main__':
     # run('../offline/radiometrics_lin_nodata_csv/config_lin.yaml')
     # run('../offline/radiometrics_lin_scan/config_lin.yaml')
     # run('../offline/radiometrics_lin_nonint_rectype/config_lin.yaml', halt_on_error=False)
-    # run('../offline/rpg_lhatpro/config_izo.yaml')
+    run('../offline/rpg_lhatpro/config_izo.yaml')
     # run('../offline/inoe/config_inoe.yaml')
     # run('../offline/sha_tempro/config_MWR_SHA_A_ed.yaml')
     # run('../offline/rpg_single_obs_blb/config_PAY_A_ed.yaml')

@@ -1,5 +1,5 @@
-# config file example for a RPG TEMPRO in Schaffhausen, Switzerland #
-#####################################################################
+# config file example for a RPG HATPRO in Payerne, Switzerland #
+################################################################
 
 # mwr_raw2l1 configuration
 # ------------------------
@@ -7,46 +7,50 @@ reader: reader_rpg   # refers to name set at import into main.py near line 10
 meas_constructor: from_rpg  # constructor for Measurement class in measurement.measurement.py
 filename_scheme: rpg  # allowed: attex, rpg (file type as ext) or radiometrics (file type as suffix after _)
 
-input_directory: mwr_raw2l1/data/rpg/0-20000-0-06620/  # use absolute path (or relative to mwr_raw2l1 project dir)
+input_directory: mwr_raw2l1/data/rpg/0-20008-0-IZO/  # use absolute path (or relative to mwr_raw2l1 project dir)
 output_directory: mwr_raw2l1/data/output/  # use absolute path (or relative to mwr_raw2l1 project dir)
-base_filename_in: MWR_0-20000-0-06620_A
-base_filename_out: MWR_1C01_0-20000-0-06620_A
+base_filename_in: MWR_0-20008-0-IZO_A
+base_filename_out: MWR_1C01_0-20008-0-IZO_A
 
 
 # station parameters
 # ------------------
-station_latitude: 47.69
-station_longitude: 8.62
-station_altitude: 438.
+station_latitude: 28.31
+station_longitude: -16.50
+station_altitude: 2400.
 
 
 # instrument parameters
 # ---------------------
 n_sidebands: 1
-bandwidth: [0.230, 0.230, 0.230, 0.230, 0.600, 1.000, 2.000]  # V-band; in GHz
-beamwidth: [.NaN, .NaN, .NaN, .NaN, .NaN, .NaN, .NaN]
+bandwidth: [0.230, 0.230, 0.230, 0.230, 0.600, 1.000, 2.000,  # V-band; in GHz
+            0.200, 0.200, 0.200, 0.200, 0.400, 0.500]  # G-band; in GHz
+beamwidth: [.NaN, .NaN, .NaN, .NaN, .NaN, .NaN, .NaN,
+            .NaN, .NaN, .NaN, .NaN, .NaN, .NaN]
 ir_bandwidth: .NaN
 ir_beamwidth: .NaN
 # ir_wavelength: # in nm. not mandatory to specify if available in data
 
 # the following parameters are potentially varying with time:
-freq_shift:  [0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000]  # V-band; in GHz
-channels_ok: [1, 1, 1, 1, 1, 1, 1]  # V-band; 1=ok(unless an issue found in QC), 0=flag as bad
+freq_shift:  [0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000,  # V-band; in GHz
+              0.000, 0.000, 0.000, 0.000, 0.000, 0.000]  # G-band; in GHz
+channels_ok: [1, 1, 1, 1, 1, 1, 1,  # V-band; 1=ok(unless an issue found in QC), 0=flag as bad
+              1, 1, 1, 1, 1, 1]  # G-band; 1=ok(unless an issue found in QC), 0=flag as bad
 
 
 # NetCDF global attributes
 # ------------------------
 nc_attributes:
   # title: do not set 'title' attribute unless you have a very good reason to deviate from the default
-  wigos_station_id: 0-20000-0-06620
+  wigos_station_id: 0-20008-0-IZO
   instrument_id: A
-  site_location: Schaffhausen, Switzerland
-  institution: MeteoSwiss
-  principal_investigator: Remote Sensing Group
+  site_location: Izaña, Spain
+  institution: Agencia Estatal de Meteorología (AEMET)
+  principal_investigator: CIAI
   instrument_manufacturer: Radiometer Physics (RPG)
-  instrument_model: TEMPRO
-  instrument_generation: G2
-  instrument_hw_id: R-TPRO-07-003
+  instrument_model: LHATPRO
+  instrument_generation: G5
+  instrument_hw_id: 0050009
   instrument_history: to_be_specified
   ir_instrument_manufacturer: to_be_specified
   ir_instrument_model: to_be_specified
