@@ -1,6 +1,7 @@
 from itertools import groupby
 
 import numpy as np
+import xarray as xr
 
 from mwr_raw2l1.errors import UnknownFrequencyBand, WrongInputFormat
 
@@ -47,7 +48,7 @@ def channels2quantity(freq, name_humidity='hum', name_temperature='temp', **kwar
     Currently, the only quantities that can be discriminated are temperature and humidity
 
     Args:
-        freq: frequency vector in GHz as :class:`xarray.DataArray`
+        freq: frequency vector in GHz as :class:`xarray.DataArray`, :class:`numpy.ndarray`, list or tuple
         name_humidity (optional): name assigned to retrieved quantity 'humidity'
         name_temperature (optional): name assigned to retrieved quantity 'temperatre'
         **kwargs: keyword arguments passed on to :func:`channels2receiver`
@@ -59,8 +60,12 @@ def channels2quantity(freq, name_humidity='hum', name_temperature='temp', **kwar
     bands_hum = [[12, 40], [160, 210]]  # frequency limits [GHz] of bands for humidity retrievals
     bands_temp = [[45, 75], [110, 130]]  # frequency limits [GHz] of bands for temperature retrievals
 
+    if freq is not xr.DataArray:
+        freq = xr.DataArray(freq)
+
     receiver = channels2receiver(freq, **kwargs)
     receiver_nbs = np.unique(receiver)
+
     receiver_quantity_match = dict()
     for rec_nb in receiver_nbs:
         rec_central_freq = freq.where(receiver == rec_nb).mean(skipna=True)
