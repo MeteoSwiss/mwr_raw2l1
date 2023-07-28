@@ -51,7 +51,8 @@ class TestRadiometrics(unittest.TestCase):
                        'this directory as all NetCDF files in this directory would be removed after each test. Verify '
                        'path_data_files_out and remove files manually if needed'.format(path_data_files_out))
             raise MWRTestError(err_msg)
-        cls.conf_inst = make_test_config(orig_inst_conf_file, test_inst_conf_file, path_data_files_in, path_data_files_out)
+        cls.conf_inst = make_test_config(orig_inst_conf_file, test_inst_conf_file,
+                                         path_data_files_in, path_data_files_out)
         cls.ds_ref = xr.load_dataset(reference_output)
 
     @classmethod
