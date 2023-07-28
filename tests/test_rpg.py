@@ -29,7 +29,7 @@ VARS_TO_IGNORE_GLOBAL = []
 # INPUTS DEPENDENT ON TEST CLASS (instrument config and reference output)
 # =======================================================================
 # RPG HATPRO standard config (including concat)
-orig_inst_conf_file_hatpro = str(abs_file_path('mwr_raw2l1/config/config_0-20000-0-06610_A.yaml'))
+orig_inst_conf_file_hatpro = str(abs_file_path('mwr_raw2l1/config/config_0-20000-0-06610_A.yaml'))  # Payerne
 path_data_files_in_hatpro = str(abs_file_path('tests/data/rpg/0-20000-0-06610/'))
 reference_output_hatpro = str(abs_file_path(
     'tests/data/rpg/reference_output/MWR_1C01_0-20000-0-06610_A201908040100.nc'))
@@ -39,6 +39,13 @@ orig_inst_conf_file_single_obs = str(abs_file_path('mwr_raw2l1/config/config_0-2
 path_data_files_in_single_obs = str(abs_file_path('tests/data/rpg/0-20000-0-06610_single_obs/'))
 reference_output_single_obs = str(abs_file_path(
     'tests/data/rpg/reference_output/MWR_1C01_0-20000-0-06610_A202305190603_single_obs.nc'))
+
+# RPG TEMPRO
+orig_inst_conf_file_tempro = str(abs_file_path('mwr_raw2l1/config/config_0-20000-0-06620_A.yaml'))  # Grenchen
+path_data_files_in_tempro = str(abs_file_path('tests/data/rpg/0-20000-0-06620/'))
+reference_output_tempro = str(abs_file_path(
+    'tests/data/rpg/reference_output/MWR_1C01_0-20000-0-06620_A202305182358.nc'))
+
 
 # INPUTS COMMON TO ALL TEST CLASSES (NetCDF format and QC config, output paths)
 # =============================================================================
@@ -188,7 +195,7 @@ class TestRPGHatpro(unittest.TestCase):
 
 
 class TestRPGSingleObs(TestRPGHatpro):
-    """Re-run RPG tests but for data with a single-observation in BLB file"""
+    """Re-run RPG HATPRO tests but for data with a single-observation in BLB file"""
 
     @classmethod
     def setUpClass(cls):  # this is only executed once at init of class
@@ -200,6 +207,26 @@ class TestRPGSingleObs(TestRPGHatpro):
         cls.conf_inst = make_test_config(orig_inst_conf_file_here, cls.test_inst_conf_file,
                                          path_data_files_in_single_obs, path_data_files_out)
         cls.ds_ref = xr.load_dataset(reference_output_single_obs)
+
+
+class TestRPGTempro(TestRPGHatpro):
+    """Run RPG tests for TEMPRO"""
+
+    @classmethod
+    def setUpClass(cls):  # this is only executed once at init of class
+        """Set up test class by generating test configuration from sample file"""
+        check_outdir_empty(path_data_files_out)
+
+        orig_inst_conf_file_here = orig_inst_conf_file_tempro
+        cls.test_inst_conf_file = os.path.join(path_test_inst_conf_file, os.path.basename(orig_inst_conf_file_here))
+        cls.conf_inst = make_test_config(orig_inst_conf_file_here, cls.test_inst_conf_file,
+                                         path_data_files_in_tempro, path_data_files_out)
+        cls.ds_ref = xr.load_dataset(reference_output_tempro)
+
+    def test_no_brt(self):
+        logger.info('will not execute test for missing BRT because the TEMPRO under test (0-20000-0-06620_A) is not '
+                    'scanning and hence does not produce BLB, i.e. no brightness temperatures would be available')
+        pass
 
 
 def make_test_config(orig_config_file, test_config_file, path_data_in, path_data_out):
