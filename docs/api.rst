@@ -17,6 +17,12 @@ the other modules.
    api/write_netcdf
    api/utils
 
+Instructions for defining the config files are given in
+
+.. toctree::
+   :maxdepth: 4
+
+   api/config_files
 
 More information on the error classes is here:
 
@@ -24,5 +30,3 @@ More information on the error classes is here:
    :maxdepth: 4
 
    api/errors
-
-Configuration file examples are found in mwr_raw2l1.config.

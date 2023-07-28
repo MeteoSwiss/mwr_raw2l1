@@ -6,7 +6,7 @@ logger_name: 'mwr_raw2l1'
 
 # configure logging to console (stdout). Logging to stdout is enabled in any case
 # -------------------------------------------------------------------------------
-loglevel_stdout: INFO  # level specification acceptable for logging module
+loglevel_stdout: INFO  # level specification acceptable for logging module (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 
 # configure logging to file (only takes effect if write_logfile is set True)
 # CARE: Each run generates a new file. Consider while specifying timestamp_format to avoid overwriting
