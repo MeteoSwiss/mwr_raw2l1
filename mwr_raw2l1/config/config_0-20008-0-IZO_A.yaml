@@ -20,23 +20,22 @@ station_longitude: -16.50
 station_altitude: 2400.
 
 
-# instrument parameters  #TODO: improve this description
+# instrument parameters (frequency-dependent parameters go are associated to channels sorted by increasing frequency)
 # ---------------------
-n_sidebands: 1
 bandwidth: [0.230, 0.230, 0.230, 0.230, 0.600, 1.000, 2.000,  # V-band; in GHz
             0.200, 0.200, 0.200, 0.200, 0.400, 0.500]  # G-band; in GHz
 beamwidth: [.NaN, .NaN, .NaN, .NaN, .NaN, .NaN, .NaN,
             .NaN, .NaN, .NaN, .NaN, .NaN, .NaN]
 ir_bandwidth: .NaN
 ir_beamwidth: .NaN
-# ir_wavelength: # in nm. not mandatory to specify if available in data
+# ir_wavelength: # in nm. not mandatory to specify if available in data. In Izaña LHATPRO has 2 IR channels
 
 # the following parameters are potentially varying with time:
 freq_shift:  [0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000,  # V-band; in GHz
               0.000, 0.000, 0.000, 0.000, 0.000, 0.000]  # G-band; in GHz
 channels_ok: [1, 1, 1, 1, 1, 1, 1,  # V-band; 1=ok(unless an issue found in QC), 0=flag as bad
               0, 0, 1, 1, 1, 1]  # G-band (first 2 channels suspicious); 1=ok(unless issue found in QC), 0=flag as bad
-
+# TODO: find way to set channel- (or receiver-) dependent sideband quantity. Here G-band channels are DSB, K-band SSB
 
 # NetCDF global attributes
 # ------------------------

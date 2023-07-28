@@ -20,7 +20,7 @@ station_longitude: 8.62
 station_altitude: 438.
 
 
-# instrument parameters
+# instrument parameters  (frequency-dependent parameters go are associated to channels sorted by increasing frequency)
 # ---------------------
 n_sidebands: 1
 bandwidth: [0.230, 0.230, 0.230, 0.230, 0.600, 1.000, 2.000]  # V-band; in GHz
