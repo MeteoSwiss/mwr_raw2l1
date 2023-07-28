@@ -2,7 +2,7 @@
 
 [tool.poetry]
 name = "mwr_raw2l1"
-version = "0.1.4"
+version = "1.0.0"
 description = "Readers for the most prominent types of operational ground-based K- and V-band microwave radiometers and a writer for NetCDF files according to E-PROFILE/ACTRIS standards."
 authors = ["Rolf Rüfenacht <rruefenacht@users.noreply.github.com>"]
 license = "BSD 3-Clause"
