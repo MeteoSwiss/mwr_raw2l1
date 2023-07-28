@@ -46,6 +46,12 @@ path_data_files_in_tempro = str(abs_file_path('tests/data/rpg/0-20000-0-06620/')
 reference_output_tempro = str(abs_file_path(
     'tests/data/rpg/reference_output/MWR_1C01_0-20000-0-06620_A202305182358.nc'))
 
+# RPG LHATPRO
+orig_inst_conf_file_lhatpro = str(abs_file_path('mwr_raw2l1/config/config_0-20008-0-IZO_A.yaml'))  # Izaña
+path_data_files_in_lhatpro = str(abs_file_path('tests/data/rpg/0-20008-0-IZO/'))
+reference_output_lhatpro = str(abs_file_path(
+    'tests/data/rpg/reference_output/MWR_1C01_0-20008-0-IZO_A202303241200.nc'))
+
 
 # INPUTS COMMON TO ALL TEST CLASSES (NetCDF format and QC config, output paths)
 # =============================================================================
@@ -210,7 +216,7 @@ class TestRPGSingleObs(TestRPGHatpro):
 
 
 class TestRPGTempro(TestRPGHatpro):
-    """Run RPG tests for TEMPRO"""
+    """Run RPG tests for TEMPRO (only a V-band temperature receiver, no humidity receiver)"""
 
     @classmethod
     def setUpClass(cls):  # this is only executed once at init of class
@@ -224,8 +230,40 @@ class TestRPGTempro(TestRPGHatpro):
         cls.ds_ref = xr.load_dataset(reference_output_tempro)
 
     def test_no_brt(self):
-        logger.info('will not execute test for missing BRT because the TEMPRO under test (0-20000-0-06620_A) is not '
+        logger.info('will not execute tests for missing BRT because the TEMPRO under test (0-20000-0-06620_A) is not '
                     'scanning and hence does not produce BLB, i.e. no brightness temperatures would be available')
+        pass
+
+
+class TestRPGLhatpro(TestRPGHatpro):
+    """Run RPG tests for LHATPRO (V-band and 6-channel G-band receiver) incl. check on channels_ok"""
+
+    @classmethod
+    def setUpClass(cls):  # this is only executed once at init of class
+        """Set up test class by generating test configuration from sample file"""
+        check_outdir_empty(path_data_files_out)
+
+        orig_inst_conf_file_here = orig_inst_conf_file_lhatpro
+        cls.test_inst_conf_file = os.path.join(path_test_inst_conf_file, os.path.basename(orig_inst_conf_file_here))
+        cls.conf_inst = make_test_config(orig_inst_conf_file_here, cls.test_inst_conf_file,
+                                         path_data_files_in_lhatpro, path_data_files_out)
+        cls.ds_ref = xr.load_dataset(reference_output_lhatpro)
+        if cls.conf_inst['channels_ok'] != [1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1]:
+            err_msg = 'reference output was genereated with channels_ok = [1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1] ' \
+                       + 'in instrument config file but found {} in {} now'.format(
+                           cls.conf_inst['channels_ok'], orig_inst_conf_file_here)
+            raise MWRTestError(err_msg)
+
+    def test_no_brt(self):
+        logger.info('will not execute tests for missing BRT because the LHATPRO under test (0-20008-0-IZO_A) is not '
+                    'scanning and hence does not produce BLB, i.e. no brightness temperatures would be available')
+        pass
+
+    def test_no_irt(self):
+        logger.info('will not execute tests for missing IRT because the LHATPRO under test (0-20008-0-IZO_A) has 2 IR '
+                    'channels but if no IRT file is present and no specification is made in inst config file, one '
+                    'single IR wavelength is assumed to set the dimensions in the output file what would trigger a '
+                    'dimension mismatch with the reference output file.')
         pass
 
 
