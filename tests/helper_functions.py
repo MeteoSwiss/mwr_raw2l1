@@ -23,9 +23,8 @@ def make_test_config(orig_config_file, test_config_file, path_data_in, path_data
     conf_inst['input_directory'] = path_data_in
     conf_inst['output_directory'] = path_data_out
     if test_config_file is not None:
-        f = open(test_config_file, 'w')  # with open... does not work here for some reason
-        yaml.dump(conf_inst, f)
-        f.close()
+        with open(test_config_file, 'w') as f:
+            yaml.dump(conf_inst, f)
     return conf_inst
 
 
