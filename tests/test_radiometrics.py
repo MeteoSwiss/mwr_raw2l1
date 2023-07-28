@@ -12,13 +12,12 @@ import os
 import unittest
 
 import xarray as xr
-import yaml
 
 from mwr_raw2l1.errors import CorruptRectype, MissingData, MissingHeader, MWRTestError, UnknownRecordType
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.main import run
-from mwr_raw2l1.utils.config_utils import get_inst_config
 from mwr_raw2l1.utils.file_utils import abs_file_path
+from tests.helper_functions import add_suffix, make_test_config
 
 # list of variables to ignore in each test (best practice: only use for updating tests, otherwise set in sub-tests)
 VARS_TO_IGNORE_GLOBAL = []
@@ -52,7 +51,7 @@ class TestRadiometrics(unittest.TestCase):
                        'this directory as all NetCDF files in this directory would be removed after each test. Verify '
                        'path_data_files_out and remove files manually if needed'.format(path_data_files_out))
             raise MWRTestError(err_msg)
-        cls.conf_inst = make_test_config(orig_inst_conf_file, test_inst_conf_file)
+        cls.conf_inst = make_test_config(orig_inst_conf_file, test_inst_conf_file, path_data_files_in, path_data_files_out)
         cls.ds_ref = xr.load_dataset(reference_output)
 
     @classmethod
@@ -79,7 +78,7 @@ class TestRadiometrics(unittest.TestCase):
         # no need to test again that values are seen ok, just see that main method runs without errors
         infile_path_here = os.path.join(path_data_files_in, 'missing_headerline/')
         inst_conf_file_here = add_suffix(test_inst_conf_file, '_missing_headerline')
-        make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path=infile_path_here)
+        make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path_here, path_data_files_out)
 
         run(inst_conf_file_here, nc_format_config_file, qc_config_file, concat=True)
 
@@ -88,7 +87,7 @@ class TestRadiometrics(unittest.TestCase):
         # no need to test again that values are seen ok, just see that main method runs without errors
         infile_path_here = os.path.join(path_data_files_in, 'empty_lines/')
         inst_conf_file_here = add_suffix(test_inst_conf_file, '_empty_lines')
-        make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path=infile_path_here)
+        make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path_here, path_data_files_out)
 
         run(inst_conf_file_here, nc_format_config_file, qc_config_file, concat=True)
 
@@ -96,7 +95,7 @@ class TestRadiometrics(unittest.TestCase):
         """Test that an exception is raised if no header is present in data file (saw this for some DWD files)"""
         infile_path_here = os.path.join(path_data_files_in, 'missing_header/')
         inst_conf_file_here = add_suffix(test_inst_conf_file, '_missing_header')
-        make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path=infile_path_here)
+        make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path_here, path_data_files_out)
 
         with self.assertRaises(MissingHeader):
             run(inst_conf_file_here, nc_format_config_file, qc_config_file, concat=True)
@@ -105,7 +104,7 @@ class TestRadiometrics(unittest.TestCase):
         """Test that an exception is raised if no column header to data record type present in data file"""
         infile_path_here = os.path.join(path_data_files_in, 'missing_colhead/')
         inst_conf_file_here = add_suffix(test_inst_conf_file, '_missing_colhead')
-        make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path=infile_path_here)
+        make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path_here, path_data_files_out)
 
         with self.assertRaises(UnknownRecordType):
             run(inst_conf_file_here, nc_format_config_file, qc_config_file, concat=True)
@@ -114,7 +113,7 @@ class TestRadiometrics(unittest.TestCase):
         """Test that an exception is raised if file contains no data section"""
         infile_path_here = os.path.join(path_data_files_in, 'missing_data/')
         inst_conf_file_here = add_suffix(test_inst_conf_file, '_missing_data')
-        make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path=infile_path_here)
+        make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path_here, path_data_files_out)
 
         with self.assertRaises(MissingData):
             run(inst_conf_file_here, nc_format_config_file, qc_config_file, concat=True)
@@ -123,7 +122,7 @@ class TestRadiometrics(unittest.TestCase):
         """Test that an exception is raised if file is corrupt and record type cannot be converted to int"""
         infile_path_here = os.path.join(path_data_files_in, 'corrupt_rectype/')
         inst_conf_file_here = add_suffix(test_inst_conf_file, '_corrupt_rectype')
-        make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path=infile_path_here)
+        make_test_config(test_inst_conf_file, inst_conf_file_here, infile_path_here, path_data_files_out)
 
         with self.assertRaises(CorruptRectype):
             run(inst_conf_file_here, nc_format_config_file, qc_config_file, concat=True)
@@ -171,30 +170,3 @@ class TestRadiometrics(unittest.TestCase):
             for attname in ['network_name', 'license', 'history']:
                 self.assertIn(attname, self.ds.attrs)
             self.assertIn('raw2l1', self.ds.attrs['history'].lower())
-
-
-def make_test_config(orig_config_file, test_config_file=None, infile_path=path_data_files_in):
-    """get sample config file and modify and save as test config file and return test config dictionary
-
-    Args:
-        orig_config_file: path to sample config file
-        test_config_file: path where to store modified config file for testing. If None, config is returned but not
-            written to any file
-        infile_path: path of input data files to read. Default is path_data_files_in defined globally.
-    Returns:
-        configuration dict of test config
-    """
-    conf_inst = get_inst_config(orig_config_file)
-    conf_inst['input_directory'] = infile_path
-    conf_inst['output_directory'] = path_data_files_out
-    if test_config_file is not None:
-        f = open(test_config_file, 'w')  # with open... does not work here for some reason
-        yaml.dump(conf_inst, f)
-        f.close()
-    return conf_inst
-
-
-def add_suffix(filename, suffix):
-    """add suffix to the end of filename, but before the extenxion"""
-    fn_split = os.path.splitext(filename)
-    return fn_split[0] + suffix + fn_split[1]

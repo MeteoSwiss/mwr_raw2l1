@@ -1,4 +1,10 @@
-"""integration tests for read-in and writing for RPG files
+"""integration tests for read-in and writing for RPG files for
+
+The following observation settings are tested:
+- RPG HATPRO
+- RPG HATPRO with single observation in scan file
+- RPG TEMPRO
+- RPG LHATPRO (including test for effect of 0 entries for channels_ok in inst config)
 
 Features tested:
 - run main and compare key data in generated NetCDF with reference NetCDF file (test with concat option)
@@ -15,13 +21,12 @@ import unittest
 from unittest.mock import patch
 
 import xarray as xr
-import yaml
 
 from mwr_raw2l1.errors import MissingDataSource, MWRTestError
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.main import run
-from mwr_raw2l1.utils.config_utils import get_inst_config
 from mwr_raw2l1.utils.file_utils import abs_file_path
+from tests.helper_functions import make_test_config, check_outdir_empty
 
 # list of variables to ignore in each test (best practice: only use for updating tests, otherwise set in sub-tests)
 VARS_TO_IGNORE_GLOBAL = []
@@ -201,7 +206,7 @@ class TestRPGHatpro(unittest.TestCase):
 
 
 class TestRPGSingleObs(TestRPGHatpro):
-    """Re-run RPG HATPRO tests but for data with a single-observation in BLB file"""
+    """Re-run RPG HATPRO tests for data with a single-observation in BLB file (an occur for rapid data submission)"""
 
     @classmethod
     def setUpClass(cls):  # this is only executed once at init of class
@@ -265,33 +270,3 @@ class TestRPGLhatpro(TestRPGHatpro):
                     'single IR wavelength is assumed to set the dimensions in the output file what would trigger a '
                     'dimension mismatch with the reference output file.')
         pass
-
-
-def make_test_config(orig_config_file, test_config_file, path_data_in, path_data_out):
-    """get sample config file and modify and save as test config file and return test config dictionary
-
-    Args:
-        orig_config_file: path to sample config file
-        test_config_file: path where to store modified config file for testing
-        path_data_in: path where to look for input observation files for testing
-        path_data_out: path where to store output file during testing
-    Returns:
-        configuration dict of test config
-    """
-    conf_inst = get_inst_config(orig_config_file)
-    conf_inst['input_directory'] = path_data_in
-    conf_inst['output_directory'] = path_data_out
-    f = open(test_config_file, 'w')  # with open... does not work here for some reason
-    yaml.dump(conf_inst, f)
-    f.close()
-    return conf_inst
-
-
-def check_outdir_empty(path_files_out, search_pattern='*.nc'):
-    """check that no files matching search pattern are found in path_files_out"""
-    nc_files_in_outdir = glob.glob(os.path.join(path_files_out, search_pattern))
-    if nc_files_in_outdir:
-        err_msg = ("path_data_files_out ('{}') already contains NetCDF files. Refuse to run tests with output to "
-                   'this directory as all NetCDF files in this directory would be removed after each test. Verify '
-                   'path_data_files_out and remove files manually if needed'.format(path_files_out))
-        raise MWRTestError(err_msg)
