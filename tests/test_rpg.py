@@ -53,9 +53,8 @@ class TestRPG(unittest.TestCase):
     def setUpClass(cls):  # this is only executed once at init of class
         """Set up test class by generating test configuration from sample file"""
         check_outdir_empty(path_data_files_out)
-        cls.path_data_files_in = path_data_files_in
         cls.conf_inst = make_test_config(orig_inst_conf_file, test_inst_conf_file,
-                                         cls.path_data_files_in, path_data_files_out)
+                                         path_data_files_in, path_data_files_out)
         cls.ds_ref = xr.load_dataset(reference_output)
 
     @classmethod
@@ -173,10 +172,13 @@ class TestRPG(unittest.TestCase):
          Returns:
             all files in self.path_data_in except the ones with an extension specified in ext_to_exclude
         """
-        infiles_for_test = glob.glob(os.path.join(self.path_data_files_in, self.conf_inst['base_filename_in'] + '*'))
+
+        infiles_for_test = glob.glob(os.path.join(self.conf_inst['input_directory'],
+                                                  self.conf_inst['base_filename_in'] + '*'))
         for file in infiles_for_test.copy():
             if os.path.splitext(file)[-1].upper() in ext_to_exclude:
                 infiles_for_test.remove(file)
+
         return infiles_for_test
 
 
@@ -187,9 +189,8 @@ class TestRPGSingleObs(TestRPG):
     def setUpClass(cls):  # this is only executed once at init of class
         """Set up test class by generating test configuration from sample file"""
         check_outdir_empty(path_data_files_out)
-        cls.path_data_files_in = path_data_files_in_single_obs
         cls.conf_inst = make_test_config(orig_inst_conf_file, test_inst_conf_file,
-                                         cls.path_data_files_in, path_data_files_out)
+                                         path_data_files_in_single_obs, path_data_files_out)
         cls.ds_ref = xr.load_dataset(reference_output_single_obs)
 
 

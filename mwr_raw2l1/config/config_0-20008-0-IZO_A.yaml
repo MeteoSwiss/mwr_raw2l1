@@ -20,7 +20,7 @@ station_longitude: -16.50
 station_altitude: 2400.
 
 
-# instrument parameters
+# instrument parameters  #TODO: improve this description
 # ---------------------
 n_sidebands: 1
 bandwidth: [0.230, 0.230, 0.230, 0.230, 0.600, 1.000, 2.000,  # V-band; in GHz
@@ -35,7 +35,7 @@ ir_beamwidth: .NaN
 freq_shift:  [0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000,  # V-band; in GHz
               0.000, 0.000, 0.000, 0.000, 0.000, 0.000]  # G-band; in GHz
 channels_ok: [1, 1, 1, 1, 1, 1, 1,  # V-band; 1=ok(unless an issue found in QC), 0=flag as bad
-              0, 0, 1, 1, 1, 1]  # G-band; 1=ok(unless an issue found in QC), 0=flag as bad
+              0, 0, 1, 1, 1, 1]  # G-band (first 2 channels suspicious); 1=ok(unless issue found in QC), 0=flag as bad
 
 
 # NetCDF global attributes
