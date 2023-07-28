@@ -26,41 +26,46 @@ from mwr_raw2l1.utils.file_utils import abs_file_path
 # list of variables to ignore in each test (best practice: only use for updating tests, otherwise set in sub-tests)
 VARS_TO_IGNORE_GLOBAL = []
 
+# INPUTS DEPENDENT ON TEST CLASS (instrument config and reference output)
+# =======================================================================
+# RPG HATPRO standard config (including concat)
+orig_inst_conf_file_hatpro = str(abs_file_path('mwr_raw2l1/config/config_0-20000-0-06610_A.yaml'))
+path_data_files_in_hatpro = str(abs_file_path('tests/data/rpg/0-20000-0-06610/'))
+reference_output_hatpro = str(abs_file_path(
+    'tests/data/rpg/reference_output/MWR_1C01_0-20000-0-06610_A201908040100.nc'))
 
-# instrument config definition
-orig_inst_conf_file = str(abs_file_path('mwr_raw2l1/config/config_0-20000-0-06610_A.yaml'))
-test_inst_conf_file = str(abs_file_path('tests/config/config_0-20000-0-06610_A.yaml'))
-path_data_files_in = str(abs_file_path('tests/data/rpg/0-20000-0-06610/'))
+# RPG HATPRO with one single observation in (BLB-) data file
+orig_inst_conf_file_single_obs = str(abs_file_path('mwr_raw2l1/config/config_0-20000-0-06610_A.yaml'))  # std HATPRO
 path_data_files_in_single_obs = str(abs_file_path('tests/data/rpg/0-20000-0-06610_single_obs/'))
-path_data_files_out = str(abs_file_path('tests/data/output/'))  # all nc files will be removed from this directory
-
-# NetCDF format definition
-nc_format_config_file = abs_file_path('mwr_raw2l1/config/L1_format.yaml')
-
-# quality control definition
-qc_config_file = abs_file_path('mwr_raw2l1/config/qc_config.yaml')
-
-# reference output file to compare against
-reference_output = str(abs_file_path('tests/data/rpg/reference_output/MWR_1C01_0-20000-0-06610_A201908040100.nc'))
 reference_output_single_obs = str(abs_file_path(
     'tests/data/rpg/reference_output/MWR_1C01_0-20000-0-06610_A202305190603_single_obs.nc'))
 
+# INPUTS COMMON TO ALL TEST CLASSES (NetCDF format and QC config, output paths)
+# =============================================================================
+nc_format_config_file = abs_file_path('mwr_raw2l1/config/L1_format.yaml')
+qc_config_file = abs_file_path('mwr_raw2l1/config/qc_config.yaml')
+path_data_files_out = str(abs_file_path('tests/data/output/'))  # all nc files will be removed from this directory
+path_test_inst_conf_file = str(abs_file_path('tests/config/'))  # path for config files potentially alteretd during test
 
-class TestRPG(unittest.TestCase):
-    """Run RPG tests for standard data with checks for missing data files"""
+
+class TestRPGHatpro(unittest.TestCase):
+    """Run RPG tests for (HATPRO) standard data with checks for missing data files"""
 
     @classmethod
     def setUpClass(cls):  # this is only executed once at init of class
         """Set up test class by generating test configuration from sample file"""
         check_outdir_empty(path_data_files_out)
-        cls.conf_inst = make_test_config(orig_inst_conf_file, test_inst_conf_file,
-                                         path_data_files_in, path_data_files_out)
-        cls.ds_ref = xr.load_dataset(reference_output)
+
+        orig_inst_conf_file_here = orig_inst_conf_file_hatpro
+        cls.test_inst_conf_file = os.path.join(path_test_inst_conf_file, os.path.basename(orig_inst_conf_file_here))
+        cls.conf_inst = make_test_config(orig_inst_conf_file_here, cls.test_inst_conf_file,
+                                         path_data_files_in_hatpro, path_data_files_out)
+        cls.ds_ref = xr.load_dataset(reference_output_hatpro)
 
     @classmethod
     def tearDownClass(cls):
         """Clean up after all tests are done. Remove test configuration file"""
-        os.remove(test_inst_conf_file)
+        os.remove(cls.test_inst_conf_file)
 
     def tearDown(self):
         """Remove generated NetCDF file after each test by removing all .nc-files from path_data_files_out"""
@@ -111,14 +116,14 @@ class TestRPG(unittest.TestCase):
         """Test that an exception is raised if neither of blb or brt files are present (at least on Tb obs required)"""
         get_files_mock.return_value = self.infiles_mock(['.BRT', '.BLB'])
         with self.assertRaises(MissingDataSource):
-            run(test_inst_conf_file, nc_format_config_file, qc_config_file)
+            run(self.test_inst_conf_file, nc_format_config_file, qc_config_file)
 
     @patch('mwr_raw2l1.main.get_files')
     def test_no_hkd(self, get_files_mock):
         """Test that an exception is raised if no HKD file present as this is required for each instrument"""
         get_files_mock.return_value = self.infiles_mock(['.HKD'])
         with self.assertRaises(MissingDataSource):
-            run(test_inst_conf_file, nc_format_config_file, qc_config_file)
+            run(self.test_inst_conf_file, nc_format_config_file, qc_config_file)
 
     # Helper methods
     # --------------
@@ -132,7 +137,7 @@ class TestRPG(unittest.TestCase):
         # subTest
         with self.subTest(operation='run_main'):
             """Run entire processing chain in main method (read-in > Measurement > write NetCDF)"""
-            run(test_inst_conf_file, nc_format_config_file, qc_config_file, concat=True)
+            run(self.test_inst_conf_file, nc_format_config_file, qc_config_file, concat=True)
         with self.subTest(operation='load_ouptut_netcdf'):
             """Load output NetCDF file with xarray. Failed test might indicate a corrupt file"""
             files = glob.glob(os.path.join(path_data_files_out, '*.nc'))
@@ -182,14 +187,17 @@ class TestRPG(unittest.TestCase):
         return infiles_for_test
 
 
-class TestRPGSingleObs(TestRPG):
+class TestRPGSingleObs(TestRPGHatpro):
     """Re-run RPG tests but for data with a single-observation in BLB file"""
 
     @classmethod
     def setUpClass(cls):  # this is only executed once at init of class
         """Set up test class by generating test configuration from sample file"""
         check_outdir_empty(path_data_files_out)
-        cls.conf_inst = make_test_config(orig_inst_conf_file, test_inst_conf_file,
+
+        orig_inst_conf_file_here = orig_inst_conf_file_single_obs
+        cls.test_inst_conf_file = os.path.join(path_test_inst_conf_file, os.path.basename(orig_inst_conf_file_here))
+        cls.conf_inst = make_test_config(orig_inst_conf_file_here, cls.test_inst_conf_file,
                                          path_data_files_in_single_obs, path_data_files_out)
         cls.ds_ref = xr.load_dataset(reference_output_single_obs)
 
