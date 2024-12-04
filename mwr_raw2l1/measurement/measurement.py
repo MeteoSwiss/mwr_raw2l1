@@ -17,7 +17,7 @@ class Measurement(MeasurementConstructors):
         Args:
             conf_qc: configuration dictionary of the quality control. For defaults use mwr_raw2l1/config/qc_config.yaml
         """
-        self.set_coords()
+        self.set_coords(primary_src='conf')
         self.set_wavelength()
         self.set_receivers()
         self.set_inst_params()
