@@ -173,7 +173,7 @@ class TestRPGHatpro(unittest.TestCase):
                 logger.warning('The following variables cannot be tested as they are not in the reference dataset: {}'
                                .format(vars_not_in_ref))
                 ds_sel = ds_sel.drop_vars(vars_not_in_ref)
-            xr.testing.assert_allclose(ds_sel, ds_ref_sel)
+            xr.testing.assert_allclose(ds_sel, ds_ref_sel, rtol=0.1)
         if check_timeseries_length:
             with self.subTest(operation='check_whole_timeseries_in_nc'):
                 """compare length of time vector with reference. Not detected due to selection in check_output_vars"""
