@@ -8,7 +8,7 @@ authors = ["Rolf Rüfenacht <rruefenacht@users.noreply.github.com>"]
 license = "BSD 3-Clause"
 
 [tool.poetry.dependencies]
-python = ">3.9 <3.11"
+python = ">3.9 <=3.12"
 netCDF4 = "*"
 PyYAML = "*"
 numpy = "<2"
@@ -28,7 +28,6 @@ sphinxcontrib-napoleon = "*"
 toml = "^0.10.2"
 PyQt5 = "^5.15.7"  # needed for displaying matplotlib plots in pycharm
 coverage = "^6.5.0"
-pytest = "*"
 
 
 [build-system]
