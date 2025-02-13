@@ -3,7 +3,11 @@
 
 name: CI
 
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - meteoswiss-dev
+  pull_request:
 
 jobs:
   build:
