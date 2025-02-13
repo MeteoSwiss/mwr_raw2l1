@@ -17,6 +17,7 @@ xarray = "<2022"
 ephem = "*"  # used for setting sun-in-beam flag in quality_flag
 colorlog = {version = "^6.6", optional = true}
 pandas = "<2"
+setuptools = "^75.8.0"
 
 [tool.poetry.dev-dependencies]
 matplotlib = "^3.5.2"
