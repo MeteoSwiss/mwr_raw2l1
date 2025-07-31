@@ -1,45 +1,39 @@
-# when editing this file, please make sure to run utils/pyproject_to_pyver.py afterwards
+[build-system]
+requires = [ "poetry-core>=1.0.0",]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "mwr_raw2l1"
-version = "1.0.0"
-description = "Readers for the most prominent types of operational ground-based K- and V-band microwave radiometers and a writer for NetCDF files according to E-PROFILE/ACTRIS standards."
-authors = ["Rolf Rüfenacht <rruefenacht@users.noreply.github.com>"]
-license = "BSD 3-Clause"
+version = "1.0.1"
+description = "This project provides readers for the data files of the the most prominent types of operational ground-based K- and V-band microwave radiometers and a writer for NetCDF files according to E-PROFILE/ACTRIS standards."
+authors = ["Rolf Rüfenacht <rruefenacht@users.noreply.github.com>","Eric Sauvageat <eric.sauvageat@meteoswiss.ch>"]
+
+[tool.isort]
+line_length = 120
 
 [tool.poetry.dependencies]
-python = ">3.9 <=3.12"
+python = ">3.6 <3.8"
 netCDF4 = "*"
 PyYAML = "*"
-numpy = "<2"
-scipy = "^1.7.3"
-xarray = "<2022"
+numpy = "1.*"
+scipy = "*"
+xarray = "*"
 ephem = "*"  # used for setting sun-in-beam flag in quality_flag
 colorlog = {version = "^6.6", optional = true}
-pandas = "<2"
-setuptools = "^75.8.0"
+pandas = "*"
+setuptools = "*"
 
 [tool.poetry.dev-dependencies]
-matplotlib = "^3.5.2"
-flake8 = "^4.0.1"
-isort = "^5.10.1"
+matplotlib = "3.*"
+flake8 = "*"
+isort = "*"
 Sphinx = "*"
 sphinx-rtd-theme = "*"
 sphinxcontrib-napoleon = "*"
-toml = "^0.10.2"
-PyQt5 = "^5.15.7"  # needed for displaying matplotlib plots in pycharm
-coverage = "^6.5.0"
-
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+toml = "*"
 
 [tool.poetry.scripts]
 mwr_raw2l1 = "mwr_raw2l1.__main__:main"
 
 [tool.poetry.extras]
-colorlog = ["colorlog"]
-
-[tool.isort]
-line_length = 120
+colorlog = [ "colorlog",]
