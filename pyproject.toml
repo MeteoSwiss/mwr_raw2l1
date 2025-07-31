@@ -18,6 +18,7 @@ ephem = "*"  # used for setting sun-in-beam flag in quality_flag
 colorlog = {version = "^6.6", optional = true}
 pandas = "*"
 setuptools = "^75.8.0"
+importlib-metadata = "<5"
 
 [tool.poetry.dev-dependencies]
 matplotlib = "3.*"
