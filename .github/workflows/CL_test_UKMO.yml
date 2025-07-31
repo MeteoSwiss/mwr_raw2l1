@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies and run tests on different python versions
 # more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: CI
+name: CI test UKMO
 
 on:
   schedule:
