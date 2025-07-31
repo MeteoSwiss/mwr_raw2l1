@@ -8,6 +8,8 @@ on:
     branches:
       - meteoswiss-dev
   pull_request:
+  workflow_dispatch:
+
 
 jobs:
   build:
