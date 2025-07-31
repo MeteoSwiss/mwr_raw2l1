@@ -3,7 +3,8 @@
 
 name: CI_MetOffice
 
-on:
+on: 
+  workflow_dispatch:
   push:
     branches:
       - metoffice
