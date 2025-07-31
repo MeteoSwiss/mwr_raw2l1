@@ -2,9 +2,9 @@
 
 [tool.poetry]
 name = "mwr_raw2l1"
-version = "1.0.0"
+version = "1.0.1"
 description = "Readers for the most prominent types of operational ground-based K- and V-band microwave radiometers and a writer for NetCDF files according to E-PROFILE/ACTRIS standards."
-authors = ["Rolf Rüfenacht <rruefenacht@users.noreply.github.com>"]
+authors = ["Rolf Rüfenacht <rruefenacht@users.noreply.github.com>","Eric Sauvageat <eric.sauvageat@meteoswiss.ch>"]
 license = "BSD 3-Clause"
 
 [tool.poetry.dependencies]
@@ -20,9 +20,9 @@ pandas = "<2"
 setuptools = "^75.8.0"
 
 [tool.poetry.dev-dependencies]
-matplotlib = "^3.5.2"
-flake8 = "^4.0.1"
-isort = "^5.10.1"
+matplotlib = "3.*"
+flake8 = "*"
+isort = "*"
 Sphinx = "*"
 sphinx-rtd-theme = "*"
 sphinxcontrib-napoleon = "*"
