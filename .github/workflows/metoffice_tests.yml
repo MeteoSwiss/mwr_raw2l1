@@ -6,7 +6,7 @@ name: CI_MetOffice
 on:
   push:
     branches:
-      - meteoswiss-metoffice
+      - metoffice
   pull_request:
 
 jobs:
