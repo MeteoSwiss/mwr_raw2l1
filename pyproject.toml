@@ -8,7 +8,7 @@ authors = ["Rolf Rüfenacht <rruefenacht@users.noreply.github.com>","Eric Sauvag
 license = "BSD 3-Clause"
 
 [tool.poetry.dependencies]
-python = ">3.9 <=3.12"
+python = ">3.9 <=3.13"
 netCDF4 = "*"
 PyYAML = "*"
 numpy = "<2"
@@ -16,7 +16,7 @@ scipy = "^1.7.3"
 xarray = "<2022"
 ephem = "*"  # used for setting sun-in-beam flag in quality_flag
 colorlog = {version = "^6.6", optional = true}
-pandas = "<2"
+pandas = "*"
 setuptools = "^75.8.0"
 
 [tool.poetry.dev-dependencies]
