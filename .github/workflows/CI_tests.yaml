@@ -5,7 +5,7 @@ name: CI
 
 on:
   schedule:
-    - cron: '40 13 * * *'
+    - cron: '40 14 * * *'
   push:
     branches:
       - meteoswiss-dev
