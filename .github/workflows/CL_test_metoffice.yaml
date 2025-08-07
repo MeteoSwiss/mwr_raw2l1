@@ -1,20 +1,17 @@
 # This workflow will install Python dependencies and run tests on different python versions
 # more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: CI_MetOffice
+name: CI
 
-on: 
-  workflow_dispatch:
+on:
   push:
     branches:
-      - metoffice
+      - meteoswiss-metoffice
   pull_request:
-  workflow_dispatch:
-
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ['3.7']
