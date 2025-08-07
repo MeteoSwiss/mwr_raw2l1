@@ -20,8 +20,8 @@ def check_receiver_sanity(data, channel):
     if data['mfr'] == 'attex':
         logger.info('Cannot check receiver sanity for Attex as no status variable is in data file')
         return None, False
-    elif data['mfr'] == 'radiometrics':  # quality good if quality=0
-        return flag_check(data, 'quality', 1, channel=None)
+    elif data['mfr'] == 'radiometrics':  # quality good if quality=1 (confirmed by Radiometrics to CHMI in March 2025) 
+        return flag_check(data, 'quality', 0, channel=None)
     elif data['mfr'] == 'rpg':  # quality good if channel_quality_ok=1 and alarm=0
         masks_and_checks = []  # collect all output tuples from flag_check here
         masks_and_checks.append(flag_check(data, 'channel_quality_ok', 0, channel))
