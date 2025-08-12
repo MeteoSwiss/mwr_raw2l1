@@ -264,7 +264,9 @@ def merge_brt_blb(all_data):
                 logger.warning(
                     'Skipping {} of {} scanning observations due to identical timestamp with zenith obs for {}'.format(
                         len(duplicate_times), len(blb_ts.time), duplicate_times))
-                out = out.merge(blb_ts, join='outer', compat='override')
+                # remove duplicate times from BRT and merge
+                out = out.sel(time=~out.time.isin(duplicate_times))
+                out = out.merge(blb_ts, join='outer')
         else:
             out = scan_to_timeseries_from_aux(all_data['blb'], hkd=all_data['hkd'])
 
