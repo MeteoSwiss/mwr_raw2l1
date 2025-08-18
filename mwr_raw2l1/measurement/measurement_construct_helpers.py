@@ -1,5 +1,6 @@
 import numpy as np
 import xarray as xr
+import pandas as pd
 
 from mwr_raw2l1.errors import DimensionError, MissingInputArgument, TimeMismatch
 from mwr_raw2l1.log import logger
@@ -149,7 +150,7 @@ def make_dataset(data, dims, vars, vars_opt=None, multidim_vars=None, time_vecto
     if data is None or not data:
         if time_vector is None:
             raise MissingInputArgument('if data is empty or None the input argument time_vector must be specified')
-        data = {'time': time_vector}  # start overwriting empty data variable
+        data = {'time': pd.to_datetime(time_vector)}  # start overwriting empty data variable
         for dim in dims[1:]:  # assume first dimension to be 'time'
             data[dim] = np.array([missing_val])  # other dimensions all one-element
         for var in all_vars:
@@ -174,7 +175,11 @@ def make_dataset(data, dims, vars, vars_opt=None, multidim_vars=None, time_vecto
             raise DimensionError(dims, var, nd)
         spec[var] = dict(dims=dims[0:nd], data=data[var])
 
-    return xr.Dataset.from_dict(spec)
+    ds = xr.Dataset.from_dict(spec)
+    # For some reason, this does not keep the formatting of the time coordinates so we overwrite it again
+    if not isinstance(ds['time'].data[0], np.datetime64):
+        ds['time'] = spec['time']['data'].values
+    return ds
 
 
 def to_single_dataset(data_dicts, *args, **kwargs):
