@@ -110,7 +110,10 @@ def rpg_to_si(all_data):
         all_data['met']['windspeed'] = all_data['met']['windspeed'] / 3.6  # km/h -> m/s
     except KeyError:  # KeyError will only occur if quantity not in data, what can well happen. Do nothing in this case
         pass
-
+    try:
+        all_data['irt']['IRT'] = all_data['irt']['IRT'] + 273.15  # °C -> K
+    except KeyError:  # KeyError will only occur if quantity not in data, what can well happen. Do nothing in this case
+        pass
     return all_data
 
 
