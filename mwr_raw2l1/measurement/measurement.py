@@ -5,7 +5,7 @@ from mwr_raw2l1.errors import DimensionMismatch, MissingConfig, MWRDataError
 from mwr_raw2l1.log import logger
 from mwr_raw2l1.measurement.measurement_constructors import MeasurementConstructors
 from mwr_raw2l1.measurement.measurement_helpers import channels2receiver, get_receiver_vars, is_var_in_data
-from mwr_raw2l1.measurement.measurement_qc_helpers import check_rain, check_receiver_sanity, check_sun
+from mwr_raw2l1.measurement.measurement_qc_helpers import check_rain, check_receiver_sanity, check_sun, find_lwcl_from_mwr
 from mwr_raw2l1.utils.num_utils import setbit, timedelta2s, unsetbit
 
 
@@ -251,6 +251,11 @@ class Measurement(MeasurementConstructors):
         if qc_thresholds[-1] == ',':
             qc_thresholds = qc_thresholds[:-1]
         self.data['qc_thresholds'] = qc_thresholds
+
+        # Compute the liquid cloud flag using MWRpy threshold method:
+        if conf_qc['lwcl_check']:
+            self.data = find_lwcl_from_mwr(self.data, multiplying_factor=conf_qc['lwcl_multiplying_factor'])
+            self.data['liquid_cloud_flag_status'] = xr.ones_like(self.data['liquid_cloud_flag'], dtype=np.int32)
 
     def _setbits_qc(self, bit_nb, channel, mask_fail, mask_applied=None):
         """set values for quality_flag and quality_flag status for executed checks"""

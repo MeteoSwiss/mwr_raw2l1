@@ -229,6 +229,8 @@ def merge_aux_data(mwr_data, all_data, srcs_to_ignore=None):
                 all_data[src] = all_data[src].rename(varname_map)
 
         # interp to same time grid (time grid from blb now stems from some interp) and merge into out
+        # Note that this does not do any extrapolation which leaves some values (e.g. IRT) to NaN
+        # in case of a file starting with a scan
         srcdat_interp = all_data[src].interp(time=out['time'], method='nearest')  # nearest: flags stay integer
         out = out.merge(srcdat_interp, join='left')
 

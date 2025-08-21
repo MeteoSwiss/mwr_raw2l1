@@ -1,5 +1,6 @@
 import ephem
 import numpy as np
+import xarray as xr
 
 from mwr_raw2l1.errors import UnknownManufacturer
 from mwr_raw2l1.log import logger
@@ -26,6 +27,11 @@ def check_receiver_sanity(data, channel):
         masks_and_checks = []  # collect all output tuples from flag_check here
         masks_and_checks.append(flag_check(data, 'channel_quality_ok', 0, channel))
         masks_and_checks.append(flag_check(data, 'alarm', 1, channel=None))
+        masks_and_checks.append(flag_check(data, 'noisediode_ok_hum', 0, channel=None))
+        masks_and_checks.append(flag_check(data, 'noisediode_ok_temp', 0, channel=None))
+        masks_and_checks.append(flag_check(data, 'Tstab_ok_hum', 0, channel=None))
+        masks_and_checks.append(flag_check(data, 'Tstab_ok_temp', 0, channel=None))
+        masks_and_checks.append(flag_check(data, 'Tstab_ok_amb', 0, channel=None))
         # TODO: could add checks for noisediode_ok_hum, noisediode_ok_temp, Tstab_ok_hum, Tstab_ok_temp, Tstab_ok_amb
         check_applied_all = [m[1] for m in masks_and_checks]
         if any(check_applied_all):
@@ -164,3 +170,73 @@ def flag_check(data, varname, value, channel=None):
     else:
         logger.info("Cannot apply check for '{}' during quality control as variable does not exist".format(varname))
         return None, False
+
+def find_lwcl_from_mwr(data, multiplying_factor=0.075):
+    """
+    This is a copy of the MWRpy function to find liquid water cloud free periods using 31.4 GHz TB variability.
+    It uses water vapor channel as proxy for a humidity dependent threshold.
+
+    For now, it works only for HATPRO instrument as this includes some empirically derived parameters. 
+
+    Refactored to work directly with xarray data instead of dict
+
+    Args:
+        data: dataset, commonly Measurement.data
+        multiplying_factor: factor to multiply the threshold with, empirically derived
+
+    Returns:
+        dataset with liquid cloud flag set
+    """
+    # Different frequencies for window and water vapor channels depending on instrument type
+    freq_win = np.where(
+        (np.isclose(data["frequency"].values, 31.4, atol=2))
+        | (np.isclose(data["frequency"].values, 190.8, atol=1))
+    )[0]
+    freq_win = np.array([freq_win[0]]) if len(freq_win) > 1 else freq_win
+    freq_wv = np.where(
+        (np.isclose(np.round(data["frequency"][:], 1), 22.2))
+        | (np.isclose(np.round(data["frequency"][:], 1), 183.9))
+    )[0]
+
+    if len(freq_win) == 1 and len(freq_wv) == 1:
+        tb = data["Tb"].isel(frequency=freq_win)
+        tb = tb.squeeze(dim='frequency', drop=True)
+        tb_zenith = tb.where(data["scanflag"] == 0, drop=True).where((data["ele"] > 89.0) & (data["ele"] < 91.0), drop=True)
+        mean_diff_t = np.nanmean(tb.time.diff(dim='time').dt.seconds)
+        number_of_samples = 180/mean_diff_t.round() if mean_diff_t < 1.8 else 180/mean_diff_t.round()
+        # tb_std = tb_df.rolling(
+        #     pd.tseries.frequencies.to_offset(offset), center=True, min_periods=50
+        # ).std()
+        tb_std = tb_zenith.rolling(
+            time=int(number_of_samples), center=True
+        ).std()
+        number_of_samples = 600/mean_diff_t.round() if mean_diff_t < 1.8 else 600/mean_diff_t.round()
+        # tb_mx = tb_std.rolling(
+        #     pd.tseries.frequencies.to_offset(offset), center=True, min_periods=100
+        # ).max()
+        tb_mx = tb_std.rolling(
+            time=int(number_of_samples), center=True
+        ).max()
+        #tb_wv = np.squeeze(ds["tb"][:, freq_wv])
+        tb_wv = data["Tb"].isel(frequency=freq_wv)
+        tb_wv = tb_wv.squeeze(dim='frequency', drop=True)
+        # In order to compute the ratio, we need to get rid of the frequency coordinates
+
+        tb_rat = tb_wv / tb
+        tb_rat = tb_rat.rolling(
+            time=int(number_of_samples), center=True
+        ).max()
+
+        threshold_rat = tb_rat * multiplying_factor
+        
+        
+        data['liquid_cloud_flag'] = xr.where(
+            tb_mx < threshold_rat,
+            0,
+            1
+        )
+    data['liquid_cloud_flag'] = xr.where((data["ele"] > 89.0) & (data["ele"] < 91.0), data['liquid_cloud_flag'], 2)
+    # also fill nans with 2
+    data['liquid_cloud_flag'] = data['liquid_cloud_flag'].fillna(2)
+
+    return data
