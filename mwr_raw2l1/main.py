@@ -58,6 +58,15 @@ def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, conca
     conf_inst = get_inst_config(inst_config_file)
     conf_nc = get_nc_format_config(nc_format_config_file)
     conf_qc = get_qc_config(qc_config_file)
+    try:
+        if conf_inst['lwcl_check'] and 'do_check' in conf_inst['lwcl_check']:
+            logger.info('Liquid cloud check activated for this instrument.')
+            conf_qc['lwcl_check'] = True
+            conf_qc['lwcl_multiplying_factor'] = conf_inst['lwcl_check']['multiplying_factor']
+    except KeyError:
+        conf_qc['lwcl_check'] = False
+        conf_qc['lwcl_multiplying_factor'] = None
+        logger.info('No liquid cloud check configured in instrument config file.')
 
     reader = get_reader(conf_inst['reader'])
     meas_constructor = get_meas_constructor(conf_inst['meas_constructor'])
