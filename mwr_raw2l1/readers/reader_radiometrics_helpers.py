@@ -3,6 +3,7 @@ import numpy as np
 from mwr_raw2l1.errors import CorruptRectype, EmptyLineError
 from mwr_raw2l1.readers.reader_helpers import get_time, simplify_header
 
+from mwr_raw2l1.log import logger
 
 def get_data(data_raw, header, no_mwr=False, **kwargs):
     """extract all known data from data_raw using header
@@ -17,13 +18,16 @@ def get_data(data_raw, header, no_mwr=False, **kwargs):
     """
     data = get_simple_vars(data_raw, header)
     try:
-        data['time'] = get_time(data_raw, header, 'date/time', '%m/%d/%y %H:%M:%S')
-    except ValueError:
         # Radiometrics changed its timestamps format with upgrade to VizMetPro.
         # The new format is '%Y/%m/%d %H:%M:%S' instead of '%m/%d/%y %H:%M:%S'.
-        # This is a workaround to support both formats but a better solution would be to 
-        # add this pattern to the config file.
+        # TODO: This is a workaround to support both formats but a better solution would be to
+        # add this pattern to the config file (or get rid of older formats but we can not exclude 
+        # that we integrate an old instrument once).
         data['time'] = get_time(data_raw, header, 'date/time', '%Y/%m/%d %H:%M:%S')
+    except ValueError:
+        logger.warning('Failed to parse time with new timestamp format %Y/%m/%d %H:%M:%S, trying with old version %m/%d/%y %H:%M:%S')
+        data['time'] = get_time(data_raw, header, 'date/time', '%m/%d/%y %H:%M:%S')
+
     if not no_mwr:
         data['Tb'], data['frequency'] = get_mwr(data_raw, header, **kwargs)
     return data
