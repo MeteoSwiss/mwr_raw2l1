@@ -9,7 +9,7 @@ from mwr_raw2l1.log import logger
 from mwr_raw2l1.utils.num_utils import timedelta2s
 
 
-def scan_endtime_to_time(endtime, n_angles, time_per_angle=11, from_starttime=False):
+def scan_endtime_to_time(endtime, n_angles, time_per_angle=11, from_starttime=True):
     """
     RPG and Attex scan files only have one timestamp per scan. This function returns the approximate timestamp for the
     observation at each angle
@@ -85,6 +85,11 @@ def scantime_from_aux(blb, hkd=None, brt=None):
         else:
             logger.warning(
                 'Cannot infer scan duration as first scan might extend to previous period. Using default values')
+        
+        if np.abs(timedelta2s(time_scan_active[0] - time_scan[0])) > 20 or np.abs(timedelta2s(time_scan_active[-1] - time_scan[-1])) < 20:
+            endtime2time_params['from_starttime'] = False
+            logger.info('Assuming that the time in BLB file is the endtime of the scan: TBC')
+
     elif brt is not None:
         # less accurate than hkd because things happen before scan starts (e.g. ambload obs).
         # Assume after last hkd measure it takes 2x time_per_angle before first scanobs ends.
@@ -95,13 +100,6 @@ def scantime_from_aux(blb, hkd=None, brt=None):
         else:
             logger.warning(
                 'Cannot infer scan duration as first scan might extend to previous period. Using default values')
-    
-    # TODO: remove the workaround below once we know for sure if time in .BLB is start or end time of the scans.
-    if np.abs(timedelta2s(time_scan_active[0] - time_scan[0])) > 50:
-        logger.info('Assuming that the time in BLB file is the endtime of the scan: TBC')
-    else:
-        endtime2time_params = dict(endtime=time_scan, n_angles=n_ele, time_per_angle=endtime2time_params['time_per_angle'], from_starttime=True)
-        logger.info('Assuming that the time in BLB file is the starttime of the scan: TBC')
     
     return scan_endtime_to_time(**endtime2time_params)
 
