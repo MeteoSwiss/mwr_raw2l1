@@ -61,7 +61,7 @@ def run(inst_config_file, nc_format_config_file=None, qc_config_file=None, conca
     try:
         if conf_inst['lwcl_check'] and 'do_check' in conf_inst['lwcl_check']:
             logger.info('Liquid cloud check activated for this instrument.')
-            conf_qc['lwcl_check'] = True
+            conf_qc['lwcl_check'] = conf_inst['lwcl_check']['do_check']
             conf_qc['lwcl_multiplying_factor'] = conf_inst['lwcl_check']['multiplying_factor']
     except KeyError:
         conf_qc['lwcl_check'] = False
