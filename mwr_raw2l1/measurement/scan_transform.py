@@ -9,7 +9,7 @@ from mwr_raw2l1.log import logger
 from mwr_raw2l1.utils.num_utils import timedelta2s
 
 
-def scan_endtime_to_time(endtime, n_angles, time_per_angle=11, from_starttime=True):
+def scan_endtime_to_time(endtime, n_angles, time_per_angle=11, from_starttime=False):
     """
     RPG and Attex scan files only have one timestamp per scan. This function returns the approximate timestamp for the
     observation at each angle
@@ -70,6 +70,7 @@ def scantime_from_aux(blb, hkd=None, brt=None):
     n_ele = len(blb['scan_ele'].values)
 
     endtime2time_params = dict(endtime=time_scan, n_angles=n_ele)
+    endtime2time_params['from_starttime'] = True  # default assume time in blb is start time of scan
     if hkd is not None and 'BLscan_active' in hkd:
         time_scan_active = hkd.time[hkd.BLscan_active.values == 1].values
         time_zen_active = hkd.time[hkd.BLscan_active.values == 0].values
