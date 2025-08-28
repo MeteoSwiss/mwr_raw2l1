@@ -9,7 +9,7 @@ from mwr_raw2l1.log import logger
 from mwr_raw2l1.utils.num_utils import timedelta2s
 
 
-def scan_endtime_to_time(endtime, n_angles, time_per_angle=17):
+def scan_endtime_to_time(endtime, n_angles, time_per_angle=11, from_starttime=False):
     """
     RPG and Attex scan files only have one timestamp per scan. This function returns the approximate timestamp for the
     observation at each angle
@@ -20,6 +20,8 @@ def scan_endtime_to_time(endtime, n_angles, time_per_angle=17):
         n_angles: number of angles per scan.
         time_per_angle: total time for scanning one angle incl. integration time and the time for moving the mirror.
             Indicated in seconds. The default is 17.
+        from_starttime: if True, the timestamps will be calculated assuming the provided time is the start time of 
+        the scan, otherwise from the end time. This arise from the change in timestamping operated in HATPRO instruments (TBC)
 
     Returns:
         time : :class:`numpy.ndarray` of :class:`datetime.datetime` objects of end times for each observed angle
@@ -33,11 +35,18 @@ def scan_endtime_to_time(endtime, n_angles, time_per_angle=17):
             # use ms as timedelta needs int. Will truncate to ms what should also avoid rounding errors in tests
             return np.timedelta64(int(seconds*1000), 'ms')
 
-    delta = [timedelta_method(n * time_per_angle) for n in reversed(range(n_angles))]
+    if from_starttime:
+        delta = [timedelta_method(n * time_per_angle) for n in range(n_angles)]
+    else:
+        delta = [timedelta_method(n * time_per_angle) for n in reversed(range(n_angles))]
     delta = np.array(delta)
 
     endtime = endtime.reshape(len(endtime), 1)  # for letting numpy broadcast along dimension 1
-    time = endtime - delta  # calculate time for each scan position (matrix)
+    if from_starttime:
+        time = endtime + delta  # calculate time for each scan position (matrix)
+    else:
+        time = endtime - delta
+
     time = time.reshape((-1,))  # make one-dimenional vector out of time matrix
 
     return time
@@ -61,6 +70,7 @@ def scantime_from_aux(blb, hkd=None, brt=None):
     n_ele = len(blb['scan_ele'].values)
 
     endtime2time_params = dict(endtime=time_scan, n_angles=n_ele)
+    endtime2time_params['from_starttime'] = True  # default assume time in blb is start time of scan
     if hkd is not None and 'BLscan_active' in hkd:
         time_scan_active = hkd.time[hkd.BLscan_active.values == 1].values
         time_zen_active = hkd.time[hkd.BLscan_active.values == 0].values
@@ -71,11 +81,16 @@ def scantime_from_aux(blb, hkd=None, brt=None):
             scan_duration = timedelta2s(time_last_scan_active[-1] - time_last_scan_active[0])
             endtime2time_params['time_per_angle'] = scan_duration / n_ele
         elif time_scan_active[0] > time_zen_active[0]:  # sure to have full scan at beginning of hkd
-            scan_duration = timedelta2s(blb.time[0].values - time_scan_active[0])
+            scan_duration = timedelta2s(time_scan_active[-1] - time_scan_active[0])
             endtime2time_params['time_per_angle'] = scan_duration / n_ele
         else:
             logger.warning(
                 'Cannot infer scan duration as first scan might extend to previous period. Using default values')
+        
+        if np.abs(timedelta2s(time_scan_active[0] - time_scan[0])) > 20 or np.abs(timedelta2s(time_scan_active[-1] - time_scan[-1])) < 20:
+            endtime2time_params['from_starttime'] = False
+            logger.info('Assuming that the time in BLB file is the endtime of the scan: TBC')
+
     elif brt is not None:
         # less accurate than hkd because things happen before scan starts (e.g. ambload obs).
         # Assume after last hkd measure it takes 2x time_per_angle before first scanobs ends.
@@ -86,7 +101,7 @@ def scantime_from_aux(blb, hkd=None, brt=None):
         else:
             logger.warning(
                 'Cannot infer scan duration as first scan might extend to previous period. Using default values')
-
+    
     return scan_endtime_to_time(**endtime2time_params)
 
 

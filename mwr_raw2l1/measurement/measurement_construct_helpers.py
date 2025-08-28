@@ -1,5 +1,6 @@
 import numpy as np
 import xarray as xr
+import pandas as pd
 
 from mwr_raw2l1.errors import DimensionError, MissingInputArgument, TimeMismatch
 from mwr_raw2l1.log import logger
@@ -109,7 +110,10 @@ def rpg_to_si(all_data):
         all_data['met']['windspeed'] = all_data['met']['windspeed'] / 3.6  # km/h -> m/s
     except KeyError:  # KeyError will only occur if quantity not in data, what can well happen. Do nothing in this case
         pass
-
+    try:
+        all_data['irt']['IRT'] = all_data['irt']['IRT'] + 273.15  # °C -> K
+    except KeyError:  # KeyError will only occur if quantity not in data, what can well happen. Do nothing in this case
+        pass
     return all_data
 
 
@@ -149,7 +153,7 @@ def make_dataset(data, dims, vars, vars_opt=None, multidim_vars=None, time_vecto
     if data is None or not data:
         if time_vector is None:
             raise MissingInputArgument('if data is empty or None the input argument time_vector must be specified')
-        data = {'time': time_vector}  # start overwriting empty data variable
+        data = {'time': pd.to_datetime(time_vector)}  # start overwriting empty data variable
         for dim in dims[1:]:  # assume first dimension to be 'time'
             data[dim] = np.array([missing_val])  # other dimensions all one-element
         for var in all_vars:
@@ -174,7 +178,11 @@ def make_dataset(data, dims, vars, vars_opt=None, multidim_vars=None, time_vecto
             raise DimensionError(dims, var, nd)
         spec[var] = dict(dims=dims[0:nd], data=data[var])
 
-    return xr.Dataset.from_dict(spec)
+    ds = xr.Dataset.from_dict(spec)
+    # For some reason, this does not keep the formatting of the time coordinates so we overwrite it again
+    if not isinstance(ds['time'].data[0], np.datetime64):
+        ds['time'] = spec['time']['data'].values
+    return ds
 
 
 def to_single_dataset(data_dicts, *args, **kwargs):
@@ -221,6 +229,8 @@ def merge_aux_data(mwr_data, all_data, srcs_to_ignore=None):
                 all_data[src] = all_data[src].rename(varname_map)
 
         # interp to same time grid (time grid from blb now stems from some interp) and merge into out
+        # Note that this does not do any extrapolation which leaves some values (e.g. IRT) to NaN
+        # in case of a file starting with a scan
         srcdat_interp = all_data[src].interp(time=out['time'], method='nearest')  # nearest: flags stay integer
         out = out.merge(srcdat_interp, join='left')
 
@@ -264,7 +274,9 @@ def merge_brt_blb(all_data):
                 logger.warning(
                     'Skipping {} of {} scanning observations due to identical timestamp with zenith obs for {}'.format(
                         len(duplicate_times), len(blb_ts.time), duplicate_times))
-                out = out.merge(blb_ts, join='outer', compat='override')
+                # remove duplicate times from BRT and merge
+                out = out.sel(time=~out.time.isin(duplicate_times))
+                out = out.merge(blb_ts, join='outer')
         else:
             out = scan_to_timeseries_from_aux(all_data['blb'], hkd=all_data['hkd'])
 

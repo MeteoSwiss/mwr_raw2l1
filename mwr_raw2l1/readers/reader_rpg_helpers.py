@@ -4,6 +4,7 @@ helper functions for the module reader_rpg
 import datetime as dt
 
 import numpy as np
+import pandas as pd
 
 from mwr_raw2l1.errors import UnknownFlagValue, WrongInputFormat
 
@@ -18,8 +19,8 @@ def interpret_time(time_in):
         time_in = np.array([time_in])
         scalar_input = True
 
-    times = [dt.datetime.utcfromtimestamp(x + posix_offset) for x in time_in]
-    out = np.array(times)
+    times = [dt.datetime.fromtimestamp(x + posix_offset, dt.timezone.utc) for x in time_in]
+    out = pd.to_datetime(times)
 
     if scalar_input:
         out = out[0]
