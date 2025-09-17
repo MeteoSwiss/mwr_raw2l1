@@ -19,7 +19,7 @@ def scan_endtime_to_time(endtime, n_angles, time_per_angle=11, from_starttime=Fa
             Corresponds ot the single timestamp saved with each angle scan. Assumed as the end time of the scan
         n_angles: number of angles per scan.
         time_per_angle: total time for scanning one angle incl. integration time and the time for moving the mirror.
-            Indicated in seconds. The default is 17.
+            Indicated in seconds. The default is 11.
         from_starttime: if True, the timestamps will be calculated assuming the provided time is the start time of 
         the scan, otherwise from the end time. This arise from the change in timestamping operated in HATPRO instruments (TBC)
 
