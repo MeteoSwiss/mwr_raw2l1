@@ -229,14 +229,14 @@ def scanflag_from_ele(ele, use_ele_diff=False):
 
     Args:
         ele: elevation vector as :class:`numpy.ndarray`
-        use_ele_diff: if True infer scanflag from differences in ele, if False ele>89 are assumed starring, all others
+        use_ele_diff: if True infer scanflag from differences in ele, if False abs(ele-90)<1 are assumed starring, all others
             as scanning. Defaults to False.
     Returns:
         scanflags as :class:`numpy.ndarray` of same shape as ele
     """
 
     if use_ele_diff:
-        err_msg = 'currently scanflags can only be inferred from assuming ele>89 as starring and all others as scanning'
+        err_msg = 'currently scanflags can only be inferred from assuming abs(ele-90)<1 as starring and all others as scanning'
         raise NotImplementedError(err_msg)
     else:
-        return np.where(ele > 89, 0, 1)
+        return np.where(np.abs(ele-90) < 1, 0, 1)
