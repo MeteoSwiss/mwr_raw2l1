@@ -21,10 +21,9 @@ LOG_COLORS = {
     'CRITICAL': 'red,bg_white'}
 
 try:
-    import colorlog
-    from colorlog import ColoredFormatter
+    import colorlog  # import in own namespace to be explicit (getLogger is available from logging and colorlog)
 
-    formatter = ColoredFormatter(
+    formatter = colorlog.ColoredFormatter(
         '%(log_color)s%(asctime)s [%(process)d] '
         '%(levelname)-8s %(message)s',
         datefmt=None,

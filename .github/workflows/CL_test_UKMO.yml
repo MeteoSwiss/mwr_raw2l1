@@ -1,28 +1,28 @@
 # This workflow will install Python dependencies and run tests on different python versions
 # more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: CI
+name: CI test UKMO
 
 on:
   schedule:
-    - cron: '40 14 * * *'
+    - cron: '48 13 * * *'
   push:
     branches:
-      - meteoswiss-dev
+      - metoffice
   pull_request:
   workflow_dispatch:
 
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
-        python-version: ['3.10', '3.11']
+        python-version: ['3.7']
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: meteoswiss-dev
+          ref: metoffice
       - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
