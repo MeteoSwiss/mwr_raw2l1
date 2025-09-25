@@ -19,6 +19,10 @@ station_latitude: 46.81
 station_longitude: 6.94
 station_altitude: 491.
 
+# liquid cloud check parameters
+liquid_cloud_check:
+  do_check: False
+  multiplying_factor: 0.075
 
 # instrument parameters (frequency-dependent parameters go are associated to channels sorted by increasing frequency)
 # ---------------------

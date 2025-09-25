@@ -5,6 +5,7 @@ __pycache__/
 *log.txt
 .idea/
 .~lock.*
+.vscode/
 
 offline/
 dist/

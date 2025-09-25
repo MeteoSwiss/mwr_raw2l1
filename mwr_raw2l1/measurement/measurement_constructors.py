@@ -60,7 +60,7 @@ class MeasurementConstructors(object):
         # dimensions and variable names for usage with make_dataset
         dims = {'mwr': ['time', 'frequency'],
                 'aux': ['time']}
-        vars = {'mwr': ['Tb', 'ele', 'azi', 'quality'],
+        vars = {'mwr': ['Tb', 'ele', 'azi', 'quality', 'T_amb'],
                 'aux': ['IRT', 'p', 'T', 'RH', 'rainflag', 'quality']}
         vars_opt = {'mwr': [],
                     'aux': []}
@@ -71,6 +71,9 @@ class MeasurementConstructors(object):
         flags_here = scanflag_from_ele(all_data['mwr']['ele']).astype(DTYPE_SCANFLAG)
         all_data['mwr']['scanflag'] = ('time', flags_here)
         data = merge_aux_data(all_data['mwr'], all_data)
+
+        # adapt the dimensions for the T_amb variable as only 1 temperature is given for 2 receivers
+        data['T_amb'] = data['T_amb'].expand_dims(dim={'receiver_nb':2}, axis=1)
 
         data['mfr'] = 'radiometrics'  # manufacturer (lowercase)
 

@@ -13,6 +13,3 @@ check_Tb_offset: False
 delta_azi_sun: 7  # minimum accepted absolute azimuth offset between instrument pointing and sun
 delta_ele_sun: 7  # minimum accepted absolute elevation offset between instrument pointing and sun
 Tb_threshold: [2.7, 330.0]   # Threshold for min and max Tb
-
-
-# potential future extension for liquid_cloud_flag
